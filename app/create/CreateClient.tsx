@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAccount } from "wagmi";
@@ -14,67 +14,28 @@ interface CreateClientProps {
 }
 
 const HOLIDAY_OPTIONS = [
-  {
-    id: "christmas",
-    label: "🎄 Christmas",
-    blurb: "Classic evergreen, lights, cozy winter vibes.",
-  },
-  {
-    id: "hanukkah",
-    label: "🕯 Hanukkah",
-    blurb: "Blue and silver, candle glow, winter nights.",
-  },
-  {
-    id: "posadas",
-    label: "⭐ Las Posadas",
-    blurb: "Lantern processions, papel picado, warm colors.",
-  },
-  {
-    id: "lucia",
-    label: "🌟 St. Lucia Day",
-    blurb: "Candle crown, white gown, Nordic morning light.",
-  },
-  {
-    id: "threeKings",
-    label: "👑 Three Kings / Epiphany",
-    blurb: "Regal fabrics, epiphany star, vibrant celebration.",
-  },
-  {
-    id: "kwanzaa",
-    label: "🖤❤️💚 Kwanzaa",
-    blurb: "Red–green–black palette, cultural patterns.",
-  },
-  {
-    id: "solstice",
-    label: "💫 Winter Solstice / Yule",
-    blurb: "Celestial motifs, stone textures, witchy energy.",
-  },
-  {
-    id: "lunarNewYear",
-    label: "🧨 Lunar New Year Preview",
-    blurb: "Red and gold lanterns, dragons, fireworks.",
-  },
-  {
-    id: "newYear",
-    label: "🎉 Global New Year",
-    blurb: "Metallic tones, confetti, skyline countdown.",
-  },
-  {
-    id: "sinterklaas",
-    label: "🎁 Sinterklaas",
-    blurb: "Red robes, golden mitre, steamboat arrival, candy treats.",
-  },
-  {
-    id: "basemas",
-    label: "🔵 Blue Basemas (Base)",
-    blurb: "Base blue, onchain glyphs, futuristic holiday.",
-  },
+  { id: "christmas", label: "🎄 Christmas", blurb: "Classic evergreen, lights, cozy winter vibes." },
+  { id: "hanukkah", label: "🕯 Hanukkah", blurb: "Blue and silver, candle glow, winter nights." },
+  { id: "posadas", label: "⭐ Las Posadas", blurb: "Lantern processions, papel picado, warm colors." },
+  { id: "lucia", label: "🌟 St. Lucia Day", blurb: "Candle crown, white gown, Nordic morning light." },
+  { id: "threeKings", label: "👑 Three Kings / Epiphany", blurb: "Regal fabrics, epiphany star, vibrant celebration." },
+  { id: "kwanzaa", label: "🖤❤️💚 Kwanzaa", blurb: "Red–green–black palette, cultural patterns." },
+  { id: "solstice", label: "💫 Winter Solstice / Yule", blurb: "Celestial motifs, stone textures, witchy energy." },
+  { id: "lunarNewYear", label: "🧨 Lunar New Year Preview", blurb: "Red and gold lanterns, dragons, fireworks." },
+  { id: "newYear", label: "🎉 Global New Year", blurb: "Metallic tones, confetti, skyline countdown." },
+  { id: "sinterklaas", label: "🎁 Sinterklaas", blurb: "Red robes, golden mitre, steamboat arrival, candy treats." },
+  { id: "basemas", label: "🔵 Blue Basemas (Base)", blurb: "Base blue, onchain glyphs, futuristic holiday." },
 ] as const;
 
 export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   const router = useRouter();
   const { address } = useAccount();
   const { composeCast } = useComposeCast();
+
+  const rootUrl = useMemo(() => {
+    if (typeof window !== "undefined") return window.location.origin;
+    return process.env.NEXT_PUBLIC_URL ?? "https://holibaes.vercel.app";
+  }, []);
 
   const [step, setStep] = useState<Step>(1);
   const [hollyForm, setHollyForm] = useState("");
@@ -105,6 +66,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       return;
     }
 
+    if (generating) return;
     setGenerating(true);
     setSavedOnce(false);
 
@@ -115,19 +77,17 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
         body: JSON.stringify({ hollyForm, holidayKey, color }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.imageUrl) throw new Error(data?.error || "No image returned.");
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.imageUrl) throw new Error(data?.error || "No image returned.");
 
       setImageUrl(data.imageUrl);
 
-      const label =
-        HOLIDAY_OPTIONS.find((h) => h.id === holidayKey)?.label ?? "Mystery";
-
+      const label = HOLIDAY_OPTIONS.find((h) => h.id === holidayKey)?.label ?? "Mystery";
       setCharacterSummary(
         `Your Holibae is a ${hollyForm} infused with ${label} energy, glowing in ${color} tones.`
       );
     } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+      setError(err?.message || "Something went wrong.");
     } finally {
       setGenerating(false);
     }
@@ -140,7 +100,9 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       return;
     }
 
+    if (saving) return;
     setSaving(true);
+
     try {
       const res = await fetch("/api/save-holibae", {
         method: "POST",
@@ -159,19 +121,21 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       if (!res.ok) throw new Error("Failed to save.");
       setSavedOnce(true);
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.message || "Failed to save.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleShareCharacter = () => {
+    setError(null);
     if (!imageUrl) {
       setError("Generate your Holibae first.");
       return;
     }
 
-    const text = `I just created my Holibae in the $originstory lab ✨ create yours: https://holibaes.vercel.app`;
+    const labName = originHolder ? "OriginStory" : "Holibae";
+    const text = `I just created my Holibae in the ${labName} lab ✨ Create yours: ${rootUrl}`;
     composeCast({ text, embeds: [imageUrl] });
   };
 
@@ -192,17 +156,22 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
     setStep(1);
   };
 
-  const mainClass =
-    "min-h-screen bg-[var(--bg),#f5f2eb] text-[var(--green),#1f3b2c] font-sans px-4 py-6";
+  // ✅ Sage green theme (no CSS vars)
+  const mainClass = "min-h-screen bg-[#b7c3a1] text-[#1f2a1d] font-sans px-4 py-6";
 
-  // 💡 FORM FLOW
+  // ✅ Beat any global button styles
+  const baseChoice =
+    "!appearance-none w-full text-left border border-black/10 rounded-md px-3 py-2 text-sm transition !bg-white/70 !text-[#1f2a1d]";
+  const activeChoice =
+    "!appearance-none w-full text-left border border-[#d4af37] rounded-md px-3 py-2 text-sm transition !bg-[#d4af37]/15 !text-[#1f2a1d]";
+
   if (!imageUrl) {
     return (
       <main className={mainClass}>
         <div className="w-full max-w-md mx-auto space-y-6">
           <header className="space-y-2">
-            <h1 className="text-xl font-semibold">Create your Holibae</h1>
-            <p className="text-sm text-[var(--green),#1f3b2c]/80">
+            <h1 className="text-2xl font-semibold">Create your Holibae</h1>
+            <p className="text-sm text-[#2f3d2b]/80">
               Pick 1) a form, 2) a holiday, and 3) a color to summon your Holibae.
             </p>
           </header>
@@ -211,9 +180,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
             {[1, 2, 3].map((s) => (
               <div
                 key={s}
-                className={`h-1.5 w-6 rounded-full ${
-                  step >= s ? "bg-[var(--gold),#d4af37]" : "bg-gray-300"
-                }`}
+                className={`h-1.5 w-6 rounded-full ${step >= s ? "bg-[#d4af37]" : "bg-black/15"}`}
               />
             ))}
           </div>
@@ -225,7 +192,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   Holibae Form (e.g. owl, doll)
                 </label>
                 <input
-                  className="w-full border rounded-md px-3 py-2 bg-white text-sm text-black"
+                  className="w-full border border-black/10 rounded-md px-3 py-2 bg-white/80 text-sm text-black placeholder:text-black/40"
                   value={hollyForm}
                   onChange={(e) => setHollyForm(e.target.value)}
                   placeholder="porcelain doll, reindeer, robot"
@@ -235,23 +202,17 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
 
             {step === 2 && (
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Choose a Holiday
-                </label>
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                <label className="block text-sm font-medium mb-2">Choose a Holiday</label>
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                   {HOLIDAY_OPTIONS.map((opt) => (
                     <button
                       key={opt.id}
                       onClick={() => setHolidayKey(opt.id)}
                       type="button"
-                      className={`w-full text-left border rounded-md px-3 py-2 text-sm transition ${
-                        holidayKey === opt.id
-                          ? "bg-[var(--gold),#d4af37]/10 border-[var(--gold),#d4af37] text-[var(--green),#1f3b2c]"
-                          : "bg-white border-gray-300 text-gray-700"
-                      }`}
+                      className={holidayKey === opt.id ? activeChoice : baseChoice}
                     >
                       <div className="font-semibold">{opt.label}</div>
-                      <div className="text-xs">{opt.blurb}</div>
+                      <div className="text-xs opacity-80">{opt.blurb}</div>
                     </button>
                   ))}
                 </div>
@@ -260,11 +221,9 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
 
             {step === 3 && (
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Choose a Color
-                </label>
+                <label className="block text-sm font-medium mb-1">Choose a Color</label>
                 <input
-                  className="w-full border rounded-md px-3 py-2 bg-white text-sm text-black"
+                  className="w-full border border-black/10 rounded-md px-3 py-2 bg-white/80 text-sm text-black placeholder:text-black/40"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
                   placeholder="e.g. moss green, glittery gold"
@@ -272,11 +231,11 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
               </div>
             )}
 
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <button
                 onClick={prevStep}
                 disabled={step === 1}
-                className="text-sm px-4 py-2 rounded-md bg-gray-300 text-black disabled:opacity-40"
+                className="text-sm px-4 py-2 rounded-md bg-black/10 text-black disabled:opacity-40"
               >
                 Back
               </button>
@@ -284,7 +243,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
               {step < 3 ? (
                 <button
                   onClick={nextStep}
-                  className="text-sm px-4 py-2 rounded-md bg-[var(--gold),#d4af37] text-black font-medium"
+                  className="text-sm px-4 py-2 rounded-md bg-[#d4af37] text-[#1f2a1d] font-medium active:scale-[0.99]"
                 >
                   Next
                 </button>
@@ -292,35 +251,32 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 <button
                   onClick={handleGenerateCharacter}
                   disabled={generating}
-                  className="text-sm px-4 py-2 rounded-md bg-[var(--green),#1f3b2c] text-white font-medium disabled:opacity-50"
+                  className="text-sm px-4 py-2 rounded-md bg-[#2f3d2b] text-white font-medium disabled:opacity-50 active:scale-[0.99]"
                 >
                   {generating ? "Summoning…" : "Get your Holibae"}
                 </button>
               )}
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
+
+            {error && <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>}
           </section>
         </div>
       </main>
     );
   }
 
-  // 💫 PREVIEW
   return (
     <main className={mainClass}>
       <div className="w-full max-w-md mx-auto space-y-4">
         <header className="flex justify-between items-center">
           <h1 className="text-lg font-semibold">Your Holibae</h1>
-          <button
-            onClick={handleCreateAnother}
-            className="text-sm underline text-[var(--green),#1f3b2c]/70"
-          >
+          <button onClick={handleCreateAnother} className="text-sm underline text-black/70">
             Create another
           </button>
         </header>
 
         <section className="space-y-4">
-          <div className="w-full overflow-hidden border rounded-xl bg-white flex justify-center">
+          <div className="w-full overflow-hidden border border-black/10 rounded-xl bg-white/80 flex justify-center">
             <Image
               src={imageUrl!}
               alt="Holibae"
@@ -335,37 +291,33 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
             <button
               onClick={handleSaveCharacter}
               disabled={saving}
-              className="w-full py-2 rounded-lg bg-[var(--green),#1f3b2c] text-white font-medium text-sm disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-[#2f3d2b] text-white font-medium text-sm disabled:opacity-50 active:scale-[0.99]"
             >
-              {saving
-                ? "Saving…"
-                : savedOnce
-                ? "Holibae saved ✅"
-                : "Save this Holibae"}
+              {saving ? "Saving…" : savedOnce ? "Holibae saved ✅" : "Save this Holibae"}
             </button>
 
             <button
               onClick={handleShareCharacter}
-              className="w-full py-2 rounded-lg bg-purple-600 text-white font-medium text-sm"
+              className="w-full py-2.5 rounded-xl bg-[#6d28d9] text-white font-medium text-sm active:scale-[0.99]"
             >
               Share Holibae
             </button>
 
             <button
               onClick={handleGoToMusic}
-              className="w-full py-2 rounded-lg bg-[var(--gold),#d4af37] text-black font-medium text-sm"
+              className="w-full py-2.5 rounded-xl bg-[#d4af37] text-[#1f2a1d] font-medium text-sm active:scale-[0.99]"
             >
               Enter music studio
             </button>
           </div>
 
           {characterSummary && (
-            <p className="text-sm bg-white border rounded-md p-3">
+            <p className="text-sm bg-white/80 border border-black/10 rounded-md p-3 text-black/90">
               {characterSummary}
             </p>
           )}
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>}
         </section>
       </div>
     </main>

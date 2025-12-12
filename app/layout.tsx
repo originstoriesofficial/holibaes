@@ -9,23 +9,53 @@ const sourceCodePro = Source_Code_Pro({
   variable: "--font-source-code-pro",
 });
 
+/**
+ * Prefer NEXT_PUBLIC_URL (set by you in Vercel env),
+ * else fall back to VERCEL_URL (set by Vercel),
+ * else localhost.
+ */
+function getRootUrl() {
+  const manual = process.env.NEXT_PUBLIC_URL;
+  if (manual) return manual.replace(/\/$/, "");
+
+  const vercel = process.env.VERCEL_URL;
+  if (vercel) return `https://${vercel}`.replace(/\/$/, "");
+
+  return "http://localhost:3000";
+}
+
 export async function generateMetadata(): Promise<Metadata> {
-  const homeUrl =
-    process.env.NEXT_PUBLIC_URL || "https://holibaes.vercel.app";
+  const rootUrl = getRootUrl();
 
   return {
+    metadataBase: new URL(rootUrl),
     title: "Holibae Labs",
     description: "AI Animation and Music Studio",
+
+    openGraph: {
+      title: "Holibae Labs",
+      description: "AI Animation and Music Studio",
+      url: rootUrl,
+      images: [{ url: `${rootUrl}/hero.png` }],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: "Holibae Labs",
+      description: "AI Animation and Music Studio",
+      images: [`${rootUrl}/hero.png`],
+    },
+
     other: {
       "fc:miniapp": JSON.stringify({
         version: "next",
-        imageUrl: `${homeUrl}/preview.png`,
+        imageUrl: `${rootUrl}/preview.png`,
         button: {
           title: "Enter The Holibae Lab",
           action: {
             type: "launch_frame",
             name: "Holibae Labs",
-            url: homeUrl,
+            url: rootUrl,
           },
         },
       }),
@@ -42,10 +72,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${sourceCodePro.variable} bg-[#f5f2eb]`}
+      className={`${inter.variable} ${sourceCodePro.variable}`}
     >
       <body
-        className="min-h-screen bg-[#f5f2eb] text-[var(--green)] font-sans"
+        className="min-h-screen font-sans bg-transparent text-inherit"
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",

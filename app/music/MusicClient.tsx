@@ -7,9 +7,26 @@ import Image from "next/image";
 import { ShareSongButton } from "../components/ShareSongButton";
 
 const styles = [
-  "Lo-fi", "Jazz", "Ambient", "Orchestral", "Fantasy", "Cyberpunk", "Retro", "Funk",
-  "Dream Pop", "Gospel", "Neo Soul", "Future Bass", "Ballad", "Pop", "Synthwave",
-  "Vaporwave", "Acoustic", "Chillwave", "Shoegaze", "Trance"
+  "Lo-fi",
+  "Jazz",
+  "Ambient",
+  "Orchestral",
+  "Fantasy",
+  "Cyberpunk",
+  "Retro",
+  "Funk",
+  "Dream Pop",
+  "Gospel",
+  "Neo Soul",
+  "Future Bass",
+  "Ballad",
+  "Pop",
+  "Synthwave",
+  "Vaporwave",
+  "Acoustic",
+  "Chillwave",
+  "Shoegaze",
+  "Trance",
 ];
 
 interface SavedSong {
@@ -44,12 +61,17 @@ export default function MusicClient() {
   }, [address, fid]);
 
   const generateSong = async () => {
+    if (loading) return;
+
     setLoading(true);
     setError(null);
     setAudioUrl(null);
 
     try {
-      const fullPrompt = `${prompt || "holibae holiday theme"} in the style of ${style}.${lyrics ? " Lyrics: " + lyrics : ""}`;
+      const fullPrompt = `${prompt || "holibae holiday theme"} in the style of ${style}.${
+        lyrics ? " Lyrics: " + lyrics : ""
+      }`;
+
       const res = await fetch("/api/compose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,7 +86,7 @@ export default function MusicClient() {
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       setAudioUrl(url);
-    } catch (err: any) {
+    } catch {
       setError("Oops! Something went wrong while creating your holiday jam.");
     } finally {
       setLoading(false);
@@ -76,7 +98,6 @@ export default function MusicClient() {
       setError("Generate a song first.");
       return;
     }
-
     if (typeof window === "undefined") return;
 
     setSaving(true);
@@ -96,7 +117,7 @@ export default function MusicClient() {
 
       const next = [entry, ...existing].slice(0, 50);
       window.localStorage.setItem(storageKey, JSON.stringify(next));
-    } catch (err) {
+    } catch {
       setError("Could not save song locally.");
     } finally {
       setSaving(false);
@@ -104,52 +125,53 @@ export default function MusicClient() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#fefcf9] to-[#f5efe3] text-[#1f3b2c] px-4 py-10">
+    <main className="min-h-screen bg-[#b7c3a1] text-[#1f2a1d] px-4 py-10">
       <div className="w-full max-w-5xl mx-auto space-y-10">
-        {/* Header */}
         <header className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#cbd5c0] bg-[#e3f2db] px-3 py-1 text-xs font-medium text-[#1f3b2c]">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-3 py-1 text-xs font-medium text-[#1f2a1d]">
               🎄 Holibae Music Studio
             </div>
+
             {originHolder && (
-              <span className="text-xs text-[#cbd5c0] font-semibold">
+              <span className="text-xs text-[#2f3d2b]/80 font-semibold">
                 OriginStory holder ✅
               </span>
             )}
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-3xl font-semibold tracking-tight">
             ❄️ Compose your Holibae Anthem
           </h1>
-          <p className="text-sm text-[#1f3b2c]/70 max-w-xl">
+          <p className="text-sm text-[#2f3d2b]/80 max-w-xl">
             Describe your Holibae’s holiday mood. We’ll create a magical 60-second seasonal anthem just for them.
           </p>
         </header>
 
         <div className="grid md:grid-cols-[1.5fr,1fr] gap-8">
-          {/* Form panel */}
-          <section className="rounded-xl border border-[#cbd5c0] bg-white/70 backdrop-blur p-6 shadow-lg space-y-6">
+          <section className="rounded-2xl border border-black/10 bg-white/70 backdrop-blur p-6 shadow-sm space-y-6">
             <div className="space-y-4">
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe the holly-jolly mood"
-                className="w-full min-h-[80px] rounded-lg border border-[#cbd5c0] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                className="w-full min-h-[80px] rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-[#1f2a1d] placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
               />
               <textarea
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
                 placeholder="Optional: write some lyrics (poetic or funny!)"
-                className="w-full min-h-[80px] rounded-lg border border-[#cbd5c0] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                className="w-full min-h-[80px] rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-[#1f2a1d] placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
               />
               <select
                 value={style}
                 onChange={(e) => setStyle(e.target.value)}
-                className="w-full rounded-lg border border-[#cbd5c0] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-[#1f2a1d] focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
               >
                 {styles.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -157,23 +179,22 @@ export default function MusicClient() {
             <button
               onClick={generateSong}
               disabled={loading}
-              className="w-full py-3 rounded-lg bg-[#d4af37] text-white font-semibold hover:brightness-105 transition disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-[#d4af37] text-[#1f2a1d] font-semibold active:scale-[0.99] disabled:opacity-50"
             >
               {loading ? "Mixing holiday magic…" : "Generate Holibae Song"}
             </button>
 
             {error && (
-              <p className="text-sm text-red-600 whitespace-pre-line">{error}</p>
+              <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
             )}
           </section>
 
-          {/* Holibae panel */}
-          <section className="rounded-xl border border-[#cbd5c0] bg-white/70 backdrop-blur p-6 shadow-lg space-y-4">
-            <h2 className="text-sm font-bold">🎁 Your Holibae</h2>
+          <section className="rounded-2xl border border-black/10 bg-white/70 backdrop-blur p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-semibold">🎁 Your Holibae</h2>
 
             <div className="flex items-center gap-4">
               {imageUrlFromCreate ? (
-                <div className="w-20 h-20 rounded-xl overflow-hidden border border-[#cbd5c0] bg-white flex-shrink-0">
+                <div className="w-20 h-20 rounded-xl overflow-hidden border border-black/10 bg-white flex-shrink-0">
                   <Image
                     src={imageUrlFromCreate}
                     alt="Your Holibae"
@@ -183,14 +204,16 @@ export default function MusicClient() {
                   />
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-xl bg-gray-100 border border-[#cbd5c0] text-xs text-gray-500 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-xl bg-white/80 border border-black/10 text-xs text-black/50 flex items-center justify-center">
                   Your Holibae
                 </div>
               )}
 
               <div className="flex-1 text-sm">
-                <div className="font-medium">{formFromCreate || "Mystery Holibae"}</div>
-                <div className="text-[#1f3b2c]/70">
+                <div className="font-medium">
+                  {formFromCreate || "Mystery Holibae"}
+                </div>
+                <div className="text-[#2f3d2b]/75">
                   Style: <span className="font-semibold">{style}</span>
                 </div>
               </div>
@@ -199,17 +222,19 @@ export default function MusicClient() {
             {audioUrl ? (
               <div className="space-y-4">
                 <audio controls src={audioUrl} className="w-full" />
+
                 <button
                   onClick={handleSaveSong}
                   disabled={saving}
-                  className="w-full py-2 rounded-lg bg-[#1f3b2c] text-white font-semibold hover:bg-opacity-90 transition disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-[#2f3d2b] text-white font-semibold active:scale-[0.99] disabled:opacity-50"
                 >
                   {saving ? "Saving…" : "Save this jingle"}
                 </button>
+
                 <ShareSongButton style={style} prompt={prompt} />
               </div>
             ) : (
-              <p className="text-sm text-[#1f3b2c]/60">
+              <p className="text-sm text-[#2f3d2b]/70">
                 Generate a jolly anthem to save and share 🎶
               </p>
             )}
