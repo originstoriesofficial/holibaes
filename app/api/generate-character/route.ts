@@ -213,13 +213,14 @@ export async function POST(req: Request) {
     // 🔑 FINAL PROMPT – color is the ONLY strong color
     const prompt = `
     ${STYLE_PLUSH}
-    A highly detailed plush ${hollyForm} character in a ${design} style,
-    wearing a ${colorPhrase} ${outfit},
+    A highly detailed plush ${hollyForm} character celebrating the ${safeKey} holiday,
+    in a ${design} style, wearing a mostly ${colorPhrase} ${outfit},
     dominant ${colorPhrase} color palette, with vivid ${colorPhrase} accents,
-    integrated into the traditional holiday colors,
+    integrated into traditional ${safeKey} holiday colors and motifs,
     full body visible from head to toe, standing, centered in frame,
     cinematic lighting, glossy, detailed, 4k, mystical 3D toy aesthetic.
     `;
+    
     
     const result = await fal.subscribe("fal-ai/stable-cascade", {
       input: {
