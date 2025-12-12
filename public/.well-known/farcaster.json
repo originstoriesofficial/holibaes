@@ -1,6 +1,6 @@
 {
-  "canonicalDomain": "https://monjeria.vercel.app",
-  "url": "https://monjeria.vercel.app",
+  "canonicalDomain": "https://holibaes.vercel.app",
+  "url": "https://holibases.vercel.app",
   "chainId": "0x2105",
   "accountAssociation": {
     "header": "eyJmaWQiOjEzMzE0LCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4RDY5OWM4MkVDRGQxN0E2RTk3RDcyNjRkMDM0MjlFRjVjNzM4RTJiMCJ9",
@@ -12,18 +12,18 @@
   },
   "miniapp": {
     "version": "1",
-    "name": "La Monjeria",
-    "iconUrl": "https://monjeria.vercel.app/icon.png",
-    "homeUrl": "https://monjeria.vercel.app",
-    "imageUrl": "https://monjeria.vercel.app/image.png",
-    "splashImageUrl": "https://monjeria.vercel.app/splash.png",
+    "name": "Holibae Labs",
+    "iconUrl": "https://holibaes.vercel.app/icon.png",
+    "homeUrl": "https://holibaes.vercel.app",
+    "imageUrl": "https://holibaes.vercel.app/image.png",
+    "splashImageUrl": "https://holibaes.vercel.app/splash.png",
     "splashBackgroundColor": "#ce19e6",
-    "webhookUrl": "https://monjeria.vercel.app/api/webhook",
+    "webhookUrl": "https://holibaes.vercel.app/api/webhook",
     "subtitle": "AI Animation and Music Studio",
-    "description": "Create and mint your own Monje and craft a unique music anthem",
+    "description": "Create and mint your own Holibae and craft a unique music anthem",
     "primaryCategory": "entertainment",
-    "tags": ["music", "art", "nft", "ai", "creativity"],
-    "ogTitle": "La Monjería - AI Studio",
-    "ogDescription": "Create, customize, and soundtrack your own Monje on Base"
+    "tags": ["music", "art", "holiday", "ai", "creativity"],
+    "ogTitle": "Holibae Labs - AI Studio",
+    "ogDescription": "Create, customize, and soundtrack your own Holibae on Base"
   }
 }

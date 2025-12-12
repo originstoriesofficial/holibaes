@@ -19,7 +19,7 @@ export const wagmiConfig = createConfig({
     farcasterMiniApp(),
     baseAccount({
       appName: 'Holibae Labs',
-      appLogoUrl: 'https://monjeria.vercel.app/icon.png'
+      appLogoUrl: 'https://holibaes.vercel.app/icon.png'
     })
   ]
 });
