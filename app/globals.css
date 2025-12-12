@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 🌿 Holibae Labs Color System */
+    --bg: #f5f2eb;        /* soft sand */
+    --green: #1f3b2c;     /* deep forest */
+    --sage: #9bbf83;      /* fresh leaf */
+    --gold: #d4af37;      /* accent gold */
+    --foreground: var(--green);
+    --background: var(--bg);
+    --border: rgba(31, 59, 44, 0.15);
+    --muted: rgba(31, 59, 44, 0.6);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0a0a;
+      --green: #cfe4c8;
+      --sage: #7ab67f;
+      --gold: #d4af37;
+      --foreground: var(--green);
+      --background: var(--bg);
+      --border: rgba(255, 255, 255, 0.12);
+      --muted: rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--foreground);
+    font-family: var(--font-inter), sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: color 0.3s, background-color 0.3s;
+  }
+
+  code {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-family: var(--font-source-code-pro), monospace;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem calc(0.25rem + 2px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    code {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html {
+      color-scheme: dark;
+    }
+  }
+}
+
+/* 🌿 Theme Application */
+body {
+  background-color: var(--bg);
+  color: var(--green);
+  font-family: var(--font-inter), sans-serif;
+}
+
+/* 💛 Buttons */
+button {
+  border-radius: 0.75rem; /* matches rounded-xl */
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.02);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 🪵 Panels / Cards */
+.card {
+  border-radius: 1rem; /* rounded-2xl */
+  border: 1px solid var(--border);
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 🌤️ Headers */
+h1,
+h2,
+h3 {
+  font-weight: bold;
+  letter-spacing: 0.02em;
+  color: var(--green);
+}
+
+/* ✨ Gold text accent */
+.gold {
+  color: var(--gold);
+}
+
+/* 🍃 Border helpers */
+.border-sage {
+  border-color: var(--sage);
+}
+
+.text-muted {
+  color: var(--muted);
+}

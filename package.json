@@ -1,0 +1,38 @@
+{
+  "name": "new-mini-app-quickstart",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@coinbase/onchainkit": "^1.1.2",
+    "@fal-ai/client": "^1.7.2",
+    "@farcaster/miniapp-sdk": "^0.2.1",
+    "@farcaster/quick-auth": "^0.0.7",
+    "@metamask/sdk": "^0.34.0",
+    "@react-native-async-storage/async-storage": "^1.24.0",
+    "aws-sdk": "^1.7.2",
+    "axios": "^1.13.2",
+    "next": "16.0.7",
+    "pinata": "^2.5.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.0.0",
+    "@next/eslint-plugin-next": "^15.3.4",
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.22",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "15.3.4",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.0.0"
+  }
+}
