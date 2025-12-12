@@ -11,7 +11,7 @@ const sourceCodePro = Source_Code_Pro({
 
 export async function generateMetadata(): Promise<Metadata> {
   const homeUrl =
-    process.env.NEXT_PUBLIC_URL || "https://monjeria.vercel.app";
+    process.env.NEXT_PUBLIC_URL || "https://holibaes.vercel.app";
 
   return {
     title: "Holibae Labs",

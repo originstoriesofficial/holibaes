@@ -27,12 +27,12 @@ export const minikitConfig = {
       "heroImageUrl": "https://holibaes.vercel.app/hero.png",
       "imageUrl": "https://holibaes.vercel.app/image.png",
       "splashImageUrl": "https://holibaes.vercel.app/splash.png",
-      "splashBackgroundColor": "#ce19e6",
+      "splashBackgroundColor": "#f5f2eb",
       "webhookUrl": "https://holibaes.vercel.app/api/webhook",
       "subtitle": "AI Animation and Music Studio",
       "description": "Create and mint your own Monje and craft a unique music anthem",
       "primaryCategory": "entertainment",
-      "tags": ["music", "art", "nft", "ai", "creativity"],
+      "tags": ["music", "art", "holidays", "ai", "creativity"],
       "ogTitle": "Holibae Labs - AI Studio",
       "ogDescription": "Create, customize, and soundtrack your own Monje on Base"
     
