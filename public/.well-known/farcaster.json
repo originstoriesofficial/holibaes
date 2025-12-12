@@ -3,9 +3,9 @@
   "url": "https://holibases.vercel.app",
   "chainId": "0x2105",
   "accountAssociation": {
-    "header": "eyJmaWQiOjEzMzE0LCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4RDY5OWM4MkVDRGQxN0E2RTk3RDcyNjRkMDM0MjlFRjVjNzM4RTJiMCJ9",
-    "payload": "eyJkb21haW4iOiJtb25qZXJpYS52ZXJjZWwuYXBwIn0",
-    "signature": "tv915xXSbH2H94C+S2IIR/4f3b7NsQik3HzkWavOOgNP3LtnPoDKowNQUNxokmdhMAm8lMmNvDj/JICZmtmR8hs="
+    "header": "",
+    "payload": "",
+    "signature": ""
   },
   "baseBuilder": {
     "ownerAddress": "0x1ffcD029CE51fFf63C2Cc32445779CDE27C0C40f"
