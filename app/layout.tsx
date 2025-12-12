@@ -3,6 +3,15 @@ import { Inter, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
+export const metadata: Metadata = {
+
+  other: {
+    'base:app_id': '693c8a3535edc2b115ca44db',
+  },
+};
+
+
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const sourceCodePro = Source_Code_Pro({
   subsets: ["latin"],
@@ -41,9 +50,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${sourceCodePro.variable}`}
+      className={`${inter.variable} ${sourceCodePro.variable} bg-[#f5f2eb]`}
     >
-      <body className="bg-[var(--bg)] text-[var(--green)] font-sans">
+      <body
+        className="min-h-screen bg-[#f5f2eb] text-[var(--green)] font-sans"
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>
