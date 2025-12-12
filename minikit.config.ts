@@ -21,19 +21,19 @@ export const minikitConfig = {
   },
   "miniapp": {
       "version": "1",
-      "name": "La Monjeria",
-      "iconUrl": "https://monjeria.vercel.app/icon.png",
-      "homeUrl": "https://monjeria.vercel.app",
-      "heroImageUrl": "https://monjeria.vercel.app/hero.png",
-      "imageUrl": "https://monjeria.vercel.app/image.png",
-      "splashImageUrl": "https://monjeria.vercel.app/splash.png",
+      "name": "Holibae Labs",
+      "iconUrl": "https://holibaes.vercel.app/icon.png",
+      "homeUrl": "https://holibaes.vercel.app",
+      "heroImageUrl": "https://holibaes.vercel.app/hero.png",
+      "imageUrl": "https://holibaes.vercel.app/image.png",
+      "splashImageUrl": "https://holibaes.vercel.app/splash.png",
       "splashBackgroundColor": "#ce19e6",
-      "webhookUrl": "https://monjeria.vercel.app/api/webhook",
+      "webhookUrl": "https://holibaes.vercel.app/api/webhook",
       "subtitle": "AI Animation and Music Studio",
       "description": "Create and mint your own Monje and craft a unique music anthem",
       "primaryCategory": "entertainment",
       "tags": ["music", "art", "nft", "ai", "creativity"],
-      "ogTitle": "La Monjería - AI Studio",
+      "ogTitle": "Holibae Labs - AI Studio",
       "ogDescription": "Create, customize, and soundtrack your own Monje on Base"
     
   }

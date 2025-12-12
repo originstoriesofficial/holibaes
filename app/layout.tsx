@@ -3,15 +3,6 @@ import { Inter, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-export const metadata: Metadata = {
-
-  other: {
-    'base:app_id': '693c8a3535edc2b115ca44db',
-  },
-};
-
-
-
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const sourceCodePro = Source_Code_Pro({
   subsets: ["latin"],
@@ -38,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
           },
         },
       }),
+      "base:app_id": "693c8a3535edc2b115ca44db",
     },
   };
 }
