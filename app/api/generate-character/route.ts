@@ -387,9 +387,10 @@ export async function POST(req: Request) {
       hollyForm?: string;
       holidayKey?: string;
       color?: string;
+      address?: string; // ✅ include address from client
     };
 
-    const { hollyForm, holidayKey, color } = body;
+    const { hollyForm, holidayKey, color, address } = body;
 
     if (!hollyForm || !holidayKey || !color) {
       return NextResponse.json(
@@ -406,7 +407,6 @@ export async function POST(req: Request) {
     const design = pickRandom(holidayConfig.design);
     const outfit = pickRandom(holidayConfig.outfit);
     const motif = pickRandom(holidayConfig.motifs);
-
     const colorPhrase = color.trim().toLowerCase();
 
     const prompt = buildPrompt({
@@ -419,6 +419,10 @@ export async function POST(req: Request) {
     });
 
     const negative_prompt = buildNegativePrompt(safeKey);
+
+    // ✅ Logging for debug
+    console.log("🎨 Generating for address:", address ?? "[missing]");
+    console.log("🧵 Prompt:\n", prompt);
 
     const result = await fal.subscribe("fal-ai/stable-cascade", {
       input: {
