@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
   turbopack: {},
 
   images: {
-    // Replace deprecated `domains` with `remotePatterns`
     remotePatterns: [
       {
         protocol: 'https',
@@ -41,18 +40,37 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'your-bucket.s3.us-west-2.amazonaws.com', // replace with actual bucket hostname if needed
+        hostname: 'your-bucket.s3.us-west-2.amazonaws.com',
       },
     ],
   },
 
   webpack: (config) => {
-    // Keep existing externals for AppKit / WalletConnect setup
     config.externals = config.externals || [];
     if (Array.isArray(config.externals)) {
       config.externals.push('pino-pretty', 'lokijs', 'encoding');
     }
     return config;
+  },
+
+  // ✅ Mini App Embed Security Headers (CSP)
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value:
+              "frame-ancestors https://*.farcaster.xyz https://*.warpcast.com https://warpcast.com https://*.base.org *",
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'ALLOWALL',
+          },
+        ],
+      },
+    ];
   },
 };
 
