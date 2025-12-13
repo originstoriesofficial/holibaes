@@ -6,14 +6,27 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-export const Button = ({ variant = "primary", children, className, ...props }: ButtonProps) => {
-  const base = "rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200";
+export const Button = ({
+  variant = "primary",
+  children,
+  className,
+  ...props
+}: ButtonProps) => {
+  const base =
+    "rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 w-full";
+
   const variants = {
-    primary: "bg-[#D4AF37] text-[#1F3B2C] hover:bg-[#c5a22e] shadow-[0_2px_6px_rgba(0,0,0,0.2)]",
-    secondary: "border border-[#9BBF83] text-[#1F3B2C] hover:bg-[#9BBF83]/20"
+    primary:
+      "bg-[var(--gold)] text-[var(--green)] hover:brightness-110 shadow hover:scale-105",
+    secondary:
+      "border border-[var(--sage)] text-[var(--green)] hover:bg-[var(--sage)]/20",
   };
+
   return (
-    <button className={clsx(base, variants[variant], className)} {...props}>
+    <button
+      className={clsx(base, variants[variant], className)}
+      {...props}
+    >
       {children}
     </button>
   );

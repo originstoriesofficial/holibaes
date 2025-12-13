@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAccount } from "wagmi";
 import { useComposeCast } from "@coinbase/onchainkit/minikit";
+import { Button } from "../components/Button";
 
 type Step = 1 | 2 | 3;
 
@@ -156,205 +157,148 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
     setStep(1);
   };
 
-  // Sage theme
-  const mainClass = "min-h-screen bg-[#b7c3a1] text-[#1f2a1d] font-sans px-4 py-6";
+  return (
+    <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10 font-sans">
+      <div className="w-full max-w-md mx-auto space-y-6">
+        {!imageUrl ? (
+          <>
+            <header className="space-y-2">
+              <h1 className="text-2xl font-semibold">Create your Holibae</h1>
+              <p className="text-sm text-muted">
+                Pick a 1) form (animal or doll type), 2) a holiday, and 3) a color to summon your Holibae.
+              </p>
+            </header>
 
-  // IMPORTANT: We use inline styles on the holiday buttons to defeat any global button CSS
-  const holidayButtonStyle = (active: boolean): React.CSSProperties => ({
-    backgroundColor: active ? "rgba(212,175,55,0.28)" : "rgba(255,255,255,0.92)",
-    color: "#1f2a1d",
-    borderColor: active ? "#d4af37" : "rgba(0,0,0,0.12)",
-    WebkitTextFillColor: "#1f2a1d", // iOS Safari / webview can override text color otherwise
-  });
-
-  // FORM FLOW
-  if (!imageUrl) {
-    return (
-      <main className={mainClass}>
-        <div className="w-full max-w-md mx-auto space-y-6">
-          <header className="space-y-2">
-            <h1 className="text-2xl font-semibold leading-tight text-[#1f2a1d]">
-              Create your Holibae
-            </h1>
-            <p className="text-sm leading-relaxed text-[#2f3d2b]/85">
-              Pick 1) a form, 2) a holiday, and 3) a color to summon your Holibae.
-            </p>
-          </header>
-
-          <div className="flex justify-center gap-2">
-            {[1, 2, 3].map((s) => (
-              <div
-                key={s}
-                className={`h-1.5 w-6 rounded-full ${
-                  step >= s ? "bg-[#d4af37]" : "bg-black/15"
-                }`}
-              />
-            ))}
-          </div>
-
-          <section className="space-y-4">
-            {step === 1 && (
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[#1f2a1d]">
-                  Holibae Form (e.g. owl, doll)
-                </label>
-                <input
-                  className="w-full border border-black/10 rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
-                  value={hollyForm}
-                  onChange={(e) => setHollyForm(e.target.value)}
-                  placeholder="porcelain doll, reindeer, robot"
+            <div className="flex justify-center gap-2">
+              {[1, 2, 3].map((s) => (
+                <div
+                  key={s}
+                  className={`h-1.5 w-6 rounded-full ${
+                    step >= s ? "bg-[var(--gold)]" : "bg-black/15"
+                  }`}
                 />
-              </div>
-            )}
-
-            {step === 2 && (
-              <div>
-                <label className="block text-sm font-medium mb-2 text-[#1f2a1d]">
-                  Choose a Holiday
-                </label>
-
-                <div className="rounded-xl border border-black/10 bg-white/55 backdrop-blur p-2">
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    {HOLIDAY_OPTIONS.map((opt) => {
-                      const active = holidayKey === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          onClick={() => setHolidayKey(opt.id)}
-                          type="button"
-                          className="w-full text-left rounded-lg px-3 py-2 border transition"
-                          style={holidayButtonStyle(active)}
-                        >
-                          <div className="font-semibold leading-snug" style={{ WebkitTextFillColor: "#1f2a1d" }}>
-                            {opt.label}
-                          </div>
-                          <div
-                            className="text-xs leading-snug"
-                            style={{
-                              color: "rgba(47,61,43,0.82)",
-                              WebkitTextFillColor: "rgba(47,61,43,0.82)",
-                            }}
-                          >
-                            {opt.blurb}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[#1f2a1d]">
-                  Choose a Color
-                </label>
-                <input
-                  className="w-full border border-black/10 rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  placeholder="e.g. moss green, glittery gold"
-                />
-              </div>
-            )}
-
-            <div className="flex justify-between gap-3">
-              <button
-                onClick={prevStep}
-                disabled={step === 1}
-                className="text-sm px-4 py-2 rounded-md bg-black/10 text-black disabled:opacity-40"
-              >
-                Back
-              </button>
-
-              {step < 3 ? (
-                <button
-                  onClick={nextStep}
-                  className="text-sm px-4 py-2 rounded-md bg-[#d4af37] text-[#1f2a1d] font-medium active:scale-[0.99]"
-                >
-                  Next
-                </button>
-              ) : (
-                <button
-                  onClick={handleGenerateCharacter}
-                  disabled={generating}
-                  className="text-sm px-4 py-2 rounded-md bg-[#2f3d2b] text-white font-medium disabled:opacity-50 active:scale-[0.99]"
-                >
-                  {generating ? "Summoning…" : "Get your Holibae"}
-                </button>
-              )}
+              ))}
             </div>
 
-            {error && (
-              <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
-            )}
-          </section>
-        </div>
-      </main>
-    );
-  }
+            <section className="space-y-4">
+              {step === 1 && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Holibae Form</label>
+                  <input
+                    className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
+                    value={hollyForm}
+                    onChange={(e) => setHollyForm(e.target.value)}
+                    placeholder="porcelain doll, reindeer, robot"
+                  />
+                </div>
+              )}
 
-  // PREVIEW
-  return (
-    <main className={mainClass}>
-      <div className="w-full max-w-md mx-auto space-y-4">
-        <header className="flex justify-between items-center">
-          <h1 className="text-lg font-semibold text-[#1f2a1d]">Your Holibae</h1>
-          <button
-            onClick={handleCreateAnother}
-            className="text-sm underline text-black/70"
-          >
-            Create another
-          </button>
-        </header>
+              {step === 2 && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">Choose a Holiday</label>
+                  <div className="rounded-xl border border-[var(--border)] bg-white/60 backdrop-blur p-2">
+                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                      {HOLIDAY_OPTIONS.map((opt) => {
+                        const active = holidayKey === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => setHolidayKey(opt.id)}
+                            type="button"
+                            className={`w-full text-left rounded-lg px-3 py-2 border text-sm transition ${
+                              active
+                                ? "bg-[var(--gold)]/20 border-[var(--gold)]"
+                                : "bg-white border-[var(--border)]"
+                            }`}
+                          >
+                            <div className="font-semibold">{opt.label}</div>
+                            <div className="text-xs text-muted">{opt.blurb}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
 
-        <section className="space-y-4">
-          <div className="w-full overflow-hidden border border-black/10 rounded-xl bg-white/90 flex justify-center">
-            <Image
-              src={imageUrl!}
-              alt="Holibae"
-              width={400}
-              height={400}
-              className="object-contain max-h-[60vh]"
-              priority
-            />
-          </div>
+              {step === 3 && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Choose a Color</label>
+                  <input
+                    className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    placeholder="e.g. moss green, glittery gold"
+                  />
+                </div>
+              )}
 
-          <div className="space-y-2">
-            <button
-              onClick={handleSaveCharacter}
-              disabled={saving}
-              className="w-full py-2.5 rounded-xl bg-[#2f3d2b] text-white font-medium text-sm disabled:opacity-50 active:scale-[0.99]"
-            >
-              {saving ? "Saving…" : savedOnce ? "Holibae saved ✅" : "Save this Holibae"}
-            </button>
+              <div className="flex justify-between gap-3">
+                <Button variant="secondary" onClick={prevStep} disabled={step === 1}>
+                  Back
+                </Button>
 
-            <button
-              onClick={handleShareCharacter}
-              className="w-full py-2.5 rounded-xl bg-[#6d28d9] text-white font-medium text-sm active:scale-[0.99]"
-            >
-              Share Holibae
-            </button>
+                {step < 3 ? (
+                  <Button onClick={nextStep}>Next</Button>
+                ) : (
+                  <Button onClick={handleGenerateCharacter} disabled={generating}>
+                    {generating ? "Summoning…" : "Get your Holibae"}
+                  </Button>
+                )}
+              </div>
 
-            <button
-              onClick={handleGoToMusic}
-              className="w-full py-2.5 rounded-xl bg-[#d4af37] text-[#1f2a1d] font-medium text-sm active:scale-[0.99]"
-            >
-              Enter music studio
-            </button>
-          </div>
+              {error && (
+                <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+              )}
+            </section>
+          </>
+        ) : (
+          <>
+            <header className="flex justify-between items-center">
+              <h1 className="text-lg font-semibold">Your Holibae</h1>
+              <button onClick={handleCreateAnother} className="text-sm underline text-muted">
+                Create another
+              </button>
+            </header>
 
-          {characterSummary && (
-            <p className="text-sm bg-white/90 border border-black/10 rounded-md p-3 text-black/90">
-              {characterSummary}
-            </p>
-          )}
+            <section className="space-y-4">
+              <div className="w-full overflow-hidden border border-[var(--border)] rounded-xl bg-white/90 flex justify-center">
+                <Image
+                  src={imageUrl!}
+                  alt="Holibae"
+                  width={400}
+                  height={400}
+                  className="object-contain max-h-[60vh]"
+                  priority
+                />
+              </div>
 
-          {error && (
-            <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
-          )}
-        </section>
+              <div className="space-y-2">
+                <Button onClick={handleSaveCharacter} disabled={saving}>
+                  {saving ? "Saving…" : savedOnce ? "Holibae saved ✅" : "Save this Holibae"}
+                </Button>
+
+                <Button onClick={handleShareCharacter} className="bg-[#6d28d9] text-white">
+                  Share Holibae
+                </Button>
+
+                <Button onClick={handleGoToMusic} variant="primary">
+                  Enter music studio
+                </Button>
+              </div>
+
+              {characterSummary && (
+                <p className="text-sm bg-white/90 border border-[var(--border)] rounded-md p-3 text-black/90">
+                  {characterSummary}
+                </p>
+              )}
+
+              {error && (
+                <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+              )}
+            </section>
+          </>
+        )}
       </div>
     </main>
   );

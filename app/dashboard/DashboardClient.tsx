@@ -47,22 +47,20 @@ export default function DashboardClient() {
   };
 
   return (
-    <main className="min-h-screen bg-[#b7c3a1] text-[#1f2a1d] px-4 py-6">
-      <div className="w-full max-w-sm mx-auto pt-4">
-        <div className="rounded-2xl border border-black/10 bg-white/70 backdrop-blur-sm px-6 py-7 space-y-5 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold">🎁 Season’s Greetings</h1>
+    <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
+      <div className="w-full max-w-md text-center">
+        <div className="card px-6 py-8 space-y-6">
+          <h1 className="text-3xl font-bold">🎁 Season’s Greetings</h1>
 
           {originHolder ? (
-            <p className="text-sm text-[#2f3d2b]/80 leading-relaxed">
+            <p className="text-muted text-sm leading-relaxed">
               Welcome, originator ✨<br />
               The Holibae Creator + Music Studio is unlocked.
             </p>
           ) : (
-            <p className="text-sm text-[#2f3d2b]/80 leading-relaxed">
+            <p className="text-muted text-sm leading-relaxed">
               You’ll need at least{" "}
-              <span className="font-semibold text-[#b08d2a]">
-                3,500 $ORIGINSTORY
-              </span>{" "}
+              <span className="font-semibold gold">3,500 $ORIGINSTORY</span>{" "}
               tokens to unlock all Holibae features.
             </p>
           )}
@@ -70,21 +68,21 @@ export default function DashboardClient() {
           <div className="flex flex-col gap-3">
             <button
               onClick={() => goTo("/create")}
-              className="w-full py-3 rounded-xl bg-[#d4af37] text-[#1f2a1d] font-semibold active:scale-[0.99]"
+              className="bg-[var(--gold)] text-black py-3 rounded-xl font-semibold shadow hover:scale-105 transition-all"
             >
               🎨 Create a Holibae
             </button>
 
             <button
               onClick={() => goTo("/music")}
-              className="w-full py-3 rounded-xl bg-[#2f3d2b] text-white font-semibold active:scale-[0.99]"
+              className="bg-[var(--green)] text-white py-3 rounded-xl font-semibold shadow hover:scale-105 transition-all"
             >
               🎶 Enter Music Studio
             </button>
           </div>
         </div>
 
-        <p className="mt-5 text-center text-xs text-[#2f3d2b]/70">
+        <p className="mt-6 text-xs text-muted">
           Powered by OriginStory • Onchain holiday familiars on Base
         </p>
       </div>

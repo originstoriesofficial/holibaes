@@ -1,3 +1,5 @@
+// app/layout.tsx
+
 import type { Metadata } from "next";
 import { Inter, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
@@ -31,21 +33,18 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(rootUrl),
     title: "Holibae Labs",
     description: "AI Animation and Music Studio",
-
     openGraph: {
       title: "Holibae Labs",
       description: "AI Animation and Music Studio",
       url: rootUrl,
       images: [{ url: `${rootUrl}/hero.png` }],
     },
-
     twitter: {
       card: "summary_large_image",
       title: "Holibae Labs",
       description: "AI Animation and Music Studio",
       images: [`${rootUrl}/hero.png`],
     },
-
     other: {
       "fc:miniapp": JSON.stringify({
         version: "next",
@@ -72,16 +71,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${sourceCodePro.variable}`}
+      className={`${inter.variable} ${sourceCodePro.variable} bg-[var(--bg)] text-[var(--foreground)]`}
     >
       <body
-        className="min-h-screen font-sans bg-transparent text-inherit"
+        className="min-h-screen flex flex-col items-center justify-center font-sans bg-[var(--bg)] text-[var(--foreground)] transition-colors duration-300"
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <main className="w-full max-w-4xl px-4 py-8">{children}</main>
+        </Providers>
       </body>
     </html>
   );
