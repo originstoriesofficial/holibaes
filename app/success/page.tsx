@@ -1,43 +1,9 @@
 "use client";
 
 import React, { useEffect } from "react";
-import type { Metadata } from "next";
 import Image from "next/image";
 
-export const dynamic = "force-static";
-
-const APP_URL = "https://holibaes.vercel.app"; // Change to holibaes if needed
-
-export async function generateMetadata(): Promise<Metadata> {
-  const imageUrl = `${APP_URL}/og.png`;
-
-  return {
-    title: "Monk Minted!",
-    description: "Your Monk is now live on Base 🧘‍♂️",
-    openGraph: {
-      title: "Basemonks — Mint Complete",
-      description: "Your monk has been minted successfully.",
-      images: [imageUrl],
-      url: `${APP_URL}/success`,
-    },
-    other: {
-      "fc:frame": JSON.stringify({
-        version: "next",
-        imageUrl,
-        button: {
-          title: "View My Monk",
-          action: {
-            type: "launch_frame",
-            url: `${APP_URL}/create`,
-            name: "Basemonks",
-            splashImageUrl: `${APP_URL}/icon.png`,
-            splashBackgroundColor: "#000000",
-          },
-        },
-      }),
-    },
-  };
-}
+const APP_URL = "https://holibaes.vercel.app"; // match what's in metadata.ts
 
 export default function SuccessPage() {
   useEffect(() => {
