@@ -6,7 +6,7 @@ import Image from "next/image";
 
 export const dynamic = "force-static";
 
-const APP_URL = "https://basemonks.vercel.app"; // Change to holibaes if needed
+const APP_URL = "https://holibaes.vercel.app"; // Change to holibaes if needed
 
 export async function generateMetadata(): Promise<Metadata> {
   const imageUrl = `${APP_URL}/og.png`;
