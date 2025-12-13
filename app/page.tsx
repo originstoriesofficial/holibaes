@@ -135,7 +135,7 @@ export default function Home() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted">
-          Holibaes • Powered by ORIGIN STØRIES • Onchain fantasia
+          Onchain Fantasia
         </p>
       </div>
     </main>
