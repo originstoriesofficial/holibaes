@@ -21,6 +21,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<string | null>(null);
 
+  // 🟢 FORCE LIGHT MODE (so Base/Farcaster don't apply dark mode overrides)
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+  }, []);
+
+  // ✅ Tell the SDK we're ready
   useEffect(() => {
     sdk.actions.ready().catch((err) =>
       console.error("sdk.actions.ready failed:", err)

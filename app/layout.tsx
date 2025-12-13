@@ -1,5 +1,3 @@
-// app/layout.tsx
-
 import type { Metadata } from "next";
 import { Inter, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
@@ -11,11 +9,6 @@ const sourceCodePro = Source_Code_Pro({
   variable: "--font-source-code-pro",
 });
 
-/**
- * Prefer NEXT_PUBLIC_URL (set by you in Vercel env),
- * else fall back to VERCEL_URL (set by Vercel),
- * else localhost.
- */
 function getRootUrl() {
   const manual = process.env.NEXT_PUBLIC_URL;
   if (manual) return manual.replace(/\/$/, "");
@@ -71,7 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${sourceCodePro.variable} bg-[var(--bg)] text-[var(--foreground)]`}
+      className={`light ${inter.variable} ${sourceCodePro.variable} bg-[var(--bg)] text-[var(--foreground)]`}
     >
       <body
         className="min-h-screen flex flex-col items-center justify-center font-sans bg-[var(--bg)] text-[var(--foreground)] transition-colors duration-300"

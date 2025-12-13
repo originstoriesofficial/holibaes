@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAccount } from "wagmi";
@@ -32,6 +32,12 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   const router = useRouter();
   const { address } = useAccount();
   const { composeCast } = useComposeCast();
+
+  // ✅ Force light mode
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+  }, []);
 
   const rootUrl = useMemo(() => {
     if (typeof window !== "undefined") return window.location.origin;
@@ -76,7 +82,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       const res = await fetch("/api/generate-character", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hollyForm, holidayKey, color, address }), // ✅ include wallet
+        body: JSON.stringify({ hollyForm, holidayKey, color, address }),
       });
 
       const data = await res.json().catch(() => null);
@@ -181,6 +187,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
               ))}
             </div>
 
+            {/* Step-specific form UI */}
             <section className="space-y-4">
               {step === 1 && (
                 <div>

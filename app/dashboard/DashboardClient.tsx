@@ -11,6 +11,12 @@ export default function DashboardClient() {
 
   const originHolder = searchParams.get("originHolder") === "1";
 
+  // ✅ Force light mode for iframe / mini-app rendering
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+  }, []);
+
   useEffect(() => {
     const init = async () => {
       try {

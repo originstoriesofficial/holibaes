@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
 import Image from "next/image";
@@ -24,6 +24,12 @@ interface SavedSong {
 export default function MusicClient() {
   const searchParams = useSearchParams();
   const { address } = useAccount();
+
+  // ✅ Force light mode
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+  }, []);
 
   const [prompt, setPrompt] = useState("a cozy winter holiday vibe with sparkles");
   const [lyrics, setLyrics] = useState("");
