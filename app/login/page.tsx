@@ -85,7 +85,8 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-5 text-center text-xs text-muted">
-          Holibaes • Onchain holiday familiars on Base
+          Holibaes • Powered by ORIGIN STØRIES • Onchain holiday fantasia
+
         </p>
       </div>
     </main>

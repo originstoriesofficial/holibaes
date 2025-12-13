@@ -83,7 +83,7 @@ export default function DashboardClient() {
         </div>
 
         <p className="mt-6 text-xs text-muted">
-          Powered by OriginStory • Onchain holiday familiars on Base
+          Powered by ORIGIN STØRIES • Onchain holiday fantasia
         </p>
       </div>
     </main>
