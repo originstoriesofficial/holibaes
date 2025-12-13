@@ -5,7 +5,7 @@ fal.config({
   credentials: process.env.FAL_KEY!,
 });
 
-// Single plush style used everywhere
+// Single plush style used everywhere (matches your "it needs to be like this")
 const STYLE_PLUSH = `
 plush-doll proportions, soft rounded silhouette, velvety texture,
 cute expressive eyes, collectible figurine energy,
@@ -14,310 +14,125 @@ gentle diffusion glow, premium toy photography lighting,
 hyper-detailed 3D render
 `.trim();
 
-// Holiday → description map (no explicit color words)
 const HOLLY_MAP = {
   christmas: {
     design: [
-      "cozy winter celebration scene",
+      "warm fireplace and holiday gathering mood style",
+      "a cozy living room with a tree and wrapped presents",
       "classic storybook holiday setting",
       "snowy village and festive decorations",
-      "warm fireplace and holiday gathering mood",
-      "a twinkling mantle with stockings and garland",
-      "a cozy living room with a tree and wrapped presents",
-      "a festive toyshop window display with ornaments",
-      "a snowy front porch with wreaths and lights",
     ],
     outfit: [
-      "a winter coat with festive details",
-      "a cozy holiday sweater and boots",
-      "a vintage toyshop-inspired outfit",
-      "a scarf and hat with subtle holiday patterns",
-      "an ugly Christmas sweater with knitted patterns (no text)",
-      "a Santa hat with fluffy trim",
-      "a reindeer onesie pajama suit",
-      "a cozy knit cardigan with jingle bell buttons",
+      "a mostly blue cozy holiday sweater and boots",
+      "an ugly Christmas sweater with knitted patterns (no text) and boots",
+      "a cozy winter coat with festive trim and boots",
     ],
     motifs: [
-      "pine garland and ornaments",
+      "a twinkling mantle with stockings and garland",
       "wrapped gifts with ribbons (no text)",
-      "snowflakes and festive decor",
-      "a small decorated tree in the background",
-      "stockings hanging from a fireplace mantle",
-      "a wreath on the wall or door",
       "string lights with soft bokeh glow",
-      "a snow globe on the surface beside the character",
     ],
   },
 
   hanukkah: {
     design: [
-      "candlelit festival atmosphere",
-      "Hanukkah storybook setting",
+      "candlelit festival atmosphere in a cozy home",
       "peaceful winter evening celebration",
-      "family gathering around a ceremonial display",
-      "a cozy home table set for a candle-lighting moment",
-      "a softly lit window scene with winter night outside",
     ],
     outfit: [
-      "a ceremonial robe with delicate patterns",
-      "a soft festival coat with subtle symbols",
       "a cozy outfit inspired by traditional garments",
-      "a simple celebratory jacket with small motifs",
       "a soft shawl with subtle star-like stitching (no text)",
-      "a small kippah (yarmulke) as a simple headpiece",
     ],
     motifs: [
       "a hanukkiah (menorah) with candles visibly lit (no text)",
       "a small dreidel on the surface (no letters visible)",
-      "a plate of sufganiyot (jelly donuts) as a prop",
-      "a small stack of gelt-like coins (generic, no markings)",
-      "a ceremonial table arrangement with candlelight glow",
     ],
   },
 
   posadas: {
     design: [
-      "lantern-lit neighborhood celebration",
-      "holiday street procession through a village",
-      "festive gathering in a town plaza",
-      "evening celebration with hanging decorations",
+      "lantern-lit neighborhood celebration scene",
       "a courtyard celebration with papel picado overhead",
-      "a warm street scene with lanterns and procession energy",
     ],
     outfit: [
-      "a poncho with festive patterns",
-      "a layered shawl inspired by traditional textiles",
-      "a celebratory cloak with tassels and embroidery",
-      "a storyteller's cape with procession details",
-      "a traditional rebozo-style shawl",
-      "a small woven sash and embroidered trim",
+      "a poncho with festive patterns and boots",
+      "a traditional rebozo-style shawl and boots",
     ],
     motifs: [
-      "paper lanterns and hanging decorations",
       "papel picado banners (no text)",
       "a star-shaped piñata silhouette in the background",
-      "poinsettia flowers as decor accents",
-      "a small candle lantern held or placed nearby",
-      "procession-inspired festive decor in-frame",
     ],
   },
 
   lucia: {
     design: [
-      "Nordic winter morning procession",
-      "quiet chapel ceremony atmosphere",
-      "Scandinavian winter celebration",
-      "soft dawn light in a northern village",
+      "Scandinavian winter celebration with soft dawn light",
       "a candlelit hallway procession scene",
-      "a calm snowy morning with soft choir-procession energy",
     ],
-    outfit: [
-      "a ceremonial gown with a simple crown",
-      "a flowing robe inspired by Lucia traditions",
-      "a minimal dress with a sash and headpiece",
-      "a long ritual gown with delicate details",
-      "a white robe with a simple sash (no text)",
-    ],
-    motifs: [
-      "a candle crown headpiece (non-text)",
-      "handheld candle(s) as a visible prop",
-      "subtle procession elements (choir silhouettes, soft candles)",
-      "chapel-like ceremonial details",
-    ],
+    outfit: ["a white robe with a simple sash (no text)"],
+    motifs: ["a candle crown headpiece (non-text)", "handheld candle(s) as a visible prop"],
   },
 
   threeKings: {
     design: [
-      "procession of three wise travelers",
-      "epic holiday parade in a town",
       "royal journey under a guiding star",
-      "story of travelers bringing gifts",
-      "a desert-night caravan scene with a bright guiding star",
-      "a town celebration welcoming gift-bringers",
+      "town celebration welcoming gift-bringers",
     ],
-    outfit: [
-      "a miniature royal cloak with ornate trim",
-      "a storyteller's robe with regal patterns",
-      "a traveler king outfit with rich fabrics",
-      "a ceremonial mantle inspired by the Magi",
-      "a small crown or turban-like headpiece (non-text)",
-    ],
-    motifs: [
-      "a guiding star symbol in the sky (no text)",
-      "gift boxes or ornate containers at the character’s feet",
-      "traveling caravan-inspired scene elements",
-      "royal procession decor details",
-    ],
+    outfit: ["a miniature royal cloak with ornate trim and boots"],
+    motifs: ["a guiding star symbol in the sky (no text)", "gift boxes at the character’s feet (no text)"],
   },
 
   kwanzaa: {
-    design: [
-      "family gathering with symbolic objects",
-      "celebration of heritage and community",
-      "holiday table with meaningful items",
-      "warm, reflective festival atmosphere",
-      "a home setting with a ceremonial table centerpiece",
-      "a community gathering vibe with crafted decor",
-    ],
-    outfit: [
-      "a coat inspired by traditional textiles",
-      "a robe with repeating geometric patterns",
-      "a wrap outfit with cultural motifs",
-      "a ceremonial jacket with symbolic icons",
-      "a kente-inspired pattern sash (pattern only, no text)",
-      "a dashiki-inspired tunic silhouette with woven trim",
-    ],
-    motifs: [
-      "a kinara (seven-candle holder) centerpiece (no text)",
-      "a woven mat (mkeka) under ceremonial items",
-      "a bowl of fruit as a harvest symbol",
-      "handmade crafts as decor accents",
-      "geometric textile motifs in the environment",
-    ],
+    design: ["warm, reflective festival atmosphere in a home setting"],
+    outfit: ["a kente-inspired sash and patterned coat (pattern only, no text)"],
+    motifs: ["a kinara (seven-candle holder) centerpiece (no text)", "a woven mat (mkeka) under ceremonial items"],
   },
 
   solstice: {
-    design: [
-      "ancient solstice ritual scene",
-      "nighttime gathering near standing stones",
-      "mystical ceremony under the stars",
-      "enchanted woodland winter setting",
-      "a bonfire circle in a snowy forest clearing",
-      "a moonlit ritual scene with frost and starlight",
-    ],
-    outfit: [
-      "a ritual cloak covered in sigils",
-      "a long hooded robe with arcane markings",
-      "a ceremonial garment with celestial symbols",
-      "a witchy coat with mysterious details",
-    ],
-    motifs: [
-      "standing stones in the background",
-      "celestial symbols and constellations (no text)",
-      "ritual candles and ceremonial objects",
-      "a bonfire glow in the distance",
-      "winter herbs/wreath-like natural talismans",
-    ],
+    design: ["enchanted woodland winter setting with mystical ceremony atmosphere"],
+    outfit: ["a long hooded robe with arcane markings (no text)"],
+    motifs: ["standing stones in the background", "ritual candles and ceremonial objects (no text)"],
   },
 
   lunarNewYear: {
-    design: [
-      "traditional new year street celebration",
-      "dragon and lion dance in a busy alley",
-      "festival in an old town with decorations",
-      "family celebration during new year festivities",
-      "a lantern-lined street with parade energy",
-      "a temple courtyard festival scene (non-text)",
-    ],
-    outfit: [
-      "a festival jacket with ornate patterns",
-      "a tunic inspired by traditional garments",
-      "a ceremonial outfit with intricate embroidery",
-      "a celebratory robe with repeating motifs",
-      "a silk-like jacket with knot-button details (no text)",
-    ],
-    motifs: [
-      "lantern festival decor (no text)",
-      "dragon/lion dance silhouettes in the background",
-      "firecracker ribbon decor (no text)",
-      "red-envelope shapes as props (blank, no characters)",
-      "ornate celebratory ornaments",
-    ],
+    design: ["a lantern-lined street with parade energy", "a temple courtyard festival scene (non-text)"],
+    outfit: ["a silk-like jacket with knot-button details (no text) and boots"],
+    motifs: ["lantern festival decor (no text)", "red-envelope shapes as props (blank, no characters)"],
   },
 
   newYear: {
-    design: [
-      "midnight city celebration scene",
-      "rooftop party with fireworks in the distance",
-      "global countdown party atmosphere",
-      "nighttime celebration with confetti and lights",
-      "a champagne-bokeh skyline scene",
-      "a glittery party backdrop with streamers",
-    ],
-    outfit: [
-      "a party jacket with subtle shimmer",
-      "a sleek celebration outfit with metallic details",
-      "a modern evening coat with festive trim",
-      "a stylish outfit suited for a countdown party",
-      "a sequin-like jacket texture (no logos)",
-    ],
-    motifs: [
-      "fireworks in the distance",
-      "confetti and sparkling bokeh (no numbers/text)",
-      "party lights and celebratory decor",
-      "champagne-glass silhouettes (no branding)",
-      "party hats (blank, no text)",
-    ],
+    design: ["nighttime celebration with confetti and lights", "a glittery party backdrop with streamers"],
+    outfit: ["a sleek celebration outfit with metallic details (no logos)"],
+    motifs: ["fireworks in the distance", "confetti and sparkling bokeh (no numbers/text)"],
   },
 
   festivus: {
-    design: [
-      "plain apartment living room scene",
-      "unadorned winter evening setting",
-      "minimalist, almost empty holiday space",
-      "mundane room with a simple pole in the corner",
-      "a dull room with harsh overhead lighting",
-    ],
-    outfit: [
-      "a simple sweater and plain pants",
-      "a neutral jacket with no patterns",
-      "an unremarkable outfit with basic details",
-      "a minimal cardigan and casual trousers",
-    ],
-    motifs: [
-      "a simple pole in the corner",
-      "plain room with minimal decor",
-      "mundane household objects",
-      "intentionally un-festive setting",
-    ],
+    design: ["plain apartment living room scene with minimal decor"],
+    outfit: ["a simple sweater and plain pants (no text)"],
+    motifs: ["a simple pole in the corner"],
   },
 
-  // ✅ add Sinterklaas (NL-specific)
+  // ✅ Sinterklaas (NL-specific) — includes the required shoe-by-fireplace identity
   sinterklaas: {
     design: [
-      "Dutch winter living room celebration",
-      "cozy canal-house interior with holiday treats on a table",
-      "evening shoe-by-the-fireplace tradition scene",
-      "warm family gathering in a Dutch home",
+      "Dutch winter living room celebration, cozy canal-house interior, premium collectible toy photography",
+      "evening shoe-by-the-fireplace tradition scene, minimal but unmistakably sinterklaas-themed",
     ],
     outfit: [
-      "a cozy knit sweater with simple festive stitching (no text)",
-      "a cape-like coat with classic trim (storybook vibe)",
-      "a small beret-style cap (non-text)",
-      "a playful helper-inspired outfit with puffed sleeves (non-text)",
+      "a cozy knit sweater with simple festive stitching (no text) and boots",
+      "a cape-like coat with classic trim and boots (storybook vibe)",
     ],
     motifs: [
       "a child’s shoe placed by the fireplace with small treats nearby",
       "peppernoten / kruidnoten scattered on a plate",
-      "a burlap sack as a background prop (neutral, no markings)",
-      "a small boat silhouette or harbor hint in the background (subtle)",
       "gift parcels wrapped in simple paper (no text)",
     ],
   },
 
   basemas: {
-    design: [
-      "futuristic onchain holiday scene",
-      "sci-fi celebration with abstract glyphs",
-      "digital-native winter festival setting",
-      "minimal techno-holiday environment",
-      "a sleek neon-lit gallery space with floating ornaments",
-      "a holographic festival plaza with soft fog and glow",
-    ],
-    outfit: [
-      "a futurist coat with circuit-like seams",
-      "a sleek techwear jacket with geometric panels",
-      "a padded outfit with subtle glowing accents",
-      "a minimalist layered coat with glyph motifs",
-      "a visor-like head accessory (no logos)",
-    ],
-    motifs: [
-      "onchain glyph garlands (no text)",
-      "blockchain-shaped ornaments",
-      "glowing network lines in the environment",
-      "abstract Base-inspired iconography (no logos/text)",
-      "floating token-like charms (blank, no markings)",
-    ],
+    design: ["futuristic onchain holiday scene with minimal techno-holiday environment"],
+    outfit: ["a sleek techwear jacket with geometric panels and boots (no logos)"],
+    motifs: ["glowing network lines in the environment", "floating token-like charms (blank, no markings)"],
   },
 } as const;
 
@@ -327,15 +142,14 @@ function pickRandom<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function buildNegativePrompt(safeKey: HollyKey) {
+/**
+ * Negative prompt: keep it focused and avoid conflicting with “warm fireplace” scenes.
+ * Only block orange-ish things when the requested palette is NOT orange.
+ */
+function buildNegativePrompt(args: { safeKey: HollyKey; colorPhrase: string }) {
+  const { safeKey, colorPhrase } = args;
+
   const base = [
-    // block “ginger => orange”
-    "orange fur",
-    "orange plush",
-    "warm orange lighting",
-    "pumpkin color",
-    "ginger hair",
-    // reduce junk
     "text",
     "letters",
     "watermark",
@@ -349,6 +163,12 @@ function buildNegativePrompt(safeKey: HollyKey) {
     "out of frame",
   ];
 
+  // If user wants a non-orange palette, discourage orange subject elements
+  const wantsOrange = /orange|ginger|pumpkin|tangerine/.test(colorPhrase);
+  if (!wantsOrange) {
+    base.push("orange fur", "orange plush", "pumpkin color", "ginger hair");
+  }
+
   // stop generic christmas bleed for non-christmas holidays
   if (safeKey !== "christmas") {
     base.push("santa hat", "christmas tree", "candy cane");
@@ -357,6 +177,10 @@ function buildNegativePrompt(safeKey: HollyKey) {
   return base.join(", ");
 }
 
+/**
+ * ✅ Prompt format rewritten to match the working pattern you posted:
+ * "STYLE..., SUBJECT..., SCENE..., WARDROBE..., dominant COLOR palette..., integrated motifs..., full body..., cinematic lighting..."
+ */
 function buildPrompt(args: {
   hollyForm: string;
   safeKey: HollyKey;
@@ -367,17 +191,26 @@ function buildPrompt(args: {
 }) {
   const { hollyForm, safeKey, design, outfit, motif, colorPhrase } = args;
 
-  // Color + accents go FIRST (hard constraint), then subject, then holiday identity.
+  // Keep the “ginger is a theme, not a color” note (but don’t force “avoid warm orange lighting” globally)
+  const gingerNote =
+    `SUBJECT NOTE: the word "ginger" (if present) refers to a theme/name, NOT an orange color.`;
+
+  // This mirrors the example: dominant blue palette + vivid accents + integrated into traditional holiday motifs
+  const colorLine = `dominant ${colorPhrase} color palette, with vivid ${colorPhrase} accents`;
+
+  const holidayIdentity = `HOLIDAY IDENTITY (must be visible): ${motif}`;
+
   return `
-PALETTE LOCK: dominant ${colorPhrase} color palette, deep ${colorPhrase} tones, vivid ${colorPhrase} accents, avoid orange hues, avoid warm orange lighting.
-SUBJECT NOTE: the word "ginger" (if present) refers to a theme/name, NOT an orange color.
-SUBJECT: A highly detailed plush ${hollyForm} character celebrating the ${safeKey} holiday.
-HOLIDAY IDENTITY (must be visible): ${motif}.
-SCENE: ${design}, minimal but unmistakably ${safeKey}-themed, premium collectible toy photography.
-WARDROBE: wearing ${outfit}, mostly ${colorPhrase}, sleek techwear finish.
-COMPOSITION: full body visible head-to-toe, standing on a small surface, centered composition.
-LIGHTING + RENDER: cinematic lighting, gentle diffusion glow, glossy, hyper-detailed 3D render, 4k.
-STYLE: ${STYLE_PLUSH}
+${STYLE_PLUSH}, 
+A highly detailed plush ${hollyForm}, leader character celebrating the ${safeKey} holiday,
+in a ${design},
+wearing ${outfit},
+${colorLine},
+integrated into traditional ${safeKey} holiday colors and ${colorLine} and motifs,
+${holidayIdentity},
+full body visible from head to toe, standing, centered in frame,
+cinematic lighting, glossy, detailed, 4k, mystical 3D toy aesthetic.
+${gingerNote}
 `.trim();
 }
 
@@ -387,27 +220,29 @@ export async function POST(req: Request) {
       hollyForm?: string;
       holidayKey?: string;
       color?: string;
-      address?: string; // ✅ include address from client
+      address?: string;
     };
 
-    const { hollyForm, holidayKey, color, address } = body;
+    const hollyForm = body?.hollyForm?.trim();
+    const holidayKeyRaw = body?.holidayKey?.trim();
+    const colorPhrase = body?.color?.trim().toLowerCase();
+    const address = body?.address;
 
-    if (!hollyForm || !holidayKey || !color) {
+    if (!hollyForm || !holidayKeyRaw || !colorPhrase) {
       return NextResponse.json(
         { error: "Missing hollyForm, holidayKey, or color." },
         { status: 400 }
       );
     }
 
-    const normalizedKey = typeof holidayKey === "string" ? holidayKey.trim() : "";
-    const isValidKey = normalizedKey in HOLLY_MAP;
-    const safeKey: HollyKey = (isValidKey ? normalizedKey : "christmas") as HollyKey;
+    const safeKey: HollyKey = (holidayKeyRaw in HOLLY_MAP
+      ? (holidayKeyRaw as HollyKey)
+      : "christmas");
 
-    const holidayConfig = HOLLY_MAP[safeKey];
-    const design = pickRandom(holidayConfig.design);
-    const outfit = pickRandom(holidayConfig.outfit);
-    const motif = pickRandom(holidayConfig.motifs);
-    const colorPhrase = color.trim().toLowerCase();
+    const cfg = HOLLY_MAP[safeKey];
+    const design = pickRandom(cfg.design);
+    const outfit = pickRandom(cfg.outfit);
+    const motif = pickRandom(cfg.motifs);
 
     const prompt = buildPrompt({
       hollyForm,
@@ -418,11 +253,11 @@ export async function POST(req: Request) {
       colorPhrase,
     });
 
-    const negative_prompt = buildNegativePrompt(safeKey);
+    const negative_prompt = buildNegativePrompt({ safeKey, colorPhrase });
 
-    // ✅ Logging for debug
     console.log("🎨 Generating for address:", address ?? "[missing]");
     console.log("🧵 Prompt:\n", prompt);
+    console.log("🚫 Negative:\n", negative_prompt);
 
     const result = await fal.subscribe("fal-ai/stable-cascade", {
       input: {
@@ -438,7 +273,10 @@ export async function POST(req: Request) {
     const imageUrl = (result as any)?.data?.images?.[0]?.url;
 
     if (!imageUrl) {
-      return NextResponse.json({ error: "Image generation failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Image generation failed" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ imageUrl });
