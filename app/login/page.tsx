@@ -44,7 +44,7 @@ export default function LoginPage() {
         <div className="card px-6 py-7 space-y-6 text-center">
           <header className="space-y-3">
             <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl border border-[var(--gold)] bg-[var(--gold)]/10">
-              <span className="text-xl">🎁</span>
+              <span className="text-xl">❄️</span>
             </div>
             <div className="space-y-1">
               <h1 className="text-2xl font-bold tracking-tight">Enter the Lab</h1>
@@ -85,7 +85,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-5 text-center text-xs text-muted">
-          Holibaes • Powered by ORIGIN STØRIES • Onchain holiday fantasia
+          Holibaes • Powered by ORIGIN STØRIES • Onchain fantasia
 
         </p>
       </div>

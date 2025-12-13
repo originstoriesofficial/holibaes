@@ -162,7 +162,7 @@ export default function MusicClient() {
           </section>
 
           <section className="card p-6 space-y-4">
-            <h2 className="text-sm font-semibold">🎁 Your Holibae</h2>
+            <h2 className="text-sm font-semibold">❄️ Your Holibae</h2>
 
             <div className="flex items-center gap-4">
               {imageUrlFromCreate ? (

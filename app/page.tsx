@@ -86,7 +86,7 @@ export default function Home() {
     <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-md text-center">
         <div className="card px-6 py-8 space-y-6">
-          <h1 className="text-3xl font-bold">🎁 Holibae Labs</h1>
+          <h1 className="text-3xl font-bold"> ❄️Holibae Labs</h1>
 
           <p className="text-muted text-sm leading-relaxed">
             Hold{" "}
@@ -122,7 +122,7 @@ export default function Home() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted">
-          Holibaes • Powered by ORIGIN STØRIES • Onchain holiday fantasia
+          Holibaes • Powered by ORIGIN STØRIES • Onchain fantasia
 
         </p>
       </div>

@@ -34,7 +34,7 @@ export const minikitConfig = {
       "primaryCategory": "entertainment",
       "tags": ["music", "art", "holidays", "ai", "creativity"],
       "ogTitle": "Holibae Labs - AI Studio",
-      "ogDescription": "Create, customize, and soundtrack your own Monje on Base"
+      "ogDescription": "Create, customize, and soundtrack your own Monje "
     
   }
 }
