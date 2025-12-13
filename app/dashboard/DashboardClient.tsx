@@ -49,22 +49,6 @@ export default function DashboardClient() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-md text-center">
-
-        {/* 🎁 HERO VIDEO (green ribbon gift) */}
-        <div className="mb-4 overflow-hidden rounded-2xl shadow">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-[160px] object-cover"
-            poster="/holibae-hero.png"
-          >
-            <source src="/holibae-hero.mp4" type="video/mp4" />
-          </video>
-        </div>
-
-        {/* CARD */}
         <div className="card px-6 py-8 space-y-6">
           <h1 className="text-3xl font-bold">❄️ Season’s Greetings</h1>
 
@@ -91,7 +75,7 @@ export default function DashboardClient() {
 
             <button
               onClick={() => goTo("/music")}
-              className="bg-[var(--green)] text-white py-3 rounded-xl font-semibold shadow hover:scale-105 transition-all"
+              className="bg-[var(--gold)] text-black py-3 rounded-xl font-semibold shadow hover:scale-105 transition-all"
             >
               🎶 Enter Music Studio
             </button>

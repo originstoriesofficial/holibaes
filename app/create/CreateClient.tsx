@@ -62,6 +62,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
 
   const handleGenerateCharacter = async () => {
     setError(null);
+
     if (!hollyForm || !holidayKey || !color) {
       setError("Please choose a form, a holiday, and a color.");
       return;
@@ -75,7 +76,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       const res = await fetch("/api/generate-character", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hollyForm, holidayKey, color }),
+        body: JSON.stringify({ hollyForm, holidayKey, color, address }), // ✅ include wallet
       });
 
       const data = await res.json().catch(() => null);
