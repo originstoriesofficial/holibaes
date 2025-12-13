@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors https://app.farcaster.xyz https://warpcast.com https://base.org *",
+            value: "frame-ancestors https://warpcast.com https://app.farcaster.xyz https://www.base.org https://base.org",
           },
           {
             key: "X-Frame-Options",

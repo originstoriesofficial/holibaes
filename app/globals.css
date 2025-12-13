@@ -83,6 +83,11 @@
   }
 }
 
+html, body {
+  background-color: #f5f2eb !important; /* enforce tan */
+  color: #1f3b2c;
+}
+
 /* 🌿 Theme Application (redundant safe fallback) */
 body {
   background-color: var(--bg, #f5f2eb);
