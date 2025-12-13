@@ -64,13 +64,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`light ${inter.variable} ${sourceCodePro.variable} bg-[var(--bg)] text-[var(--foreground)]`}
+      className={`light ${inter.variable} ${sourceCodePro.variable} bg-[var(--bg)] text-[var(--foreground)] min-h-screen`}
+      style={{
+        backgroundColor: "#f7e8d0", // fallback color for iframe/ssr
+      }}
     >
       <body
         className="min-h-screen flex flex-col items-center justify-center font-sans bg-[var(--bg)] text-[var(--foreground)] transition-colors duration-300"
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",
+          backgroundColor: "#f7e8d0", // fallback color
         }}
       >
         <Providers>
