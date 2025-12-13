@@ -40,9 +40,27 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'your-bucket.s3.us-west-2.amazonaws.com',
+        hostname: 'your-bucket.s3.us-west-2.amazonaws.com', // replace if needed
       },
     ],
+  },
+
+  async headers() {
+    return [
+      {
+        source: "/(.*)", // apply to all routes
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors https://app.farcaster.xyz https://warpcast.com https://base.org *",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "ALLOWALL",
+          },
+        ],
+      },
+    ];
   },
 
   webpack: (config) => {
@@ -51,26 +69,6 @@ const nextConfig: NextConfig = {
       config.externals.push('pino-pretty', 'lokijs', 'encoding');
     }
     return config;
-  },
-
-  // ✅ Mini App Embed Security Headers (CSP)
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value:
-              "frame-ancestors https://*.farcaster.xyz https://*.warpcast.com https://warpcast.com https://*.base.org *",
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL',
-          },
-        ],
-      },
-    ];
   },
 };
 
