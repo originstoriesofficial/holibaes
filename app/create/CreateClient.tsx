@@ -156,22 +156,27 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
     setStep(1);
   };
 
-  // ✅ Sage green theme (no CSS vars)
+  // Sage theme
   const mainClass = "min-h-screen bg-[#b7c3a1] text-[#1f2a1d] font-sans px-4 py-6";
 
-  // ✅ Beat any global button styles
-  const baseChoice =
-    "!appearance-none w-full text-left border border-black/10 rounded-md px-3 py-2 text-sm transition !bg-white/70 !text-[#1f2a1d]";
-  const activeChoice =
-    "!appearance-none w-full text-left border border-[#d4af37] rounded-md px-3 py-2 text-sm transition !bg-[#d4af37]/15 !text-[#1f2a1d]";
+  // IMPORTANT: We use inline styles on the holiday buttons to defeat any global button CSS
+  const holidayButtonStyle = (active: boolean): React.CSSProperties => ({
+    backgroundColor: active ? "rgba(212,175,55,0.28)" : "rgba(255,255,255,0.92)",
+    color: "#1f2a1d",
+    borderColor: active ? "#d4af37" : "rgba(0,0,0,0.12)",
+    WebkitTextFillColor: "#1f2a1d", // iOS Safari / webview can override text color otherwise
+  });
 
+  // FORM FLOW
   if (!imageUrl) {
     return (
       <main className={mainClass}>
         <div className="w-full max-w-md mx-auto space-y-6">
           <header className="space-y-2">
-            <h1 className="text-2xl font-semibold">Create your Holibae</h1>
-            <p className="text-sm text-[#2f3d2b]/80">
+            <h1 className="text-2xl font-semibold leading-tight text-[#1f2a1d]">
+              Create your Holibae
+            </h1>
+            <p className="text-sm leading-relaxed text-[#2f3d2b]/85">
               Pick 1) a form, 2) a holiday, and 3) a color to summon your Holibae.
             </p>
           </header>
@@ -180,7 +185,9 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
             {[1, 2, 3].map((s) => (
               <div
                 key={s}
-                className={`h-1.5 w-6 rounded-full ${step >= s ? "bg-[#d4af37]" : "bg-black/15"}`}
+                className={`h-1.5 w-6 rounded-full ${
+                  step >= s ? "bg-[#d4af37]" : "bg-black/15"
+                }`}
               />
             ))}
           </div>
@@ -188,11 +195,11 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
           <section className="space-y-4">
             {step === 1 && (
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-[#1f2a1d]">
                   Holibae Form (e.g. owl, doll)
                 </label>
                 <input
-                  className="w-full border border-black/10 rounded-md px-3 py-2 bg-white/80 text-sm text-black placeholder:text-black/40"
+                  className="w-full border border-black/10 rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
                   value={hollyForm}
                   onChange={(e) => setHollyForm(e.target.value)}
                   placeholder="porcelain doll, reindeer, robot"
@@ -202,28 +209,49 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
 
             {step === 2 && (
               <div>
-                <label className="block text-sm font-medium mb-2">Choose a Holiday</label>
-                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                  {HOLIDAY_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setHolidayKey(opt.id)}
-                      type="button"
-                      className={holidayKey === opt.id ? activeChoice : baseChoice}
-                    >
-                      <div className="font-semibold">{opt.label}</div>
-                      <div className="text-xs opacity-80">{opt.blurb}</div>
-                    </button>
-                  ))}
+                <label className="block text-sm font-medium mb-2 text-[#1f2a1d]">
+                  Choose a Holiday
+                </label>
+
+                <div className="rounded-xl border border-black/10 bg-white/55 backdrop-blur p-2">
+                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                    {HOLIDAY_OPTIONS.map((opt) => {
+                      const active = holidayKey === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          onClick={() => setHolidayKey(opt.id)}
+                          type="button"
+                          className="w-full text-left rounded-lg px-3 py-2 border transition"
+                          style={holidayButtonStyle(active)}
+                        >
+                          <div className="font-semibold leading-snug" style={{ WebkitTextFillColor: "#1f2a1d" }}>
+                            {opt.label}
+                          </div>
+                          <div
+                            className="text-xs leading-snug"
+                            style={{
+                              color: "rgba(47,61,43,0.82)",
+                              WebkitTextFillColor: "rgba(47,61,43,0.82)",
+                            }}
+                          >
+                            {opt.blurb}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
 
             {step === 3 && (
               <div>
-                <label className="block text-sm font-medium mb-1">Choose a Color</label>
+                <label className="block text-sm font-medium mb-1 text-[#1f2a1d]">
+                  Choose a Color
+                </label>
                 <input
-                  className="w-full border border-black/10 rounded-md px-3 py-2 bg-white/80 text-sm text-black placeholder:text-black/40"
+                  className="w-full border border-black/10 rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
                   placeholder="e.g. moss green, glittery gold"
@@ -258,25 +286,31 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
               )}
             </div>
 
-            {error && <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>}
+            {error && (
+              <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+            )}
           </section>
         </div>
       </main>
     );
   }
 
+  // PREVIEW
   return (
     <main className={mainClass}>
       <div className="w-full max-w-md mx-auto space-y-4">
         <header className="flex justify-between items-center">
-          <h1 className="text-lg font-semibold">Your Holibae</h1>
-          <button onClick={handleCreateAnother} className="text-sm underline text-black/70">
+          <h1 className="text-lg font-semibold text-[#1f2a1d]">Your Holibae</h1>
+          <button
+            onClick={handleCreateAnother}
+            className="text-sm underline text-black/70"
+          >
             Create another
           </button>
         </header>
 
         <section className="space-y-4">
-          <div className="w-full overflow-hidden border border-black/10 rounded-xl bg-white/80 flex justify-center">
+          <div className="w-full overflow-hidden border border-black/10 rounded-xl bg-white/90 flex justify-center">
             <Image
               src={imageUrl!}
               alt="Holibae"
@@ -312,12 +346,14 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
           </div>
 
           {characterSummary && (
-            <p className="text-sm bg-white/80 border border-black/10 rounded-md p-3 text-black/90">
+            <p className="text-sm bg-white/90 border border-black/10 rounded-md p-3 text-black/90">
               {characterSummary}
             </p>
           )}
 
-          {error && <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+          )}
         </section>
       </div>
     </main>
