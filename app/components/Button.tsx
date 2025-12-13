@@ -24,4 +24,10 @@ export const Button = ({
 
   return (
     <button
-      className={clsx(base, v
+      className={clsx(base, variants[variant], className)}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
