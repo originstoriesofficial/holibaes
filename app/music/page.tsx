@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, Suspense } from "react";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic"; // <-- renamed here
 
-const MusicClient = dynamic(() => import("./MusicClient"), { ssr: false });
+const MusicClient = dynamicImport(() => import("./MusicClient"), {
+  ssr: false,
+});
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
