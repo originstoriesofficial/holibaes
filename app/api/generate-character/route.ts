@@ -363,12 +363,14 @@ export async function POST(req: Request) {
     // 🔑 FINAL PROMPT – color is the ONLY strong color
     const prompt = `
     ${STYLE_PLUSH}
-    ${colorPhrase} accents throughout. A highly detailed award-winning, plush ${hollyForm} character wearing an ${outfit}, covered in elements representing the ${safeKey} holiday,
-    in a ${design} style, mostly ${colorPhrase} color palette, with vivid ${motifs} accents,
-    integrated into traditional ${safeKey} holiday colors and ${motifs},
-    full body visible from head to toe, standing, centered in frame,
-    cinematic lighting, glossy, detailed, 4k, mystical 3D toy aesthetic.
+    A highly detailed plush ${hollyForm} character with ${colorPhrase} accents throughout —
+    used on outfit details, accessories, and holiday props.
+    The character wears ${outfit}, standing in a festive ${design} scene,
+    surrounded by ${motifs}.
+    Lighting is soft and cinematic, with glowing ${colorPhrase} highlights in the environment.
+    3D toy aesthetic, glossy texture, full-body visible, 4k.
     `;
+    
     
     
     const result = await fal.subscribe("fal-ai/stable-cascade", {
