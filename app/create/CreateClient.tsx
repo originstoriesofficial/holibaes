@@ -168,19 +168,18 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       <div className="w-full max-w-md mx-auto space-y-6">
         {!imageUrl ? (
           <>
- <header className="space-y-3">
-  <h1 className="text-2xl font-bold text-[#ce19e6] font-[Oswald] tracking-wide">
-    Create your Holibae
-  </h1>
-  <div className="text-sm text-muted space-y-1 text-left">
-    <p>Pick:</p>
-    <p>1) a form (animal or doll type)</p>
-    <p>2) a holiday</p>
-    <p>3) a color to summon your Holibae</p>
-  </div>
-</header>
-
-
+            <header className="space-y-3">
+              <h1 className="text-2xl font-bold text-[#ce19e6] font-[Oswald] tracking-wide">
+                Create your Holibae
+              </h1>
+              <div className="text-sm text-muted space-y-1 text-left">
+                <p>Pick:</p>
+                <p>1) a form (animal or doll type)</p>
+                <p>2) a holiday</p>
+                <p>3) a color to summon your Holibae</p>
+              </div>
+            </header>
+  
             <div className="flex justify-center gap-2">
               {[1, 2, 3].map((s) => (
                 <div
@@ -191,23 +190,27 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 />
               ))}
             </div>
-
+  
             <section className="space-y-4">
               {step === 1 && (
                 <div>
-                  <label className="block text-sm font-semibold text-[#ce19e6] mb-1">Holibae Form</label>
+                  <label className="block text-sm font-semibold text-[#ce19e6] mb-1">
+                    Step One: Holibae Form
+                  </label>
                   <input
                     className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
                     value={hollyForm}
                     onChange={(e) => setHollyForm(e.target.value)}
-                    placeholder="penguin, porcelain doll, reindeer, robot"
+                    placeholder="ex: penguin, porcelain doll, reindeer, robot"
                   />
                 </div>
               )}
-
+  
               {step === 2 && (
                 <div>
-                  <label className="block text-sm font-semibold text-[#ce19e6] mb-2">Choose a Holiday</label>
+                  <label className="block text-sm font-semibold text-[#ce19e6] mb-2">
+                    Step Two: Choose a Holiday
+                  </label>
                   <div className="rounded-xl border border-[var(--border)] bg-white/60 backdrop-blur p-2">
                     <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                       {HOLIDAY_OPTIONS.map((opt) => {
@@ -232,10 +235,12 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   </div>
                 </div>
               )}
-
+  
               {step === 3 && (
                 <div>
-                  <label className="block text-sm font-semibold text-[#ce19e6] mb-1">Choose a Color</label>
+                  <label className="block text-sm font-semibold text-[#ce19e6] mb-1">
+                    Step Three: Choose a Color
+                  </label>
                   <input
                     className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
                     value={color}
@@ -244,12 +249,12 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   />
                 </div>
               )}
-
+  
               <div className="flex justify-between gap-3">
                 <Button variant="secondary" onClick={prevStep} disabled={step === 1}>
                   Back
                 </Button>
-
+  
                 {step < 3 ? (
                   <Button onClick={nextStep}>Next</Button>
                 ) : (
@@ -258,7 +263,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   </Button>
                 )}
               </div>
-
+  
               {error && (
                 <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
               )}
@@ -274,7 +279,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 Create another
               </button>
             </header>
-
+  
             <section className="space-y-4">
               <div className="w-full overflow-hidden border border-[var(--border)] rounded-xl bg-white/90 flex justify-center">
                 <Image
@@ -286,27 +291,28 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   priority
                 />
               </div>
-
+  
               <div className="space-y-2">
                 <Button onClick={handleSaveCharacter} disabled={saving}>
                   {saving ? "Saving…" : savedOnce ? "Holibae saved ✅" : "Save this Holibae"}
                 </Button>
-
+  
                 <Button onClick={handleShareCharacter} className="bg-[#6d28d9] text-white">
                   Share Holibae
                 </Button>
-
-                <Button onClick={handleGoToMusic} className="bg-[#ce19e6] text-[var(--gold)]">
+  
+                {/* ✅ FIX: Use white text for readability */}
+                <Button onClick={handleGoToMusic} className="bg-[#ce19e6] text-white">
                   Enter music studio
                 </Button>
               </div>
-
+  
               {characterSummary && (
                 <p className="text-sm bg-white/90 border border-[var(--border)] rounded-md p-3 text-black/90">
                   {characterSummary}
                 </p>
               )}
-
+  
               {error && (
                 <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
               )}
@@ -316,4 +322,4 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       </div>
     </main>
   );
-}
+  }

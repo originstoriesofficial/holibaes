@@ -25,7 +25,6 @@ export default function MusicClient() {
   const searchParams = useSearchParams();
   const { address } = useAccount();
 
-  // ✅ Force light mode
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("light");
@@ -112,7 +111,7 @@ export default function MusicClient() {
   };
 
   return (
-<main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
+    <main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-5xl mx-auto space-y-10">
         <header className="space-y-4">
           <div className="flex items-center gap-2 flex-wrap">
@@ -126,31 +125,34 @@ export default function MusicClient() {
             )}
           </div>
 
-          <h1 className="text-3xl font-bold">❄️ Compose your Holibae Anthem</h1>
+          <h1 className="text-3xl font-bold text-[#ce19e6] font-[Oswald]">
+            ❄️ Compose your Holibae Anthem
+          </h1>
           <p className="text-sm text-muted max-w-xl">
             Describe your Holibae’s holiday mood. We’ll create a magical 60-second seasonal anthem just for them.
           </p>
         </header>
 
         <div className="grid md:grid-cols-[1.5fr,1fr] gap-8">
-          <section className="card p-6 space-y-6">
+          {/* 🧠 SONG CREATION SECTION */}
+          <section className="card p-6 space-y-6 bg-white/90 border border-[var(--border)] rounded-2xl shadow">
             <div className="space-y-4">
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe the holly-jolly mood"
-                className="w-full min-h-[80px] rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
+                className="w-full min-h-[80px] rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[#ce19e6]"
               />
               <textarea
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
                 placeholder="Optional: write some lyrics (poetic or funny!)"
-                className="w-full min-h-[80px] rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
+                className="w-full min-h-[80px] rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[#ce19e6]"
               />
               <select
                 value={style}
                 onChange={(e) => setStyle(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#ce19e6]"
               >
                 {styles.map((s) => (
                   <option key={s} value={s}>
@@ -167,8 +169,9 @@ export default function MusicClient() {
             {error && <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>}
           </section>
 
-          <section className="card p-6 space-y-4">
-            <h2 className="text-sm font-semibold">❄️ Your Holibae</h2>
+          {/* 🖼️ HOLIBAE DISPLAY + AUDIO */}
+          <section className="card p-6 space-y-4 bg-white/90 border border-[var(--border)] rounded-2xl shadow">
+            <h2 className="text-sm font-semibold text-[#ce19e6]">❄️ Your Holibae</h2>
 
             <div className="flex items-center gap-4">
               {imageUrlFromCreate ? (
@@ -197,7 +200,7 @@ export default function MusicClient() {
 
             {audioUrl ? (
               <div className="space-y-4">
-                <audio controls src={audioUrl} className="w-full" />
+                <audio controls src={audioUrl} className="w-full rounded-md" />
                 <Button onClick={handleSaveSong} disabled={saving}>
                   {saving ? "Saving…" : "Save this jingle"}
                 </Button>
