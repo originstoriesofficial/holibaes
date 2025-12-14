@@ -112,7 +112,7 @@ export default function MusicClient() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10 font-sans">
+<main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-5xl mx-auto space-y-10">
         <header className="space-y-4">
           <div className="flex items-center gap-2 flex-wrap">

@@ -165,7 +165,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10 font-sans">
+<main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-md mx-auto space-y-6">
         {!imageUrl ? (
           <>

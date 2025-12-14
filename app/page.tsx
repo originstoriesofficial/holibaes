@@ -90,11 +90,11 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
+    <main className="min-h-screen flex items-center justify-center bg-[var(--bg,#f5f2eb)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-md text-center">
 
         {/* 🎁 PRESENT / HERO (put holibae-hero.mp4 in /public) */}
-        <div className="mb-4 overflow-hidden rounded-2xl shadow">
+        <div className="mb-4 overflow-hidden rounded-2xl shadow bg-[#f5f2eb]">
           <video
             autoPlay
             loop
@@ -104,6 +104,7 @@ export default function Home() {
             poster="/holibae-hero.png"
           >
             <source src="/holibae-hero.mp4" type="video/mp4" />
+            <img src="/holibae-hero.png" alt="Holibae Hero Fallback" />
           </video>
         </div>
 

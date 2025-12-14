@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { useRouter } from 'next/navigation';
 
@@ -9,6 +9,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // ✅ Force light mode
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+  }, []);
 
   const signIn = async () => {
     setLoading(true);
@@ -39,7 +45,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--green)] px-4">
+    <main className="min-h-screen flex items-center justify-center bg-[var(--bg,#f5f2eb)] text-[var(--green)] px-4">
       <div className="w-full max-w-md">
         <div className="card px-6 py-7 space-y-6 text-center">
           <header className="space-y-3">
@@ -84,10 +90,7 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p className="mt-5 text-center text-xs text-muted">
-           Onchain Fantasia
-
-        </p>
+        <p className="mt-5 text-center text-xs text-muted">Onchain Fantasia</p>
       </div>
     </main>
   );

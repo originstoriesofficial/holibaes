@@ -6,13 +6,14 @@ import Image from "next/image";
 const APP_URL = "https://holibaes.vercel.app"; // match what's in metadata.ts
 
 export default function SuccessPage() {
+  // ✅ Force light mode in Farcaster/Base app
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("light");
   }, []);
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] text-[var(--green)] px-4 py-10 flex flex-col items-center justify-center">
+    <main className="min-h-screen bg-[var(--bg,#f5f2eb)] text-[var(--green)] px-4 py-10 flex flex-col items-center justify-center">
       <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-[var(--gold)] text-center">
         🧘‍♂️ Mint Successful!
       </h1>
