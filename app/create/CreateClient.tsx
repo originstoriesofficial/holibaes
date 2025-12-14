@@ -168,14 +168,18 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       <div className="w-full max-w-md mx-auto space-y-6">
         {!imageUrl ? (
           <>
-            <header className="space-y-2">
-              <h1 className="text-2xl font-bold text-[#ce19e6] font-[Oswald] tracking-wide">
-                Create your Holibae
-              </h1>
-              <p className="text-sm text-muted">
-                Pick a 1) form (animal or doll type), 2) a holiday, and 3) a color to summon your Holibae.
-              </p>
-            </header>
+ <header className="space-y-3">
+  <h1 className="text-2xl font-bold text-[#ce19e6] font-[Oswald] tracking-wide">
+    Create your Holibae
+  </h1>
+  <div className="text-sm text-muted space-y-1 text-left">
+    <p>Pick:</p>
+    <p>1) a form (animal or doll type)</p>
+    <p>2) a holiday</p>
+    <p>3) a color to summon your Holibae</p>
+  </div>
+</header>
+
 
             <div className="flex justify-center gap-2">
               {[1, 2, 3].map((s) => (
@@ -196,7 +200,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                     className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
                     value={hollyForm}
                     onChange={(e) => setHollyForm(e.target.value)}
-                    placeholder="porcelain doll, reindeer, robot"
+                    placeholder="penguin, porcelain doll, reindeer, robot"
                   />
                 </div>
               )}

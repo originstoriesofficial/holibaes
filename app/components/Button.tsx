@@ -17,7 +17,7 @@ export const Button = ({
 
   const variants = {
     primary:
-      "bg-[var(--gold)] text-black shadow-md hover:brightness-105 hover:scale-[1.03] focus-visible:ring-[var(--gold)]",
+      "bg-[var(--gold)] text-[#ce19e6] shadow-md hover:brightness-105 hover:scale-[1.03] focus-visible:ring-[var(--gold)]",
     secondary:
       "border border-[var(--sage)] text-[var(--green)] hover:bg-[var(--sage)]/10 focus-visible:ring-[var(--sage)]",
   };

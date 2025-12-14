@@ -363,7 +363,7 @@ export async function POST(req: Request) {
     // 🔑 FINAL PROMPT – color is the ONLY strong color
     const prompt = `
     ${STYLE_PLUSH}
-    ${colorPhrase} accents throughout. A highly detailed plush ${hollyForm} character celebrating the ${safeKey} holiday,
+    ${colorPhrase} accents throughout. A highly detailed award-winning, plush ${hollyForm} character covered in elements representing the ${safeKey} holiday,
     in a ${design} style, wearing a mostly ${colorPhrase} ${outfit},
     dominant ${colorPhrase} color palette, with vivid ${motifs} accents,
     integrated into traditional ${safeKey} holiday colors and ${motifs},

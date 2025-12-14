@@ -88,19 +88,13 @@ export default function Home() {
     <main className="min-h-screen flex items-center justify-center bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-md text-center">
 
-        {/* 🎁 HERO VIDEO */}
+        {/* 🎁 HERO IMAGE */}
         <div className="mb-4 overflow-hidden rounded-2xl shadow bg-[#f7e8d0]">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
+          <img
+            src="/holibae-hero.png"
+            alt="Holibae Hero"
             className="w-full h-[170px] object-cover"
-            poster="/holibae-hero.png"
-          >
-            <source src="/holibae-hero.mp4" type="video/mp4" />
-            <img src="/holibae-hero.png" alt="Holibae Hero Fallback" />
-          </video>
+          />
         </div>
 
         {/* 🟣 PURPLE + GOLD CARD */}
@@ -112,7 +106,7 @@ export default function Home() {
           <p className="text-sm leading-relaxed text-white/80">
             Hold{" "}
             <span className="font-semibold text-[#f5c95d]">
-              at least {MIN_REQUIRED.toLocaleString()} $originstory 
+              at least {MIN_REQUIRED.toLocaleString()} $originstory
             </span>{" "}
             to enter the lab.
           </p>
