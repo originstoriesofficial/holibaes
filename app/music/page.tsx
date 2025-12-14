@@ -1,23 +1,18 @@
-"use client";
+import { Suspense } from "react";
+import dynamicImport from "next/dynamic"; // ✅ renamed to avoid conflict
 
-import { useEffect, Suspense } from "react";
-import dynamicImport from "next/dynamic"; // renamed to avoid conflict
-
+// ✅ Load client-only MusicClient component
 const MusicClient = dynamicImport(() => import("./MusicClient"), {
   ssr: false,
 });
 
+// ✅ Next.js route config
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
-export const revalidate = 0;
+export const revalidate = false;
 export const runtime = "edge";
 
 export default function MusicPage() {
-  useEffect(() => {
-    document.documentElement.classList.remove("dark");
-    document.documentElement.classList.add("light");
-  }, []);
-
   return (
     <Suspense
       fallback={
