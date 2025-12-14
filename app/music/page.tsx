@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, Suspense } from "react";
-import dynamicImport from "next/dynamic"; // <-- renamed here
+import dynamicImport from "next/dynamic"; // renamed to avoid conflict
 
 const MusicClient = dynamicImport(() => import("./MusicClient"), {
   ssr: false,
