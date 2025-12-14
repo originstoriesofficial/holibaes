@@ -133,10 +133,6 @@ export default function Home() {
             <p className="text-sm text-red-500 whitespace-pre-line">{error}</p>
           )}
         </div>
-
-        <p className="mt-6 text-center text-xs text-muted">
-          Onchain Fantasia
-        </p>
       </div>
     </main>
   );

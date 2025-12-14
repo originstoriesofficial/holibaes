@@ -104,10 +104,6 @@ export default function DashboardClient() {
             </button>
           </div>
         </div>
-
-        <p className="mt-6 text-xs text-black/50 font-medium">
-          Powered by ORIGIN STØRIES • Onchain Fantasia
-        </p>
       </div>
     </main>
   );

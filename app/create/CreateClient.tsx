@@ -192,24 +192,25 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
             </div>
   
             <section className="space-y-4">
-              {step === 1 && (
-                <div>
-                  <label className="block text-sm font-semibold text-[#ce19e6] mb-1">
-                    Step One: Holibae Form
-                  </label>
-                  <input
-                    className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
-                    value={hollyForm}
-                    onChange={(e) => setHollyForm(e.target.value)}
-                    placeholder="ex: penguin, porcelain doll, reindeer, robot"
-                  />
-                </div>
-              )}
+  {step === 1 && (
+    <div>
+      <label className="block text-sm font-semibold text-[#ce19e6] mb-1">
+        Write Your Holibae Form
+      </label>
+      <textarea
+        rows={4} // ⬅️ You can increase this for more vertical space
+        className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40 resize-none"
+        value={hollyForm}
+        onChange={(e) => setHollyForm(e.target.value)}
+        placeholder="ex: penguin, porcelain doll, reindeer, robot"
+      />
+    </div>
+  )}
   
               {step === 2 && (
                 <div>
                   <label className="block text-sm font-semibold text-[#ce19e6] mb-2">
-                    Step Two: Choose a Holiday
+                  Choose a Holiday
                   </label>
                   <div className="rounded-xl border border-[var(--border)] bg-white/60 backdrop-blur p-2">
                     <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
@@ -236,19 +237,21 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 </div>
               )}
   
-              {step === 3 && (
-                <div>
-                  <label className="block text-sm font-semibold text-[#ce19e6] mb-1">
-                    Step Three: Choose a Color
-                  </label>
-                  <input
-                    className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    placeholder="e.g. moss green, glittery gold"
-                  />
-                </div>
-              )}
+  {step === 3 && (
+  <div>
+    <label className="block text-sm font-semibold text-[#ce19e6] mb-1">
+      Step Three: Choose a Color
+    </label>
+    <textarea
+      rows={3} // ⬅️ Gives the field more height for clarity
+      className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40 resize-none"
+      value={color}
+      onChange={(e) => setColor(e.target.value)}
+      placeholder="e.g. moss green, glittery gold"
+    />
+  </div>
+)}
+
   
               <div className="flex justify-between gap-3">
                 <Button variant="secondary" onClick={prevStep} disabled={step === 1}>
