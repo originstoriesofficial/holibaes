@@ -26,7 +26,7 @@ export const minikitConfig = {
       "homeUrl": "https://holibaes.vercel.app",
       "heroImageUrl": "https://holibaes.vercel.app/hero.png",
       "imageUrl": "https://holibaes.vercel.app/image.png",
-      "splashImageUrl": "https://holibaes.vercel.app/holibae-splash.png",
+      "splashImageUrl": "https://holibaes.vercel.app/splash.png",
       "splashBackgroundColor": "#0e1a14",
       "webhookUrl": "https://holibaes.vercel.app/api/webhook",
       "subtitle": "AI Animation and Music Studio",
