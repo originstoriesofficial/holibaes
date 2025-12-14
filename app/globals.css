@@ -4,31 +4,26 @@
 
 @layer base {
   :root {
-    /* 🌿 Holibae Labs Color System */
-    --bg: #f5f2eb;        /* soft sand */
-    --green: #1f3b2c;     /* deep forest */
-    --sage: #9bbf83;      /* fresh leaf */
+    /* ✨ Holibae Labs Reskin: Purple + Gold */
+    --bg: #f5f2eb;        /* tan background */
+    --purple: #ce19e6;    /* main purple */
     --gold: #d4af37;      /* accent gold */
-    --foreground: var(--green);
-    --background: var(--bg);
-    --border: rgba(31, 59, 44, 0.15);
-    --muted: rgba(31, 59, 44, 0.6);
+    --foreground: #2a1037; /* deep purple text */
+    --muted: rgba(42, 16, 55, 0.6);
+    --border: rgba(42, 16, 55, 0.15);
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0a0a0a;
-      --green: #cfe4c8;
-      --sage: #7ab67f;
-      --gold: #d4af37;
-      --foreground: var(--green);
-      --background: var(--bg);
-      --border: rgba(255, 255, 255, 0.12);
+      --purple: #d88af2;
+      --gold: #f5c95d;
+      --foreground: #f8f0fc;
       --muted: rgba(255, 255, 255, 0.6);
+      --border: rgba(255, 255, 255, 0.12);
     }
   }
 
-  /* 🖤 Fix Base mini-app background bleed */
   html,
   body {
     margin: 0;
@@ -38,8 +33,8 @@
     width: 100%;
     max-width: 100vw;
     overflow-x: hidden;
-    background: var(--bg, #f5f2eb); /* fallback added */
-    color: var(--foreground, #1f3b2c);
+    background: var(--bg, #f5f2eb);
+    color: var(--foreground, #2a1037);
     font-family: var(--font-inter), sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -73,7 +68,7 @@
 
     body {
       background-color: var(--bg, #0a0a0a);
-      color: var(--foreground, #cfe4c8);
+      color: var(--foreground, #f8f0fc);
     }
 
     code {
@@ -83,21 +78,49 @@
   }
 }
 
+/* 🖼️ Base mini-app bleed fix */
 html, body {
-  background-color: #f5f2eb !important; /* enforce tan */
-  color: #1f3b2c;
+  background-color: #f5f2eb !important;
+  color: var(--foreground);
 }
 
-/* 🌿 Theme Application (redundant safe fallback) */
-body {
-  background-color: var(--bg, #f5f2eb);
-  color: var(--green, #1f3b2c);
-  font-family: var(--font-inter), sans-serif;
+/* 📦 Cards */
+.card {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* 💛 Buttons */
+/* ✨ Headings */
+h1, h2, h3 {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--foreground);
+}
+
+/* 💛 Accent helpers */
+.gold {
+  color: var(--gold);
+}
+.text-muted {
+  color: var(--muted);
+}
+.border-gold {
+  border-color: var(--gold);
+}
+.bg-purple {
+  background-color: var(--purple);
+}
+.text-purple {
+  color: var(--purple);
+}
+
+/* 🎛️ Buttons */
 button {
-  border-radius: 0.75rem; /* matches rounded-xl */
+  border-radius: 0.75rem;
   font-weight: 600;
   transition: all 0.2s ease-in-out;
 }
@@ -109,36 +132,4 @@ button:hover {
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* 🪵 Panels / Cards */
-.card {
-  border-radius: 1rem; /* rounded-2xl */
-  border: 1px solid var(--border);
-  background-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* 🌤️ Headers */
-h1,
-h2,
-h3 {
-  font-weight: bold;
-  letter-spacing: 0.02em;
-  color: var(--green);
-}
-
-/* ✨ Gold text accent */
-.gold {
-  color: var(--gold);
-}
-
-/* 🍃 Border helpers */
-.border-sage {
-  border-color: var(--sage);
-}
-
-.text-muted {
-  color: var(--muted);
 }

@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Inter, Source_Code_Pro } from "next/font/google";
+import { Inter, Source_Code_Pro, Oswald } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
+// Font setup
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const sourceCodePro = Source_Code_Pro({
   subsets: ["latin"],
   variable: "--font-source-code-pro",
 });
+const oswald = Oswald({ subsets: ["latin"], variable: "--font-oswald" });
 
+// Root URL helper
 function getRootUrl() {
   const manual = process.env.NEXT_PUBLIC_URL;
   if (manual) return manual.replace(/\/$/, "");
@@ -19,6 +22,7 @@ function getRootUrl() {
   return "http://localhost:3000";
 }
 
+// Metadata setup
 export async function generateMetadata(): Promise<Metadata> {
   const rootUrl = getRootUrl();
 
@@ -56,6 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Layout component
 export default function RootLayout({
   children,
 }: {
@@ -64,9 +69,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`light ${inter.variable} ${sourceCodePro.variable} text-[var(--foreground)] min-h-screen`}
+      className={`light ${inter.variable} ${sourceCodePro.variable} ${oswald.variable} text-[var(--foreground)] min-h-screen`}
       style={{
-        backgroundColor: "#f7e8d0", // ✅ forces tan bg on html
+        backgroundColor: "#f7e8d0", // tan background
       }}
     >
       <body
@@ -74,7 +79,7 @@ export default function RootLayout({
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",
-          backgroundColor: "#f7e8d0", // ✅ forces tan bg on body
+          backgroundColor: "#f7e8d0",
         }}
       >
         <Providers>

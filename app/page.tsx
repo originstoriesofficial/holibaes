@@ -21,13 +21,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<string | null>(null);
 
-  // 🟢 FORCE LIGHT MODE (so Base/Farcaster don't apply dark mode overrides)
+  // 🟢 Force light mode (disable dark mode on mobile clients)
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("light");
   }, []);
 
-  // ✅ Tell the SDK we're ready
+  // ✅ Notify SDK when ready
   useEffect(() => {
     sdk.actions.ready().catch((err) =>
       console.error("sdk.actions.ready failed:", err)
@@ -56,16 +56,11 @@ export default function Home() {
         return;
       }
 
-      const res = await fetch(
-        `/api/check-nft?address=${encodeURIComponent(address)}`
-      );
-
-      const data = (await res.json().catch(() => null)) as
-        | CheckAccessResponse
-        | null;
+      const res = await fetch(`/api/check-nft?address=${encodeURIComponent(address)}`);
+      const data = (await res.json().catch(() => null)) as CheckAccessResponse | null;
 
       if (!res.ok || !data) {
-        setError("Unable to verify OriginStory token status.");
+        setError("Unable to verify originstory token status.");
         return;
       }
 
@@ -74,7 +69,7 @@ export default function Home() {
       if (!data.eligible) {
         const min = data.minRequired ?? MIN_REQUIRED;
         setError(
-          `Access restricted.\nYou need at least ${min.toLocaleString()} OriginStory tokens to enter.`
+          `Access restricted.\nYou need at least ${min.toLocaleString()} originstory tokens to enter.`
         );
         router.push(`/dashboard?originHolder=0&min=${min}`);
         return;
@@ -90,11 +85,11 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[var(--bg,#f5f2eb)] text-[var(--foreground)] px-4 py-10">
+    <main className="min-h-screen flex items-center justify-center bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-md text-center">
 
-        {/* 🎁 PRESENT / HERO (put holibae-hero.mp4 in /public) */}
-        <div className="mb-4 overflow-hidden rounded-2xl shadow bg-[#f5f2eb]">
+        {/* 🎁 HERO VIDEO */}
+        <div className="mb-4 overflow-hidden rounded-2xl shadow bg-[#f7e8d0]">
           <video
             autoPlay
             loop
@@ -108,13 +103,16 @@ export default function Home() {
           </video>
         </div>
 
-        <div className="card px-6 py-8 space-y-6">
-          <h1 className="text-3xl font-bold">❄️ Holibae Labs</h1>
+        {/* 🟣 PURPLE + GOLD CARD */}
+        <div className="px-6 py-8 space-y-6 rounded-2xl bg-black text-white border border-purple-900 shadow-md">
+          <h1 className="text-3xl font-bold font-oswald tracking-tight">
+            ❄️ Holibae Labs ❄️
+          </h1>
 
-          <p className="text-muted text-sm leading-relaxed">
+          <p className="text-sm leading-relaxed text-white/80">
             Hold{" "}
-            <span className="font-semibold gold">
-              at least {MIN_REQUIRED.toLocaleString()} OriginStory tokens
+            <span className="font-semibold text-[#f5c95d]">
+              at least {MIN_REQUIRED.toLocaleString()} originstory tokens
             </span>{" "}
             to enter the lab.
           </p>
@@ -122,15 +120,15 @@ export default function Home() {
           <button
             onClick={handleEnter}
             disabled={loading}
-            className="bg-[var(--gold)] text-black py-3.5 w-full rounded-xl font-semibold shadow hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full py-3.5 rounded-xl bg-[#ce19e6] text-[#f5c95d] font-semibold shadow hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Checking access…" : "Enter Holibae Labs"}
           </button>
 
           {balance && (
-            <p className="text-xs text-muted">
-              Your OriginStory balance:{" "}
-              <span className="font-semibold text-[var(--foreground)]">
+            <p className="text-xs text-white/70">
+              Your originstory balance:{" "}
+              <span className="font-semibold text-white">
                 {Number(balance).toLocaleString()}
               </span>{" "}
               (min required: {MIN_REQUIRED.toLocaleString()})
@@ -138,7 +136,7 @@ export default function Home() {
           )}
 
           {error && (
-            <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+            <p className="text-sm text-red-500 whitespace-pre-line">{error}</p>
           )}
         </div>
 

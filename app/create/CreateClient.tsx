@@ -33,7 +33,6 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   const { address } = useAccount();
   const { composeCast } = useComposeCast();
 
-  // ✅ Force light mode
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("light");
@@ -165,12 +164,14 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   };
 
   return (
-<main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
+    <main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-md mx-auto space-y-6">
         {!imageUrl ? (
           <>
             <header className="space-y-2">
-              <h1 className="text-2xl font-semibold">Create your Holibae</h1>
+              <h1 className="text-2xl font-bold text-[#ce19e6] font-[Oswald] tracking-wide">
+                Create your Holibae
+              </h1>
               <p className="text-sm text-muted">
                 Pick a 1) form (animal or doll type), 2) a holiday, and 3) a color to summon your Holibae.
               </p>
@@ -181,17 +182,16 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 <div
                   key={s}
                   className={`h-1.5 w-6 rounded-full ${
-                    step >= s ? "bg-[var(--gold)]" : "bg-black/15"
+                    step >= s ? "bg-[var(--gold)]" : "bg-[var(--muted)]/30"
                   }`}
                 />
               ))}
             </div>
 
-            {/* Step-specific form UI */}
             <section className="space-y-4">
               {step === 1 && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">Holibae Form</label>
+                  <label className="block text-sm font-semibold text-[#ce19e6] mb-1">Holibae Form</label>
                   <input
                     className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
                     value={hollyForm}
@@ -203,7 +203,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
 
               {step === 2 && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Choose a Holiday</label>
+                  <label className="block text-sm font-semibold text-[#ce19e6] mb-2">Choose a Holiday</label>
                   <div className="rounded-xl border border-[var(--border)] bg-white/60 backdrop-blur p-2">
                     <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                       {HOLIDAY_OPTIONS.map((opt) => {
@@ -231,7 +231,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
 
               {step === 3 && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">Choose a Color</label>
+                  <label className="block text-sm font-semibold text-[#ce19e6] mb-1">Choose a Color</label>
                   <input
                     className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40"
                     value={color}
@@ -263,7 +263,9 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
         ) : (
           <>
             <header className="flex justify-between items-center">
-              <h1 className="text-lg font-semibold">Your Holibae</h1>
+              <h1 className="text-lg font-bold text-[#ce19e6] font-[Oswald] tracking-wide">
+                ❄️ Your Holibae ❄️
+              </h1>
               <button onClick={handleCreateAnother} className="text-sm underline text-muted">
                 Create another
               </button>
@@ -290,7 +292,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   Share Holibae
                 </Button>
 
-                <Button onClick={handleGoToMusic} variant="primary">
+                <Button onClick={handleGoToMusic} className="bg-[#ce19e6] text-[var(--gold)]">
                   Enter music studio
                 </Button>
               </div>

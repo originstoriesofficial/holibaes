@@ -13,13 +13,13 @@ export const Button = ({
   ...props
 }: ButtonProps) => {
   const base =
-    "rounded-2xl px-5 py-3 text-base font-semibold transition-all duration-200 w-full";
+    "w-full rounded-2xl px-5 py-3 text-base font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 
   const variants = {
     primary:
-      "bg-[var(--gold)] text-black hover:brightness-105 shadow-md hover:scale-[1.03]",
+      "bg-[var(--gold)] text-black shadow-md hover:brightness-105 hover:scale-[1.03] focus-visible:ring-[var(--gold)]",
     secondary:
-      "border border-[var(--sage)] text-[var(--green)] hover:bg-[var(--sage)]/10",
+      "border border-[var(--sage)] text-[var(--green)] hover:bg-[var(--sage)]/10 focus-visible:ring-[var(--sage)]",
   };
 
   return (

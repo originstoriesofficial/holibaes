@@ -16,29 +16,25 @@ export function ShareSongButton({
 }: ShareSongButtonProps) {
   const { composeCast } = useComposeCast();
 
-  const appUrl = useMemo(
-    () => process.env.NEXT_PUBLIC_MINIAPP_URL ?? "https://monjeria.vercel.app",
-    []
-  );
+  const appUrl = useMemo(() => {
+    return process.env.NEXT_PUBLIC_MINIAPP_URL ?? "https://monjeria.vercel.app";
+  }, []);
 
   const handleShare = () => {
-    const textLines: string[] = [
-      `I just composed a Holibaes music track in La Monjería 🎶`,
+    const textLines = [
+      `I just composed a Holibae anthem in La Monjería 🎶`,
       `Style: ${style}`,
     ];
 
-    if (prompt) {
+    if (prompt?.trim()) {
       textLines.push(`Vibe: ${prompt}`);
     }
 
     const text = textLines.join("\n");
 
-    // Link people back into the music studio
-    const embeds: [string] = [`${appUrl}/music`];
-
     composeCast({
       text,
-      embeds,
+      embeds: [`${appUrl}/music`],
     });
   };
 
@@ -48,7 +44,7 @@ export function ShareSongButton({
       onClick={handleShare}
       className={
         className ??
-        "w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-xs md:text-sm font-semibold"
+        "w-full py-2.5 rounded-xl bg-[#ce19e6] hover:bg-[#b215c2] text-white text-xs md:text-sm font-semibold transition-all"
       }
     >
       Share song

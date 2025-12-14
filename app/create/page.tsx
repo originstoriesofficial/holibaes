@@ -18,8 +18,10 @@ export default function CreatePage({ searchParams }: CreatePageProps) {
   const originHolder = searchParams?.originHolder === "1";
 
   return (
-    <main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-8">
-      <CreateClient fid={fid} originHolder={originHolder} />
+    <main className="min-h-screen bg-[var(--bg,#f5f2eb)] text-[var(--foreground)] font-sans px-4 py-10">
+      <div className="w-full max-w-4xl mx-auto">
+        <CreateClient fid={fid} originHolder={originHolder} />
+      </div>
     </main>
   );
 }
