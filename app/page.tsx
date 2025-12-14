@@ -112,7 +112,7 @@ export default function Home() {
           <p className="text-sm leading-relaxed text-white/80">
             Hold{" "}
             <span className="font-semibold text-[#f5c95d]">
-              at least {MIN_REQUIRED.toLocaleString()} originstory tokens
+              at least {MIN_REQUIRED.toLocaleString()} $originstory 
             </span>{" "}
             to enter the lab.
           </p>

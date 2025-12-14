@@ -66,8 +66,8 @@ export default function DashboardClient() {
           ) : (
             <p className="text-muted text-sm leading-relaxed">
               You’ll need at least{" "}
-              <span className="font-semibold gold">3,500 $ORIGINSTORY</span>{" "}
-              tokens to unlock all Holibae features.
+              <span className="font-semibold gold">3.5k $ORIGINSTORY</span>{" "}
+              to unlock all Holibae features.
             </p>
           )}
 
