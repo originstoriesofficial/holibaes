@@ -363,9 +363,9 @@ export async function POST(req: Request) {
     // 🔑 FINAL PROMPT – color is the ONLY strong color
     const prompt = `
     ${STYLE_PLUSH}
-    A highly detailed plush ${hollyForm} character with ${colorPhrase} accents throughout —
-    used on outfit details,wearing an ${outfit},
-    The character wears ${outfit}, standing in a festive ${design} scene,
+    A highly detailed and realistic plush ${hollyForm} character with ${colorPhrase} accents throughout —
+    used on outfit details,the ${hollyForm} is wearing an ${outfit},
+    The character is tanding in a festive ${design} scene,
     surrounded by ${motifs}.
     Lighting is soft and cinematic, with glowing ${colorPhrase} highlights in the environment.
     3D toy aesthetic, glossy texture, full-body visible, 4k.
