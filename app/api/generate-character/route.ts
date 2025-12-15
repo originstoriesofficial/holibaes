@@ -364,7 +364,7 @@ export async function POST(req: Request) {
     const prompt = `
     ${STYLE_PLUSH}
     A highly detailed plush ${hollyForm} character with ${colorPhrase} accents throughout —
-    used on outfit details, accessories, and holiday props.
+    used on outfit details,wearing an ${outfit},
     The character wears ${outfit}, standing in a festive ${design} scene,
     surrounded by ${motifs}.
     Lighting is soft and cinematic, with glowing ${colorPhrase} highlights in the environment.
