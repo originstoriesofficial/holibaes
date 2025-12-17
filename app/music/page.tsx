@@ -11,13 +11,16 @@ export default function MusicPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-black text-zinc-50 px-4 py-6">
-          <div className="w-full max-w-4xl mx-auto space-y-6">
-            <div className="h-10 w-40 rounded-full bg-zinc-800/80 mb-2" />
-            <div className="h-7 w-64 rounded-full bg-zinc-800/80 mb-4" />
-            <div className="grid gap-6 md:grid-cols-[1.4fr,1fr]">
-              <div className="h-64 rounded-2xl border border-zinc-800 bg-zinc-950/70" />
-              <div className="h-64 rounded-2xl border border-zinc-800 bg-zinc-950/70" />
+        <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
+          <div className="w-full max-w-5xl mx-auto space-y-10">
+            <div className="space-y-5">
+              <div className="h-10 w-64 rounded-full bg-[var(--silver-light)] animate-pulse" />
+              <div className="h-12 w-96 rounded-lg bg-[var(--silver-light)] animate-pulse" />
+              <div className="h-4 w-80 rounded-full bg-[var(--silver-light)] animate-pulse" />
+            </div>
+            <div className="grid gap-8 md:grid-cols-[1.5fr,1fr]">
+              <div className="h-96 rounded-2xl border border-[var(--border)] bg-white shadow animate-pulse" />
+              <div className="h-96 rounded-2xl border border-[var(--border)] bg-white shadow animate-pulse" />
             </div>
           </div>
         </main>

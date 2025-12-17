@@ -111,103 +111,130 @@ export default function MusicClient() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
+    <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-5xl mx-auto space-y-10">
-        <header className="space-y-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-xs font-medium">
+        <header className="space-y-5">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--base-blue)]">
               🎄 Holibae Music Studio
             </div>
             {originHolder && (
-              <span className="text-xs text-muted font-semibold">
+              <span className="text-sm text-[var(--base-blue)] font-semibold">
                 OriginStory holder ✅
               </span>
             )}
           </div>
 
-          <h1 className="text-3xl font-bold text-[#ce19e6] font-[Oswald]">
-            ❄️ Compose your Holibae Anthem
-          </h1>
-          <p className="text-sm text-muted max-w-xl">
-            Describe your Holibae’s holiday mood. We’ll create a magical 60-second seasonal anthem just for them.
+          <div className="space-y-3">
+            <h1 className="text-5xl font-bold text-[var(--base-blue)] tracking-wide">
+              ❄️ Compose your Holibae Anthem
+            </h1>
+            <div className="h-1 w-24 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
+          </div>
+          
+          <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
+            Describe your Holibae's holiday mood. We'll create a magical 60-second seasonal anthem just for them.
           </p>
         </header>
 
         <div className="grid md:grid-cols-[1.5fr,1fr] gap-8">
           {/* 🧠 SONG CREATION SECTION */}
-          <section className="card p-6 space-y-6 bg-white/90 border border-[var(--border)] rounded-2xl shadow">
-            <div className="space-y-4">
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe the holly-jolly mood"
-                className="w-full min-h-[80px] rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[#ce19e6]"
-              />
-              <textarea
-                value={lyrics}
-                onChange={(e) => setLyrics(e.target.value)}
-                placeholder="Optional: write some lyrics (poetic or funny!)"
-                className="w-full min-h-[80px] rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[#ce19e6]"
-              />
-              <select
-                value={style}
-                onChange={(e) => setStyle(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#ce19e6]"
-              >
-                {styles.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+          <section className="card p-8 space-y-6">
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[var(--foreground)]">Holiday Mood</label>
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Describe the holly-jolly mood"
+                  className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--base-blue)] transition-colors"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[var(--foreground)]">Lyrics (Optional)</label>
+                <textarea
+                  value={lyrics}
+                  onChange={(e) => setLyrics(e.target.value)}
+                  placeholder="Write some lyrics (poetic or funny!)"
+                  className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--base-blue)] transition-colors"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[var(--foreground)]">Music Style</label>
+                <select
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value)}
+                  className="w-full rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base text-[var(--foreground)] focus:outline-none focus:border-[var(--base-blue)] transition-colors cursor-pointer"
+                >
+                  {styles.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <Button onClick={generateSong} disabled={loading}>
-              {loading ? "Mixing holiday magic…" : "Generate Holibae Song"}
+            <Button onClick={generateSong} disabled={loading} className="text-lg">
+              {loading ? "🎵 Mixing holiday magic…" : "🎶 Generate Holibae Song"}
             </Button>
 
-            {error && <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>}
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
           </section>
 
           {/* 🖼️ HOLIBAE DISPLAY + AUDIO */}
-          <section className="card p-6 space-y-4 bg-white/90 border border-[var(--border)] rounded-2xl shadow">
-            <h2 className="text-sm font-semibold text-[#ce19e6]">❄️ Your Holibae</h2>
+          <section className="card p-8 space-y-6">
+            <h2 className="text-lg font-bold text-[var(--base-blue)]">❄️ Your Holibae</h2>
 
             <div className="flex items-center gap-4">
               {imageUrlFromCreate ? (
-                <div className="w-20 h-20 rounded-xl overflow-hidden border border-[var(--border)] bg-white flex-shrink-0">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-[var(--border)] bg-white flex-shrink-0 shadow">
                   <Image
                     src={imageUrlFromCreate}
                     alt="Your Holibae"
-                    width={80}
-                    height={80}
+                    width={96}
+                    height={96}
                     className="w-full h-full object-cover"
                   />
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-xl bg-white/80 border border-[var(--border)] text-xs text-black/50 flex items-center justify-center">
+                <div className="w-24 h-24 rounded-xl bg-[var(--silver-light)] border-2 border-[var(--border)] text-sm text-[var(--muted)] flex items-center justify-center text-center p-2">
                   Your Holibae
                 </div>
               )}
 
-              <div className="flex-1 text-sm">
-                <div className="font-medium">{formFromCreate || "Mystery Holibae"}</div>
-                <div className="text-muted">
-                  Style: <span className="font-semibold">{style}</span>
+              <div className="flex-1 space-y-1">
+                <div className="font-semibold text-base text-[var(--foreground)]">
+                  {formFromCreate || "Mystery Holibae"}
+                </div>
+                <div className="text-sm text-[var(--muted)]">
+                  Style: <span className="font-semibold text-[var(--base-blue)]">{style}</span>
                 </div>
               </div>
             </div>
 
             {audioUrl ? (
               <div className="space-y-4">
-                <audio controls src={audioUrl} className="w-full rounded-md" />
-                <Button onClick={handleSaveSong} disabled={saving}>
-                  {saving ? "Saving…" : "Save this jingle"}
-                </Button>
-                <ShareSongButton style={style} prompt={prompt} />
+                <div className="bg-[var(--silver-light)] p-4 rounded-xl">
+                  <audio controls src={audioUrl} className="w-full" />
+                </div>
+                <div className="space-y-3">
+                  <Button onClick={handleSaveSong} disabled={saving} variant="secondary">
+                    {saving ? "Saving…" : "💾 Save this jingle"}
+                  </Button>
+                  <ShareSongButton style={style} prompt={prompt} />
+                </div>
               </div>
             ) : (
-              <p className="text-sm text-muted">Generate a jolly anthem to save and share 🎶</p>
+              <div className="bg-[var(--silver-light)] p-6 rounded-xl text-center">
+                <p className="text-base text-[var(--muted)]">Generate a jolly anthem to save and share 🎶</p>
+              </div>
             )}
           </section>
         </div>

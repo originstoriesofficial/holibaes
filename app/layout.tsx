@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Source_Code_Pro, Oswald } from "next/font/google";
+import { Inter, Source_Code_Pro, Oswald, Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -9,7 +9,16 @@ const sourceCodePro = Source_Code_Pro({
   subsets: ["latin"],
   variable: "--font-source-code-pro",
 });
-const oswald = Oswald({ subsets: ["latin"], variable: "--font-oswald" });
+const oswald = Oswald({ 
+  subsets: ["latin"], 
+  variable: "--font-oswald",
+  weight: ["400", "500", "600", "700"]
+});
+const poppins = Poppins({
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  weight: ["400", "500", "600", "700"]
+});
 
 // Root URL helper
 function getRootUrl() {
@@ -71,7 +80,7 @@ export default function RootLayout({
       lang="en"
       className={`light ${inter.variable} ${sourceCodePro.variable} ${oswald.variable} text-[var(--foreground)] min-h-screen`}
       style={{
-        backgroundColor: "#f7e8d0", // tan background
+        backgroundColor: "#f8f9fa", // Base blue theme background
       }}
     >
       <body
@@ -79,7 +88,7 @@ export default function RootLayout({
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",
-          backgroundColor: "#f7e8d0",
+          backgroundColor: "#f8f9fa",
         }}
       >
         <Providers>

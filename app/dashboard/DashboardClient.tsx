@@ -54,11 +54,11 @@ export default function DashboardClient() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
+    <main className="min-h-screen flex flex-col items-center justify-start bg-[var(--bg)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-md text-center">
 
         {/* 🎁 Hero image at top */}
-        <div className="mb-6 overflow-hidden rounded-2xl shadow bg-[#f7e8d0]">
+        <div className="mb-6 overflow-hidden rounded-2xl shadow-lg">
           <Image
             src="/holibae-hero.png"
             alt="Holibae Holiday Hero"
@@ -69,36 +69,45 @@ export default function DashboardClient() {
           />
         </div>
 
-        {/* 🟣 Purple + Gold Card */}
-        <div className="px-6 py-8 space-y-6 rounded-2xl bg-black text-white border border-purple-900 shadow-md">
-          <h1 className="text-3xl font-bold font-oswald tracking-tight">
-            ❄️ Holibae Labs ❄️
-          </h1>
+        {/* 🔵 Base Blue + White Card */}
+        <div className="card px-8 py-10 space-y-8">
+          <div className="space-y-3">
+            <h1 className="text-5xl font-bold font-oswald tracking-wide text-[var(--foreground)] leading-tight">
+              ❄️ Holibae Labs
+            </h1>
+            <div className="h-1 w-20 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] mx-auto rounded-full"></div>
+          </div>
 
           {originHolder ? (
-            <p className="text-sm leading-relaxed text-white/80">
-              Welcome, originator ✨<br />
-              The Holibae Creator + Music Studio is unlocked.
-            </p>
+            <div className="space-y-2">
+              <p className="text-lg font-semibold text-[var(--base-blue)]">
+                Welcome, originator ✨
+              </p>
+              <p className="text-base leading-relaxed text-[var(--muted)]">
+                The Holibae Creator + Music Studio is unlocked.
+              </p>
+            </div>
           ) : (
-            <p className="text-sm leading-relaxed text-white/80">
-              You’ll need at least{" "}
-              <span className="font-semibold text-[#f5c95d]">3.5k $ORIGINSTORY</span>{" "}
-              to unlock all Holibae features.
-            </p>
+            <div className="bg-[var(--silver-light)] rounded-xl p-4 border-l-4 border-[var(--base-blue)]">
+              <p className="text-base leading-relaxed text-[var(--foreground)]">
+                You'll need at least{" "}
+                <span className="font-bold text-[var(--base-blue)] text-lg">3.5k $ORIGINSTORY</span>{" "}
+                to unlock all Holibae features.
+              </p>
+            </div>
           )}
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4 pt-4">
             <button
               onClick={() => goTo("/create")}
-              className="bg-[#ce19e6] text-[#f5c95d] py-3 rounded-xl font-semibold shadow hover:scale-105 transition-all"
+              className="btn-primary text-xl"
             >
               🎨 Create a Holibae
             </button>
 
             <button
               onClick={() => goTo("/music")}
-              className="bg-[#ce19e6] text-[#f5c95d] py-3 rounded-xl font-semibold shadow hover:scale-105 transition-all"
+              className="bg-[var(--silver)] text-white py-4 min-h-[56px] rounded-xl text-xl font-semibold shadow hover:bg-[var(--base-blue)] hover:-translate-y-0.5 hover:shadow-lg transition-all"
             >
               🎶 Enter Music Studio
             </button>

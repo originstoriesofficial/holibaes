@@ -164,56 +164,61 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
-      <div className="w-full max-w-md mx-auto space-y-6">
+    <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
+      <div className="w-full max-w-lg mx-auto space-y-8">
         {!imageUrl ? (
           <>
-            <header className="space-y-3">
-              <h1 className="text-2xl font-bold text-[#ce19e6] font-[Oswald] tracking-wide">
-                Create your Holibae
-              </h1>
-              <div className="text-sm text-muted space-y-1 text-left">
-                <p>Pick:</p>
-                <p>1) a form (animal or doll type)</p>
-                <p>2) a holiday</p>
-                <p>3) a color to summon your Holibae</p>
+            <header className="space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-4xl font-bold text-[var(--base-blue)] tracking-wide">
+                  Create your Holibae
+                </h1>
+                <div className="h-1 w-20 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
+              </div>
+              <div className="text-base text-[var(--muted)] space-y-2">
+                <p className="font-semibold text-[var(--foreground)]">Three simple steps:</p>
+                <ol className="list-decimal list-inside space-y-1 pl-2">
+                  <li>Choose a form (animal or character)</li>
+                  <li>Pick a holiday tradition</li>
+                  <li>Select a color palette</li>
+                </ol>
               </div>
             </header>
   
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-3">
               {[1, 2, 3].map((s) => (
                 <div
                   key={s}
-                  className={`h-1.5 w-6 rounded-full ${
-                    step >= s ? "bg-[var(--gold)]" : "bg-[var(--muted)]/30"
+                  className={`h-2 flex-1 max-w-[80px] rounded-full transition-all ${
+                    step >= s ? "bg-[var(--base-blue)]" : "bg-[var(--silver-light)]"
                   }`}
                 />
               ))}
             </div>
   
-            <section className="space-y-4">
-  {step === 1 && (
-    <div>
-      <label className="block text-sm font-semibold text-[#ce19e6] mb-1">
-        Write Your Holibae Form
-      </label>
-      <textarea
-        rows={4} // ⬅️ You can increase this for more vertical space
-        className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40 resize-none"
-        value={hollyForm}
-        onChange={(e) => setHollyForm(e.target.value)}
-        placeholder="ex: penguin, porcelain doll, reindeer, robot"
-      />
-    </div>
-  )}
+            <section className="card p-8 space-y-6">
+              {step === 1 && (
+                <div className="space-y-3">
+                  <label className="block text-lg font-semibold text-[var(--base-blue)]">
+                    Step 1: Your Holibae Form
+                  </label>
+                  <textarea
+                    rows={4}
+                    className="w-full border-2 border-[var(--border)] rounded-xl px-4 py-3 bg-white text-base text-[var(--foreground)] placeholder:text-[var(--muted)] resize-none focus:outline-none focus:border-[var(--base-blue)] transition-colors"
+                    value={hollyForm}
+                    onChange={(e) => setHollyForm(e.target.value)}
+                    placeholder="e.g., penguin, porcelain doll, reindeer, robot"
+                  />
+                </div>
+              )}
   
               {step === 2 && (
-                <div>
-                  <label className="block text-sm font-semibold text-[#ce19e6] mb-2">
-                  Choose a Holiday
+                <div className="space-y-3">
+                  <label className="block text-lg font-semibold text-[var(--base-blue)]">
+                    Step 2: Choose a Holiday
                   </label>
-                  <div className="rounded-xl border border-[var(--border)] bg-white/60 backdrop-blur p-2">
-                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  <div className="rounded-xl border-2 border-[var(--border)] bg-white p-3">
+                    <div className="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
                       {HOLIDAY_OPTIONS.map((opt) => {
                         const active = holidayKey === opt.id;
                         return (
@@ -221,14 +226,16 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                             key={opt.id}
                             onClick={() => setHolidayKey(opt.id)}
                             type="button"
-                            className={`w-full text-left rounded-lg px-3 py-2 border text-sm transition ${
+                            className={`w-full text-left rounded-lg px-4 py-3 border-2 text-sm transition-all ${
                               active
-                                ? "bg-[var(--gold)]/20 border-[var(--gold)]"
-                                : "bg-white border-[var(--border)]"
+                                ? "bg-[var(--base-blue)] text-white border-[var(--base-blue)] shadow-md"
+                                : "bg-white border-[var(--border)] hover:border-[var(--base-blue)] hover:bg-[var(--silver-light)]"
                             }`}
                           >
-                            <div className="font-semibold">{opt.label}</div>
-                            <div className="text-xs text-muted">{opt.blurb}</div>
+                            <div className="font-semibold text-base">{opt.label}</div>
+                            <div className={`text-xs mt-1 ${active ? "text-white/90" : "text-[var(--muted)]"}`}>
+                              {opt.blurb}
+                            </div>
                           </button>
                         );
                       })}
@@ -237,87 +244,99 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 </div>
               )}
   
-  {step === 3 && (
-  <div>
-    <label className="block text-sm font-semibold text-[#ce19e6] mb-1">
-      Step Three: Choose a Color
-    </label>
-    <textarea
-      rows={3} // ⬅️ Gives the field more height for clarity
-      className="w-full border border-[var(--border)] rounded-md px-3 py-2 bg-white/90 text-sm text-black placeholder:text-black/40 resize-none"
-      value={color}
-      onChange={(e) => setColor(e.target.value)}
-      placeholder="e.g. moss green, glittery gold"
-    />
-  </div>
-)}
-
+              {step === 3 && (
+                <div className="space-y-3">
+                  <label className="block text-lg font-semibold text-[var(--base-blue)]">
+                    Step 3: Choose a Color
+                  </label>
+                  <textarea
+                    rows={3}
+                    className="w-full border-2 border-[var(--border)] rounded-xl px-4 py-3 bg-white text-base text-[var(--foreground)] placeholder:text-[var(--muted)] resize-none focus:outline-none focus:border-[var(--base-blue)] transition-colors"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    placeholder="e.g., moss green, glittery gold, midnight blue"
+                  />
+                </div>
+              )}
   
-              <div className="flex justify-between gap-3">
-                <Button variant="secondary" onClick={prevStep} disabled={step === 1}>
-                  Back
+              <div className="flex gap-3 pt-4">
+                <Button variant="secondary" onClick={prevStep} disabled={step === 1} className="flex-1">
+                  ← Back
                 </Button>
   
                 {step < 3 ? (
-                  <Button onClick={nextStep}>Next</Button>
+                  <Button onClick={nextStep} className="flex-1">
+                    Next →
+                  </Button>
                 ) : (
-                  <Button onClick={handleGenerateCharacter} disabled={generating}>
-                    {generating ? "Summoning…" : "Get your Holibae"}
+                  <Button onClick={handleGenerateCharacter} disabled={generating} className="flex-1">
+                    {generating ? "✨ Summoning…" : "🎨 Create Holibae"}
                   </Button>
                 )}
               </div>
   
               {error && (
-                <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
               )}
             </section>
           </>
         ) : (
           <>
             <header className="flex justify-between items-center">
-              <h1 className="text-lg font-bold text-[#ce19e6] font-[Oswald] tracking-wide">
-                ❄️ Your Holibae ❄️
-              </h1>
-              <button onClick={handleCreateAnother} className="text-sm underline text-muted">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold text-[var(--base-blue)] tracking-wide">
+                  ❄️ Your Holibae
+                </h1>
+                <div className="h-1 w-16 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
+              </div>
+              <button 
+                onClick={handleCreateAnother} 
+                className="text-sm font-semibold text-[var(--silver)] hover:text-[var(--base-blue)] transition-colors underline"
+              >
                 Create another
               </button>
             </header>
   
-            <section className="space-y-4">
-              <div className="w-full overflow-hidden border border-[var(--border)] rounded-xl bg-white/90 flex justify-center">
+            <section className="space-y-6">
+              <div className="card overflow-hidden p-4">
                 <Image
                   src={imageUrl!}
                   alt="Holibae"
-                  width={400}
-                  height={400}
-                  className="object-contain max-h-[60vh]"
+                  width={500}
+                  height={500}
+                  className="object-contain w-full rounded-lg"
                   priority
                 />
               </div>
   
-              <div className="space-y-2">
+              {characterSummary && (
+                <div className="card p-5">
+                  <p className="text-base text-[var(--foreground)] leading-relaxed">
+                    {characterSummary}
+                  </p>
+                </div>
+              )}
+  
+              <div className="space-y-3">
                 <Button onClick={handleSaveCharacter} disabled={saving}>
-                  {saving ? "Saving…" : savedOnce ? "Holibae saved ✅" : "Save this Holibae"}
+                  {saving ? "Saving…" : savedOnce ? "✅ Holibae saved" : "💾 Save this Holibae"}
                 </Button>
   
-                <Button onClick={handleShareCharacter} className="bg-[#6d28d9] text-white">
-                  Share Holibae
+                <Button onClick={handleShareCharacter} variant="secondary">
+                  📤 Share Holibae
                 </Button>
   
-                {/* ✅ FIX: Use white text for readability */}
-                <Button onClick={handleGoToMusic} className="bg-[#ce19e6] text-white">
-                  Enter music studio
+                <Button onClick={handleGoToMusic} className="bg-[var(--silver)] hover:bg-[var(--base-blue)]">
+                  🎶 Enter music studio
                 </Button>
               </div>
   
-              {characterSummary && (
-                <p className="text-sm bg-white/90 border border-[var(--border)] rounded-md p-3 text-black/90">
-                  {characterSummary}
-                </p>
-              )}
-  
               {error && (
-                <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
               )}
             </section>
           </>
@@ -325,4 +344,4 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       </div>
     </main>
   );
-  }
+}
