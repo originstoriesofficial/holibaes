@@ -13,17 +13,6 @@
     --border: rgba(42, 16, 55, 0.15);
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0a0a0a;
-      --purple: #d88af2;
-      --gold: #f5c95d;
-      --foreground: #f8f0fc;
-      --muted: rgba(255, 255, 255, 0.6);
-      --border: rgba(255, 255, 255, 0.12);
-    }
-  }
-
   html,
   body {
     margin: 0;
@@ -59,22 +48,6 @@
     font-family: var(--font-source-code-pro), monospace;
     font-size: 0.875rem;
     padding: 0.25rem 0.5rem calc(0.25rem + 2px);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    html {
-      color-scheme: dark;
-    }
-
-    body {
-      background-color: var(--bg, #0a0a0a);
-      color: var(--foreground, #f8f0fc);
-    }
-
-    code {
-      background-color: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
   }
 }
 
