@@ -100,16 +100,16 @@ export default function DashboardClient() {
           <div className="flex flex-col gap-4 pt-4">
             <button
               onClick={() => goTo("/create")}
-              className="btn-primary text-xl"
+              className="btn-primary w-full"
             >
-              Create a Holibae
+              🎨 Create a Holibae
             </button>
 
             <button
               onClick={() => goTo("/music")}
-              className="bg-[var(--silver)] text-white py-4 min-h-[56px] rounded-xl text-xl font-semibold shadow hover:bg-[var(--base-blue)] hover:-translate-y-0.5 hover:shadow-lg transition-all"
+              className="bg-[var(--silver)] text-white py-4 min-h-[56px] rounded-xl text-lg font-semibold shadow hover:bg-[var(--base-blue)] hover:-translate-y-0.5 hover:shadow-lg transition-all w-full"
             >
-              Enter Music Studio
+              🎶 Enter Music Studio
             </button>
           </div>
         </div>
