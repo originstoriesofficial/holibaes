@@ -131,14 +131,14 @@ export default function MusicClient() {
             </h1>
             <div className="h-1 w-24 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
           </div>
-          
+
           <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
             Describe your Holibae's holiday mood. We'll create a magical 60-second seasonal anthem just for them.
           </p>
         </header>
 
         <div className="grid md:grid-cols-[1.5fr,1fr] gap-8">
-          {/* 🧠 SONG CREATION SECTION */}
+          {/* SONG CREATION */}
           <section className="card p-8 space-y-6">
             <div className="space-y-5">
               <div className="space-y-2">
@@ -147,7 +147,7 @@ export default function MusicClient() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Describe the holly-jolly mood"
-                  className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--base-blue)] transition-colors"
+                  className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base"
                 />
               </div>
 
@@ -157,7 +157,7 @@ export default function MusicClient() {
                   value={lyrics}
                   onChange={(e) => setLyrics(e.target.value)}
                   placeholder="Write some lyrics (poetic or funny!)"
-                  className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--base-blue)] transition-colors"
+                  className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base"
                 />
               </div>
 
@@ -166,7 +166,7 @@ export default function MusicClient() {
                 <select
                   value={style}
                   onChange={(e) => setStyle(e.target.value)}
-                  className="w-full rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base text-[var(--foreground)] focus:outline-none focus:border-[var(--base-blue)] transition-colors cursor-pointer"
+                  className="w-full rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base"
                 >
                   {styles.map((s) => (
                     <option key={s} value={s}>
@@ -188,19 +188,19 @@ export default function MusicClient() {
             )}
           </section>
 
-          {/* 🖼️ HOLIBAE DISPLAY + AUDIO */}
+          {/* HOLIBAE PREVIEW */}
           <section className="card p-8 space-y-6">
             <h2 className="text-lg font-bold text-[var(--base-blue)]">❄️ Your Holibae</h2>
 
             <div className="flex items-center gap-4">
               {imageUrlFromCreate ? (
-                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-[var(--border)] bg-white flex-shrink-0 shadow">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-[var(--border)] bg-white shadow">
                   <Image
                     src={imageUrlFromCreate}
                     alt="Your Holibae"
                     width={96}
                     height={96}
-                    className="w-full h-full object-cover"
+                    className="object-cover w-full h-full"
                   />
                 </div>
               ) : (
@@ -224,11 +224,27 @@ export default function MusicClient() {
                 <div className="bg-[var(--silver-light)] p-4 rounded-xl">
                   <audio controls src={audioUrl} className="w-full" />
                 </div>
+
                 <div className="space-y-3">
                   <Button onClick={handleSaveSong} disabled={saving} variant="secondary">
                     {saving ? "Saving…" : "💾 Save this jingle"}
                   </Button>
-                  <ShareSongButton style={style} prompt={prompt} />
+
+                  <a
+                    href={audioUrl}
+                    download="holibae-song.mp3"
+                    className="block w-full text-center py-2 rounded-lg bg-amber-600 font-semibold text-sm shadow-md hover:bg-amber-700 transition"
+                  >
+                    ⬇️ Download Song
+                  </a>
+
+                  <ShareSongButton
+                    style={style}
+                    prompt={prompt}
+                    audioUrl={audioUrl}
+                    characterImageUrl={imageUrlFromCreate || undefined}
+                    characterForm={formFromCreate || undefined}
+                  />
                 </div>
               </div>
             ) : (

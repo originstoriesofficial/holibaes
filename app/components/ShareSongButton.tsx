@@ -1,31 +1,40 @@
+"use client";
+
 import React from "react";
 import { useComposeCast } from "@coinbase/onchainkit/minikit";
 import { Button } from "./Button";
 
-interface ShareSongButtonProps {
+export interface ShareSongButtonProps {
   style: string;
   prompt: string;
   characterImageUrl?: string | null;
   characterForm?: string | null;
+  audioUrl?: string | null;
 }
 
-export function ShareSongButton({ 
-  style, 
-  prompt, 
+export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
+  style,
+  prompt,
   characterImageUrl,
-  characterForm 
-}: ShareSongButtonProps) {
+  characterForm,
+  audioUrl,
+}) => {
   const { composeCast } = useComposeCast();
 
   const handleShare = () => {
     const characterInfo = characterForm ? ` featuring my ${characterForm} Holibae` : "";
     const text = `🎶 Just created a ${style} holiday anthem${characterInfo}! "${prompt}" ✨\n\nCreate yours at Holibae Labs!`;
-    
-    if (characterImageUrl) {
-      composeCast({ text, embeds: [characterImageUrl] });
-    } else {
-      composeCast({ text });
-    }
+
+    const embeds: [string] | [string, string] | undefined =
+      characterImageUrl && audioUrl?.startsWith("http")
+        ? [characterImageUrl, audioUrl]
+        : characterImageUrl
+        ? [characterImageUrl]
+        : audioUrl?.startsWith("http")
+        ? [audioUrl]
+        : undefined;
+
+    composeCast({ text, embeds });
   };
 
   return (
@@ -33,4 +42,4 @@ export function ShareSongButton({
       🎵 Share Song {characterImageUrl && "+ Holibae"}
     </Button>
   );
-}
+};
