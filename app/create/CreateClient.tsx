@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import {
-  MONKERIA_CONTRACT_ADDRESS,
-  monkeriaAbi,
-} from "@/constants/monkeriaContract";
+import { useAccount } from "wagmi";
+import { useComposeCast } from "@coinbase/onchainkit/minikit";
+import { Button } from "../components/Button";
 
 type Step = 1 | 2 | 3;
 
@@ -16,330 +14,332 @@ interface CreateClientProps {
   originHolder: boolean;
 }
 
+const HOLIDAY_OPTIONS = [
+  { id: "christmas", label: "🎄 Christmas", blurb: "Classic evergreen, lights, cozy winter vibes." },
+  { id: "hanukkah", label: "🕯 Hanukkah", blurb: "Blue and silver, candle glow, winter nights." },
+  { id: "posadas", label: "⭐ Las Posadas", blurb: "Lantern processions, papel picado, warm colors." },
+  { id: "lucia", label: "🌟 St. Lucia Day", blurb: "Candle crown, white gown, Nordic morning light." },
+  { id: "threeKings", label: "👑 Three Kings / Epiphany", blurb: "Regal fabrics, epiphany star, vibrant celebration." },
+  { id: "kwanzaa", label: "🖤❤️💚 Kwanzaa", blurb: "Red–green–black palette, cultural patterns." },
+  { id: "solstice", label: "💫 Winter Solstice / Yule", blurb: "Celestial motifs, stone textures, witchy energy." },
+  { id: "lunarNewYear", label: "🧨 Lunar New Year Preview", blurb: "Red and gold lanterns, dragons, fireworks." },
+  { id: "newYear", label: "🎉 Global New Year", blurb: "Metallic tones, confetti, skyline countdown." },
+  { id: "sinterklaas", label: "🎁 Sinterklaas", blurb: "Red robes, golden mitre, steamboat arrival, candy treats." },
+  { id: "basemas", label: "🔵 Blue Basemas (Base)", blurb: "Base blue, onchain glyphs, futuristic holiday." },
+] as const;
+
 export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   const router = useRouter();
-  const { address, isConnected } = useAccount();
-  const publicClient = usePublicClient();
-  const { writeContractAsync } = useWriteContract();
+  const { address } = useAccount();
+  const { composeCast } = useComposeCast();
+
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+  }, []);
+
+  const rootUrl = useMemo(() => {
+    if (typeof window !== "undefined") return window.location.origin;
+    return process.env.NEXT_PUBLIC_URL ?? "https://holibaes.vercel.app";
+  }, []);
 
   const [step, setStep] = useState<Step>(1);
-
-  // Holibae inputs
-  const [animal, setAnimal] = useState("");
-  const [holiday, setHoliday] = useState("");
+  const [hollyForm, setHollyForm] = useState("");
+  const [holidayKey, setHolidayKey] = useState<string>("");
   const [color, setColor] = useState("");
 
   const [characterSummary, setCharacterSummary] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [minting, setMinting] = useState(false);
-  const [hasMinted, setHasMinted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedOnce, setSavedOnce] = useState(false);
 
   const nextStep = () => {
     setError(null);
-    setStep((prev) => Math.min(3, prev + 1) as Step);
+    setStep((prev) => (prev === 3 ? 3 : ((prev + 1) as Step)));
   };
 
   const prevStep = () => {
     setError(null);
-    setStep((prev) => Math.max(1, prev - 1) as Step);
+    setStep((prev) => (prev === 1 ? 1 : ((prev - 1) as Step)));
   };
 
-  // 🔥 Generate Holibae via /api/generate-character
   const handleGenerateCharacter = async () => {
     setError(null);
 
-    if (!animal || !holiday || !color) {
-      setError("Please complete all 3 steps (animal, holiday, color).");
+    if (!hollyForm || !holidayKey || !color) {
+      setError("Please choose a form, a holiday, and a color.");
       return;
     }
 
+    if (generating) return;
     setGenerating(true);
-    setHasMinted(false);
-    setCharacterSummary(null);
-    setImageUrl(null);
+    setSavedOnce(false);
 
     try {
       const res = await fetch("/api/generate-character", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hollyForm: animal,
-          holidayKey: holiday,
-          color,
-        }),
+        body: JSON.stringify({ hollyForm, holidayKey, color, address }),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.error || "Failed to generate Holibae.");
-      }
-
-      const data = await res.json();
-      if (!data.imageUrl) throw new Error("No image URL returned.");
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.imageUrl) throw new Error(data?.error || "No image returned.");
 
       setImageUrl(data.imageUrl);
 
+      const label = HOLIDAY_OPTIONS.find((h) => h.id === holidayKey)?.label ?? "Mystery";
       setCharacterSummary(
-        `Your Holibae is a ${animal} styled for ${holiday}, with a color palette based on "${color}".`
+        `Your Holibae is a ${hollyForm} infused with ${label} energy, glowing in ${color} tones.`
       );
     } catch (err: any) {
-      console.error("Generation error:", err);
-      setError(err?.message || "Something went wrong generating your Holibae.");
+      setError(err?.message || "Something went wrong.");
     } finally {
       setGenerating(false);
     }
   };
 
-  // 🔥 Mint Holibae NFT (this is where payment actually happens)
-  const handleMintCharacter = async () => {
+  const handleSaveCharacter = async () => {
     setError(null);
+    if (!imageUrl || !address) {
+      setError("Missing image or wallet address.");
+      return;
+    }
 
+    if (saving) return;
+    setSaving(true);
+
+    try {
+      const res = await fetch("/api/save-holibae", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address,
+          fid,
+          hollyForm,
+          holidayKey,
+          color,
+          imageUrl,
+          summary: characterSummary,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to save.");
+      setSavedOnce(true);
+    } catch (err: any) {
+      setError(err?.message || "Failed to save.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleShareCharacter = () => {
+    setError(null);
     if (!imageUrl) {
       setError("Generate your Holibae first.");
       return;
     }
 
-    if (!isConnected || !address) {
-      setError("Wallet not connected. Open in the Base app and try again.");
-      return;
-    }
-
-    if (!publicClient) {
-      setError("Public client not ready.");
-      return;
-    }
-
-    setMinting(true);
-
-    try {
-      // Contract decides 0.001 vs 0.002 based on Origin/Mantle holding
-      const mintPriceWei = (await publicClient.readContract({
-        address: MONKERIA_CONTRACT_ADDRESS,
-        abi: monkeriaAbi,
-        functionName: "getMintPrice",
-        args: [address],
-      })) as bigint;
-
-      const txHash = await writeContractAsync({
-        address: MONKERIA_CONTRACT_ADDRESS,
-        abi: monkeriaAbi,
-        functionName: "mint",
-        args: [imageUrl, BigInt(1)],
-        value: mintPriceWei,
-        account: address,
-      });
-
-      console.log("Mint tx:", txHash);
-      setHasMinted(true);
-    } catch (err: any) {
-      console.error("Mint error:", err);
-      setError(err?.message || "Mint failed. Check your Base balance.");
-      setHasMinted(false);
-    } finally {
-      setMinting(false);
-    }
+    const labName = originHolder ? "OriginStory" : "Holibae";
+    const text = `I just created my Holibae in the ${labName} lab ✨ Create yours: ${rootUrl}`;
+    composeCast({ text, embeds: [imageUrl] });
   };
 
-  // 🎵 After mint → enter studio
   const handleGoToMusic = () => {
-    if (!hasMinted) {
-      setError("Please mint your Holibae first.");
-      return;
-    }
-
     const params = new URLSearchParams();
     if (fid) params.set("fid", fid);
     if (originHolder) params.set("originHolder", "1");
-    params.set("animal", animal);
+    if (hollyForm) params.set("hollyForm", hollyForm);
     if (imageUrl) params.set("imageUrl", imageUrl);
-    params.set("hasHolibae", "1");
-
     router.push(`/music?${params.toString()}`);
   };
 
+  const handleCreateAnother = () => {
+    setImageUrl(null);
+    setCharacterSummary(null);
+    setSavedOnce(false);
+    setError(null);
+    setStep(1);
+  };
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
-      <div className="w-full max-w-md space-y-4 text-center pb-6">
-        <h1 className="text-2xl font-bold mb-1">Create your Holibae</h1>
-        <p className="text-sm text-zinc-300">
-          Choose an animal, a holiday, and a color. We&apos;ll generate your
-          plush 3D Holibae and mint it on Base to unlock the music studio.
-        </p>
-
-        {/* Access / pricing info at top */}
-        <div className="mt-2 p-2 rounded-md bg-zinc-900 border border-zinc-700 text-xs text-left">
-          {originHolder ? (
-            <>
-              <p className="font-semibold text-emerald-400">
-                Access: OriginStory holder detected ✅
-              </p>
-              <p className="text-zinc-300 mt-1">
-                Your Holibae mints at a discounted rate (0.001 ETH in this
-                testnet contract).
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="font-semibold text-amber-400">
-                Access: No OriginStory token detected
-              </p>
-              <p className="text-zinc-300 mt-1">
-                Minting a Holibae costs 0.002 ETH (testnet). You need a minted
-                Holibae to enter the music studio.
-              </p>
-            </>
-          )}
-        </div>
-
-        {/* Step indicator */}
-        <div className="flex justify-center gap-2 mt-3">
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`h-2 w-8 rounded-full ${
-                step >= s ? "bg-amber-500" : "bg-zinc-700"
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* STEP 1 — ANIMAL */}
-        {step === 1 && (
-          <div className="space-y-3 mt-2">
-            <label className="block text-left text-sm">
-              1. What animal is your Holibae?
-            </label>
-            <input
-              className="w-full px-3 py-2 rounded-md bg-zinc-900 border border-zinc-700 text-sm"
-              placeholder="e.g. owl, fox, deer, bear"
-              value={animal}
-              onChange={(e) => setAnimal(e.target.value)}
-            />
-          </div>
-        )}
-
-        {/* STEP 2 — HOLIDAY */}
-        {step === 2 && (
-          <div className="space-y-3 mt-2">
-            <label className="block text-left text-sm">
-              2. Choose their holiday origin
-            </label>
-            <select
-              className="w-full px-3 py-2 rounded-md bg-zinc-900 border border-zinc-700 text-sm"
-              value={holiday}
-              onChange={(e) => setHoliday(e.target.value)}
-            >
-              <option value="">Select a holiday</option>
-              <option value="christmas">🎄 Christmas</option>
-              <option value="hanukkah">🕯 Hanukkah</option>
-              <option value="posadas">⭐ Las Posadas</option>
-              <option value="lucia">🌟 St. Lucia Day</option>
-              <option value="threeKings">👑 Three Kings</option>
-              <option value="kwanzaa">🖤❤️💚 Kwanzaa</option>
-              <option value="solstice">💫 Winter Solstice</option>
-              <option value="lunarNewYear">🧨 Lunar New Year</option>
-              <option value="newYear">🎉 Global New Year</option>
-              <option value="festivus">🧩 Festivus</option>
-              <option value="basemas">🔵 Basemas</option>
-            </select>
-          </div>
-        )}
-
-        {/* STEP 3 — COLOR */}
-        {step === 3 && (
-          <div className="space-y-3 mt-2">
-            <label className="block text-left text-sm">
-              3. What is the dominant color palette?
-            </label>
-            <input
-              className="w-full px-3 py-2 rounded-md bg-zinc-900 border border-zinc-700 text-sm"
-              placeholder="e.g. icy teal, ember gold, lunar red"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-            />
-          </div>
-        )}
-
-        {/* NAV BUTTONS */}
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={prevStep}
-            disabled={step === 1}
-            className="px-3 py-2 text-sm rounded-md border border-zinc-600 disabled:opacity-40"
-          >
-            Back
-          </button>
-
-          {step < 3 ? (
-            <button
-              onClick={nextStep}
-              className="px-3 py-2 text-sm rounded-md bg-amber-600 font-semibold"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              onClick={handleGenerateCharacter}
-              disabled={generating}
-              className="px-3 py-2 text-sm rounded-md bg-amber-600 font-semibold disabled:opacity-60"
-            >
-              {generating ? "Summoning your Holibae…" : "Generate Holibae"}
-            </button>
-          )}
-        </div>
-
-        {/* MINT BUTTON ABOVE PREVIEW */}
-        {imageUrl && (
-          <div className="mt-5 space-y-3">
-            <button
-              onClick={handleMintCharacter}
-              disabled={minting || hasMinted}
-              className="w-full py-2 rounded-lg bg-amber-600 font-semibold text-sm shadow-md disabled:opacity-60"
-            >
-              {minting
-                ? "Minting your Holibae…"
-                : hasMinted
-                ? "Holibae Minted ✅"
-                : originHolder
-                ? "Mint Holibae (Origin holder pricing)"
-                : "Mint Holibae (0.002 ETH)"}
-            </button>
-
-            <button
-              onClick={handleGoToMusic}
-              disabled={!hasMinted}
-              className="w-full py-2 rounded-lg bg-emerald-600 font-semibold text-sm shadow-md disabled:opacity-40"
-            >
-              Enter Music Studio
-            </button>
-
-            {/* PREVIEW IMAGE */}
-            <div className="relative w-full aspect-square rounded-xl overflow-hidden border border-zinc-700">
-              <Image
-                src={imageUrl}
-                alt="Generated Holibae"
-                fill
-                className="object-cover"
-              />
+    <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
+      <div className="w-full max-w-lg mx-auto space-y-8">
+        {!imageUrl ? (
+          <>
+            <header className="space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-4xl font-bold text-[var(--base-blue)] tracking-wide">
+                  Create your Holibae
+                </h1>
+                <div className="h-1 w-20 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
+              </div>
+              <div className="text-base text-[var(--muted)] space-y-2">
+                <p className="font-semibold text-[var(--foreground)]">Three simple steps:</p>
+                <ol className="list-decimal list-inside space-y-1 pl-2">
+                  <li>Choose a form (animal or character)</li>
+                  <li>Pick a holiday tradition</li>
+                  <li>Select a color palette</li>
+                </ol>
+              </div>
+            </header>
+  
+            <div className="flex justify-center gap-3">
+              {[1, 2, 3].map((s) => (
+                <div
+                  key={s}
+                  className={`h-2 flex-1 max-w-[80px] rounded-full transition-all ${
+                    step >= s ? "bg-[var(--base-blue)]" : "bg-[var(--silver-light)]"
+                  }`}
+                />
+              ))}
             </div>
-          </div>
-        )}
-
-        {/* Summary */}
-        {characterSummary && (
-          <div className="mt-4 p-3 rounded-md bg-zinc-900 border border-zinc-700 text-left text-sm whitespace-pre-line">
-            {characterSummary}
-          </div>
-        )}
-
-        {/* Errors */}
-        {error && (
-          <p className="mt-3 text-sm text-red-400 whitespace-pre-line">
-            {error}
-          </p>
+  
+            <section className="card p-8 space-y-6">
+              {step === 1 && (
+                <div className="space-y-3">
+                  <label className="block text-lg font-semibold text-[var(--base-blue)]">
+                    Step 1: Your Holibae Form
+                  </label>
+                  <textarea
+                    rows={4}
+                    className="w-full border-2 border-[var(--border)] rounded-xl px-4 py-3 bg-white text-base text-[var(--foreground)] placeholder:text-[var(--muted)] resize-none focus:outline-none focus:border-[var(--base-blue)] transition-colors"
+                    value={hollyForm}
+                    onChange={(e) => setHollyForm(e.target.value)}
+                    placeholder="e.g., penguin, porcelain doll, reindeer, robot"
+                  />
+                </div>
+              )}
+  
+              {step === 2 && (
+                <div className="space-y-3">
+                  <label className="block text-lg font-semibold text-[var(--base-blue)]">
+                    Step 2: Choose a Holiday
+                  </label>
+                  <div className="rounded-xl border-2 border-[var(--border)] bg-white p-3">
+                    <div className="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                      {HOLIDAY_OPTIONS.map((opt) => {
+                        const active = holidayKey === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => setHolidayKey(opt.id)}
+                            type="button"
+                            className={`w-full text-left rounded-lg px-4 py-3 border-2 text-sm transition-all ${
+                              active
+                                ? "bg-[var(--base-blue)] text-white border-[var(--base-blue)] shadow-md"
+                                : "bg-white border-[var(--border)] hover:border-[var(--base-blue)] hover:bg-[var(--silver-light)]"
+                            }`}
+                          >
+                            <div className="font-semibold text-base">{opt.label}</div>
+                            <div className={`text-xs mt-1 ${active ? "text-white/90" : "text-[var(--muted)]"}`}>
+                              {opt.blurb}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+  
+              {step === 3 && (
+                <div className="space-y-3">
+                  <label className="block text-lg font-semibold text-[var(--base-blue)]">
+                    Step 3: Choose a Color
+                  </label>
+                  <textarea
+                    rows={3}
+                    className="w-full border-2 border-[var(--border)] rounded-xl px-4 py-3 bg-white text-base text-[var(--foreground)] placeholder:text-[var(--muted)] resize-none focus:outline-none focus:border-[var(--base-blue)] transition-colors"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    placeholder="e.g., moss green, glittery gold, midnight blue"
+                  />
+                </div>
+              )}
+  
+              <div className="flex gap-3 pt-4">
+                <Button variant="secondary" onClick={prevStep} disabled={step === 1} className="flex-1">
+                  ← Back
+                </Button>
+  
+                {step < 3 ? (
+                  <Button onClick={nextStep} className="flex-1">
+                    Next →
+                  </Button>
+                ) : (
+                  <Button onClick={handleGenerateCharacter} disabled={generating} className="flex-1">
+                    {generating ? "✨ Summoning…" : "🎨 Create Holibae"}
+                  </Button>
+                )}
+              </div>
+  
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+            </section>
+          </>
+        ) : (
+          <>
+            <header className="flex justify-between items-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold text-[var(--base-blue)] tracking-wide">
+                  ❄️ Your Holibae
+                </h1>
+                <div className="h-1 w-16 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
+              </div>
+              <button 
+                onClick={handleCreateAnother} 
+                className="text-sm font-semibold text-[var(--silver)] hover:text-[var(--base-blue)] transition-colors underline"
+              >
+                Create another
+              </button>
+            </header>
+  
+            <section className="space-y-6">
+              <div className="card overflow-hidden p-4">
+                <Image
+                  src={imageUrl!}
+                  alt="Holibae"
+                  width={500}
+                  height={500}
+                  className="object-contain w-full rounded-lg"
+                  priority
+                />
+              </div>
+  
+              {characterSummary && (
+                <div className="card p-5">
+                  <p className="text-base text-[var(--foreground)] leading-relaxed">
+                    {characterSummary}
+                  </p>
+                </div>
+              )}
+  
+              <div className="space-y-3">
+                <Button onClick={handleSaveCharacter} disabled={saving}>
+                  {saving ? "Saving…" : savedOnce ? "✅ Holibae saved" : "💾 Save this Holibae"}
+                </Button>
+  
+                <Button onClick={handleShareCharacter} variant="secondary">
+                  📤 Share Holibae
+                </Button>
+  
+                <Button onClick={handleGoToMusic} className="bg-[var(--silver)] hover:bg-[var(--base-blue)]">
+                  🎶 Enter music studio
+                </Button>
+              </div>
+  
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+            </section>
+          </>
         )}
       </div>
     </main>
