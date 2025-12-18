@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useAccount } from "wagmi";
+import { moontime } from "./fonts"; 
+
 
 interface CheckAccessResponse {
   eligible: boolean;
@@ -99,43 +101,44 @@ export default function Home() {
   
         {/* BLUE CARD */}
         <div className="px-6 py-8 space-y-6 rounded-2xl bg-[#0000ff] text-[#3c8aff] border border-[#3c8aff] shadow-md">
-  
-          <h1 className="text-3xl font-bold font-oswald tracking-tight text-[#3c8aff]">
-            ❄️ Greetings ❄️
-          </h1>
-          <p className="text-sm leading-relaxed text-white">
+
+<h1
+  className={`${moontime.className} text-4xl tracking-tight text-[#3c8aff]`}
+>
+  ❄️ Greetings ❄️
+</h1>
+
+<p className="text-sm leading-relaxed text-white">
   Hold{" "}
   <span className="font-semibold text-white">
     at least {MIN_REQUIRED.toLocaleString()} $originstory
   </span>{" "}
-  to enter the lab.
+  to enter.
 </p>
 
-  
-          <button
-            onClick={handleEnter}
-            disabled={loading}
-            className="w-full py-5 rounded-xl bg-white text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? "Checking access…" : "Enter Holibae Labs"}
-          </button>
-  
-          {balance && (
-            <p className="text-xs text-white/90">
-              Your originstory balance:{" "}
-              <span className="font-semibold text-white">
-                {Number(balance).toLocaleString()}
-              </span>{" "}
-              (min required: {MIN_REQUIRED.toLocaleString()})
-            </p>
-          )}
-  
-          {error && (
-            <p className="text-sm text-red-300 whitespace-pre-line">
-              {error}
-            </p>
-          )}
-  
+<button
+  onClick={handleEnter}
+  disabled={loading}
+  className="w-full py-5 rounded-xl bg-white text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+>
+  {loading ? "Checking access…" : "Enter Holibae Labs"}
+</button>
+
+{balance && (
+  <p className="text-xs text-white/90">
+    Your originstory balance:{" "}
+    <span className="font-semibold text-white">
+      {Number(balance).toLocaleString()}
+    </span>{" "}
+    (min required: {MIN_REQUIRED.toLocaleString()})
+  </p>
+)}
+
+{error && (
+  <p className="text-sm text-red-300 whitespace-pre-line">
+    {error}
+  </p>
+)}
         </div> {/* end blue card */}
       </div>  {/* end container */}
     </main>   /* end main */

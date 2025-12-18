@@ -183,7 +183,7 @@ export default function MusicClient() {
 
           <div className="space-y-3">
             <h1 className="text-5xl font-bold text-[var(--base-blue)] tracking-wide">
-              ❄️ Compose your Holibae Anthem
+              ❄️ Your Holibae Anthem ❄️ 
             </h1>
             <div className="h-1 w-24 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
           </div>
@@ -224,7 +224,7 @@ export default function MusicClient() {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-[var(--foreground)]">
-                  Music Style
+                 Choose Music Style
                 </label>
                 <select
                   value={style}
@@ -326,9 +326,7 @@ export default function MusicClient() {
               </div>
             ) : (
               <div className="bg-[var(--silver-light)] p-6 rounded-xl text-center">
-                <p className="text-base text-[var(--muted)]">
-                  Generate a jolly anthem to save and share 🎶
-                </p>
+      
               </div>
             )}
           </section>

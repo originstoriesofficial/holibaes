@@ -103,14 +103,14 @@ export default function DashboardClient() {
               onClick={() => goTo("/create")}
               className="btn-primary w-full py-5 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Create a Holibae
+              Create your Holibae
             </button>
 
             <button
               onClick={() => goTo("/music")}
               className="w-full py-5 rounded-xl bg-[#3c8aff] text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Enter Music Studio
+               💿 Music Studio
             </button>
           </div>
         </div>
