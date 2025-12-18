@@ -383,8 +383,8 @@ export default function MusicClient() {
               </div>
             )}
 
-            {/* save to IPFS */}
-            {!ipfsUrl && audioBlob && (
+               {/* save to IPFS */}
+               {!ipfsUrl && audioBlob && (
               <Button
                 onClick={handleSaveSong}
                 disabled={saving}
@@ -395,8 +395,8 @@ export default function MusicClient() {
               </Button>
             )}
 
-            {/* create video */}
-            {ipfsUrl && (
+            {/* create video – only after song is saved, before video exists */}
+            {ipfsUrl && !videoUrl && (
               <Button
                 onClick={createAndPollVideo}
                 disabled={loading}
@@ -406,26 +406,25 @@ export default function MusicClient() {
               </Button>
             )}
 
-            {/* final video */}
+            {/* final video + share – only after video is ready */}
             {videoUrl && (
-              <a
-                href={videoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="block w-full text-center py-3 rounded-lg bg-[#3c8aff] text-white font-semibold shadow hover:scale-105 transition"
-              >
-                ▶️ Watch Holibae Song Video
-              </a>
-            )}
+              <>
+                <a
+                  href={videoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block w-full text-center py-3 rounded-lg bg-[#3c8aff] text-white font-semibold shadow hover:scale-105 transition"
+                >
+                  ▶️ Watch Holibae Song Video
+                </a>
 
-            {/* share */}
-            {(videoUrl || imageUrlFromCreate) && (
-              <ShareSongButton
-                prompt={prompt || DEFAULT_PROMPT_SUGGESTION}
-                style={style}
-                holibaeImageUrl={imageUrlFromCreate || undefined}
-                videoUrl={videoUrl || undefined}
-              />
+                <ShareSongButton
+                  prompt={prompt || DEFAULT_PROMPT_SUGGESTION}
+                  style={style}
+                  holibaeImageUrl={imageUrlFromCreate || undefined}
+                  videoUrl={videoUrl}
+                />
+              </>
             )}
 
             {error && !loading && (
