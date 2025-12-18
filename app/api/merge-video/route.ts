@@ -1,12 +1,41 @@
 // app/api/merge-video/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
+import { Transloadit } from "transloadit";
 
 export const runtime = "nodejs";
 
+const KEY = process.env.TRANSLOADIT_KEY;
+const SECRET = process.env.TRANSLOADIT_SECRET;
+const TEMPLATE_ID = process.env.TRANSLOADIT_TEMPLATE_ID;
+
+// We create the client once (cold start) – safe in serverless
+let transloadit: Transloadit | null = null;
+if (KEY && SECRET) {
+  transloadit = new Transloadit({
+    authKey: KEY,
+    authSecret: SECRET,
+  });
+} else {
+  console.warn(
+    "[merge-video] TRANSLOADIT_KEY or TRANSLOADIT_SECRET missing in env"
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { audioUrl, imageUrl, address, fid } = await req.json();
+    if (!transloadit) {
+      return NextResponse.json(
+        { error: "Transloadit not configured on server" },
+        { status: 500 }
+      );
+    }
+
+    const { audioUrl, imageUrl, address, fid } = (await req.json()) as {
+      audioUrl?: string;
+      imageUrl?: string;
+      address?: string;
+      fid?: string | null;
+    };
 
     if (!audioUrl || !imageUrl || !address) {
       return NextResponse.json(
@@ -15,75 +44,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const KEY = process.env.TRANSLOADIT_KEY;
-    const SECRET = process.env.TRANSLOADIT_SECRET;
-    const TEMPLATE_ID = process.env.TRANSLOADIT_TEMPLATE_ID;
-
-    if (!KEY || !SECRET || !TEMPLATE_ID) {
-      console.error("Missing TRANSLOADIT_* env vars");
+    if (!TEMPLATE_ID) {
       return NextResponse.json(
-        { error: "Server misconfigured (Transloadit env vars missing)" },
+        { error: "TRANSLOADIT_TEMPLATE_ID not configured" },
         { status: 500 }
       );
     }
 
-    // params object must match what your template expects
-    const params = {
-      auth: {
-        key: KEY,
-        // 10 min lifetime
-        expires: Math.floor(Date.now() / 1000) + 10 * 60,
+    // Create assembly using the template & our two URLs
+    const status = (await transloadit.createAssembly({
+      params: {
+        template_id: TEMPLATE_ID,
+        fields: {
+          imageUrl,
+          audioUrl,
+          walletAddress: address,
+          fid: fid ?? "",
+        },
       },
-      template_id: TEMPLATE_ID,
-      fields: {
-        image_url: imageUrl,
-        audio_url: audioUrl,
-        walletAddress: address,
-        fid: fid ?? "",
-      },
-    };
+      // Wait until finished so we can return the final video URL
+      waitForCompletion: true,
+    })) as any;
 
-    const paramsJson = JSON.stringify(params);
+    // We marked "encode_video" with result: true in the template
+    const videoResult =
+      status?.results?.encode_video?.[0] ??
+      status?.results?.merged?.[0] ??
+      status?.results?.export_video?.[0];
 
-    // HMAC-SHA1 signature
-    const signature = crypto
-      .createHmac("sha1", SECRET)
-      .update(paramsJson)
-      .digest("hex");
+    const videoUrl: string | undefined =
+      videoResult?.ssl_url || videoResult?.url;
 
-    const body = new URLSearchParams();
-    body.set("params", paramsJson);
-    body.set("signature", signature);
-
-    const tlRes = await fetch("https://api2.transloadit.com/assemblies", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body,
-    });
-
-    const data = await tlRes.json();
-
-    if (!tlRes.ok) {
-      console.error("Transloadit assembly error:", data);
+    if (!videoUrl) {
+      console.error("Transloadit status had no usable video result:", status);
       return NextResponse.json(
-        { error: "Transloadit assembly failed", details: data },
+        { error: "No videoUrl found in Transloadit results" },
         { status: 502 }
       );
     }
 
-    const assemblyId = data.assembly_id as string;
-    const assemblyUrl = data.assembly_url as string;
-
-    return NextResponse.json(
-      { assemblyId, assemblyUrl },
-      { status: 200 }
-    );
+    return NextResponse.json({ videoUrl }, { status: 200 });
   } catch (err) {
-    console.error("❌ merge-video route error:", err);
+    console.error("❌ /api/merge-video error", err);
     return NextResponse.json(
-      { error: "Internal error creating video" },
+      { error: "Internal error merging audio + image" },
       { status: 500 }
     );
   }
