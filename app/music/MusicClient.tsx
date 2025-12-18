@@ -8,9 +8,26 @@ import { ShareSongButton } from "../components/ShareSongButton";
 import { Button } from "../components/Button";
 
 const styles = [
-  "Lo-fi", "Jazz", "Ambient", "Orchestral", "Fantasy", "Cyberpunk", "Retro", "Funk",
-  "Dream Pop", "Gospel", "Neo Soul", "Future Bass", "Ballad", "Pop", "Synthwave",
-  "Vaporwave", "Acoustic", "Chillwave", "Shoegaze", "Trance",
+  "Lo-fi",
+  "Jazz",
+  "Ambient",
+  "Orchestral",
+  "Fantasy",
+  "Cyberpunk",
+  "Retro",
+  "Funk",
+  "Dream Pop",
+  "Gospel",
+  "Neo Soul",
+  "Future Bass",
+  "Ballad",
+  "Pop",
+  "Synthwave",
+  "Vaporwave",
+  "Acoustic",
+  "Chillwave",
+  "Shoegaze",
+  "Trance",
 ];
 
 const DEFAULT_PROMPT_SUGGESTION = "a cozy winter holiday vibe with sparkles";
@@ -36,16 +53,17 @@ export default function MusicClient() {
   const [prompt, setPrompt] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [style, setStyle] = useState(styles[0]);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null); // used for playback/download
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null); // raw audio from compose
-  const [ipfsUrl, setIpfsUrl] = useState<string | null>(null); // pinned URL for sharing
+  const [audioUrl, setAudioUrl] = useState<string | null>(null); // for playback/download
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null); // raw audio
+  const [ipfsUrl, setIpfsUrl] = useState<string | null>(null); // pinned URL
   const [ipfsHash, setIpfsHash] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fid = searchParams.get("fid");
-  const formFromCreate = searchParams.get("hollyForm") ?? searchParams.get("animal");
+  const formFromCreate =
+    searchParams.get("hollyForm") ?? searchParams.get("animal");
   const imageUrlFromCreate = searchParams.get("imageUrl");
   const originHolder = searchParams.get("originHolder") === "1";
 
@@ -65,10 +83,16 @@ export default function MusicClient() {
     setIpfsHash(null);
 
     try {
-      const basePrompt = (prompt && prompt.trim()) || DEFAULT_PROMPT_SUGGESTION;
-      const fullPrompt = `${basePrompt} in the style of ${style}.${
-        lyrics ? " Lyrics: " + lyrics : ""
-      }`;
+      const basePrompt =
+        (prompt && prompt.trim()) || DEFAULT_PROMPT_SUGGESTION;
+
+      let fullPrompt = `${basePrompt} in the style of ${style}.`;
+
+      if (lyrics.trim()) {
+        fullPrompt += ` Use these lyrics: ${lyrics.trim()}.`;
+      } else {
+        fullPrompt += ` Instrumental only, no vocals, no singing, no choir.`;
+      }
 
       const res = await fetch("/api/compose", {
         method: "POST",
@@ -130,16 +154,12 @@ export default function MusicClient() {
         throw new Error("Could not save song to IPFS.");
       }
 
-      const data = await res.json();
-      const { gatewayUrl, ipfsHash: hash } = data as {
-        gatewayUrl: string;
-        ipfsHash: string;
-      };
+      const data = (await res.json()) as { cid: string; url: string };
 
-      setIpfsUrl(gatewayUrl);
-      setIpfsHash(hash);
+      setIpfsUrl(data.url);
+      setIpfsHash(data.cid);
 
-      // Optional: also log in localStorage for quick local history
+      // optional local history
       if (typeof window !== "undefined") {
         const existingRaw = window.localStorage.getItem(storageKey);
         const existing: SavedSong[] = existingRaw ? JSON.parse(existingRaw) : [];
@@ -150,7 +170,7 @@ export default function MusicClient() {
           prompt: prompt || DEFAULT_PROMPT_SUGGESTION,
           lyrics,
           style,
-          ipfsHash: hash,
+          ipfsHash: data.cid,
         };
 
         const next = [entry, ...existing].slice(0, 50);
@@ -164,7 +184,8 @@ export default function MusicClient() {
     }
   };
 
-  const effectiveDownloadUrl = ipfsUrl || audioUrl || undefined;
+  // Download from blob if present, otherwise IPFS URL
+  const effectiveDownloadUrl = audioUrl || ipfsUrl || undefined;
 
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
@@ -183,14 +204,14 @@ export default function MusicClient() {
 
           <div className="space-y-3">
             <h1 className="text-5xl font-bold text-[var(--base-blue)] tracking-wide">
-              ❄️ Your Holibae Anthem ❄️ 
+              ❄️ Your Holibae Anthem ❄️
             </h1>
             <div className="h-1 w-24 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
           </div>
 
           <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
-            Describe your Holibae&apos;s holiday mood. We&apos;ll create a magical 60-second
-            seasonal anthem just for them.
+            Describe your Holibae&apos;s holiday mood. We&apos;ll create a magical
+            60-second seasonal anthem just for them.
           </p>
         </header>
 
@@ -224,7 +245,7 @@ export default function MusicClient() {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-[var(--foreground)]">
-                 Choose Music Style
+                  Choose Music Style
                 </label>
                 <select
                   value={style}
@@ -253,7 +274,9 @@ export default function MusicClient() {
 
           {/* HOLIBAE PREVIEW */}
           <section className="card p-8 space-y-6">
-            <h2 className="text-lg font-bold text-[var(--base-blue)]">❄️ Your Holibae</h2>
+            <h2 className="text-lg font-bold text-[var(--base-blue)]">
+              ❄️ Your Holibae
+            </h2>
 
             <div className="flex items-center gap-4">
               {imageUrlFromCreate ? (
@@ -293,15 +316,23 @@ export default function MusicClient() {
             {audioUrl ? (
               <div className="space-y-4">
                 <div className="bg-[var(--silver-light)] p-4 rounded-xl">
-                  <audio controls src={effectiveDownloadUrl} className="w-full" />
+                  <audio
+                    controls
+                    src={effectiveDownloadUrl}
+                    className="w-full"
+                  />
                 </div>
 
                 <div className="space-y-3">
-                  <Button onClick={handleSaveSong} disabled={saving} variant="secondary">
+                  <Button
+                    onClick={handleSaveSong}
+                    disabled={saving}
+                    variant="secondary"
+                  >
                     {saving
                       ? "Saving…"
                       : ipfsUrl
-                      ? "✅ Jingle saved onchain storage"
+                      ? "✅ Jingle saved to IPFS"
                       : "💾 Save this jingle"}
                   </Button>
 
@@ -326,7 +357,9 @@ export default function MusicClient() {
               </div>
             ) : (
               <div className="bg-[var(--silver-light)] p-6 rounded-xl text-center">
-      
+                <p className="text-base text-[var(--muted)]">
+                  Generate a jolly anthem to save and share 🎶
+                </p>
               </div>
             )}
           </section>

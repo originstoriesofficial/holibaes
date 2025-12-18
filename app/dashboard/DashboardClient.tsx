@@ -68,51 +68,48 @@ export default function DashboardClient() {
         </div>
 
         <div className="card px-8 py-10 space-y-8">
-          <div className="space-y-3">
-            <h1 className="text-5xl font-bold font-oswald tracking-wide text-[var(--foreground)] leading-tight">
-              ❄️ Holibae Labs
-            </h1>
-            <div className="h-1 w-20 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] mx-auto rounded-full" />
-          </div>
 
-          {originHolder ? (
-            <div className="space-y-2">
-              <p
-                className={`${moontime.className} text-3xl text-[var(--base-blue)] leading-tight`}
-              >
-                Welcome originator ✨
-              </p>
-              <p className="text-base leading-relaxed text-[var(--muted)]">
-                The Holibae Creator + Music Studio is unlocked.
-              </p>
-            </div>
-          ) : (
-            <div className="bg-[var(--silver-light)] rounded-xl p-4 border-l-4 border-[var(--base-blue)]">
-              <p className="text-base leading-relaxed text-[var(--foreground)]">
-                You&apos;ll need at least{" "}
-                <span className="font-bold text-[var(--base-blue)] text-lg">
-                  3.5k $ORIGINSTORY
-                </span>{" "}
-                to unlock all Holibae features.
-              </p>
-            </div>
-          )}
+{originHolder ? (
+  <div className="space-y-4 text-center">
 
-          <div className="flex flex-col gap-4 pt-4">
-            <button
-              onClick={() => goTo("/create")}
-              className="btn-primary w-full py-5 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              Create your Holibae
-            </button>
+    {/* ⭐ main header in moontime font */}
+    <h1
+      className={`${moontime.className} text-5xl text-[var(--base-blue)] leading-tight`}
+    >
+      ⭐ Welcome originator
+    </h1>
 
-            <button
-              onClick={() => goTo("/music")}
-              className="w-full py-5 rounded-xl bg-[#3c8aff] text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-               💿 Music Studio
-            </button>
-          </div>
+    <p className="text-base leading-relaxed text-[var(--muted)]">
+      The Holibae Creator + Music Studio is unlocked.
+    </p>
+  </div>
+) : (
+  <div className="bg-[var(--silver-light)] rounded-xl p-4 border-l-4 border-[var(--base-blue)]">
+    <p className="text-base leading-relaxed text-[var(--foreground)]">
+      You’ll need at least{" "}
+      <span className="font-bold text-[var(--base-blue)] text-lg">
+        3.5k $ORIGINSTORY
+      </span>{" "}
+      to unlock all Holibae features.
+    </p>
+  </div>
+)}
+
+<div className="flex flex-col gap-4 pt-6">
+  <button
+    onClick={() => goTo("/create")}
+    className="btn-primary w-full py-5 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+  >
+    Create a Holibae
+  </button>
+
+  <button
+    onClick={() => goTo("/music")}
+    className="w-full py-5 rounded-xl bg-[#3c8aff] text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+  >
+    Enter Music Studio
+  </button>
+</div>
         </div>
       </div>
     </main>

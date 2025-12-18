@@ -9,7 +9,7 @@ export interface ShareSongButtonProps {
   prompt: string;
   characterImageUrl?: string | null;
   characterForm?: string | null;
-  audioUrl?: string | null; // should be an HTTP/IPFS URL
+  audioUrl?: string | null; // use IPFS / gateway URL here
 }
 
 export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
@@ -22,21 +22,19 @@ export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
   const { composeCast } = useComposeCast();
 
   const handleShare = () => {
-    if (!audioUrl && !characterImageUrl) return;
-
     const characterInfo = characterForm
       ? ` featuring my ${characterForm} Holibae`
       : "";
-    const text = `🎶 Just created a ${style} holiday anthem${characterInfo}! "${prompt}" ✨\n\nCreate yours at Holibae Labs!`;
+
+    const songLink = audioUrl ? `\n\nListen here: ${audioUrl}` : "";
+
+    const text = `🎶 Just created a ${style} holiday anthem${characterInfo}! "${prompt}" ✨${songLink}\n\nCreate yours at Holibae Labs!`;
 
     let embeds: [] | [string] | [string, string] | undefined;
 
-    if (characterImageUrl && audioUrl) {
-      embeds = [characterImageUrl, audioUrl];
-    } else if (characterImageUrl) {
+    // only embed the Holibae image; audio is a link in text
+    if (characterImageUrl) {
       embeds = [characterImageUrl];
-    } else if (audioUrl) {
-      embeds = [audioUrl];
     } else {
       embeds = undefined;
     }

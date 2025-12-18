@@ -387,7 +387,7 @@ export async function POST(req: Request) {
     // 🔑 FINAL PROMPT – colorPhrase is still the main color driver
     const prompt = `
 ${STYLE_PLUSH}
-A highly detailed and realistic plush ${hollyForm} character with ${colorPhrase} accents throughout, designed as a seasonal ${holidayName} collectible.
+A highly detailed and realistic plush ${hollyForm} character with ${colorPhrase} accents throughout, designed as a seasonal ${holidayName} traditional holiday collectible. Gentle diffusion glow, ${holidayName} elements in the background, premium toy photography lighting, hyper-detailed 3D render
 
 The ${hollyForm} is wearing ${outfit}, clearly inspired by ${holidayName} traditions, with distinctly seasonal details in the clothing and accessories.
 
@@ -402,7 +402,7 @@ Lighting is soft and cinematic, with glowing ${colorPhrase} highlights in the en
       input: {
         prompt,
         image_size: "square_hd",
-        guidance_scale: 6, // a bit higher so it listens to the prompt more
+        guidance_scale: 10, // a bit higher so it listens to the prompt more
         enable_safety_checker: true,
         num_images: 1,
       },

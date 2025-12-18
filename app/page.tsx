@@ -13,7 +13,7 @@ interface CheckAccessResponse {
   minRequired?: number;
 }
 
-const MIN_REQUIRED = 3500;
+const MIN_REQUIRED = 10000;
 
 export default function Home() {
   const router = useRouter();
@@ -119,10 +119,20 @@ export default function Home() {
 <button
   onClick={handleEnter}
   disabled={loading}
-  className="w-full py-5 rounded-xl bg-white text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+  className="
+    w-full py-5 rounded-xl 
+    bg-[#0f7b3e]          /* deep green */
+    text-white           
+    text-lg font-semibold 
+    shadow-lg 
+    hover:scale-105 hover:shadow-xl 
+    transition-all 
+    disabled:opacity-60 disabled:cursor-not-allowed
+  "
 >
   {loading ? "Checking access…" : "Enter Holibae Labs"}
 </button>
+
 
 {balance && (
   <p className="text-xs text-white/90">
