@@ -1,49 +1,58 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from "next/server";
+
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, music_length_ms = 60000, output_format = 'mp3_44100_128' } = await req.json()
+    const { prompt, music_length_ms } = await req.json();
 
     if (!prompt) {
-      return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })
+      return NextResponse.json(
+        { error: "Missing prompt" },
+        { status: 400 }
+      );
     }
 
-    const apiKey = process.env.MUSIC_API_KEY
-    if (!apiKey) {
-      console.error('Missing ELEVENLABS_API_KEY in environment variables')
-      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+    const falRes = await fetch(
+      "https://api.fal.ai/music/generate",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.FAL_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt,
+          duration_ms: music_length_ms ?? 60000,
+          format: "mp3",
+        }),
+      }
+    );
+
+    if (!falRes.ok) {
+      const txt = await falRes.text();
+      console.error("compose failed:", txt);
+      return NextResponse.json(
+        { error: "music failed", details: txt },
+        { status: 502 }
+      );
     }
 
-    const response = await fetch('https://api.elevenlabs.io/v1/music/generate', {
-      method: 'POST',
+    // stream / buffer MP3
+    const arrayBuffer = await falRes.arrayBuffer();
+    const uint8 = new Uint8Array(arrayBuffer);
+
+    return new NextResponse(uint8, {
+      status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'xi-api-key': apiKey,
+        "Content-Type": "audio/mpeg",
       },
-      body: JSON.stringify({
-        prompt,
-        music_length_ms,
-        output_format,
-      }),
-    })
-
-    if (!response.ok) {
-      const errText = await response.text()
-      console.error('ElevenLabs music generation failed:', errText)
-      return NextResponse.json({ error: 'Failed to generate music', details: errText }, { status: 500 })
-    }
-
-    const audioBuffer = await response.arrayBuffer()
-
-    return new NextResponse(audioBuffer, {
-      headers: {
-        'Content-Type': 'audio/mpeg',
-        'Content-Disposition': 'inline; filename="monk-anthem.mp3"',
-      },
-    })
+    });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Internal Server Error'
-    console.error('Compose API Error:', message)
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error("compose error:", err);
+    return NextResponse.json(
+      { error: "server compose failed" },
+      { status: 500 }
+    );
   }
 }
