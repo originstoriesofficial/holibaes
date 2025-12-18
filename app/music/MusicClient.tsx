@@ -424,7 +424,7 @@ export default function MusicClient() {
                 variant="secondary"
                 className="w-full"
               >
-                {saving ? "Saving…" : "💾 Save to IPFS"}
+                {saving ? "Saving…" : "💾 Save/Create Video/Share}
               </Button>
             )}
 
