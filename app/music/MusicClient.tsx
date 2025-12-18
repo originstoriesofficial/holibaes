@@ -424,7 +424,7 @@ export default function MusicClient() {
                 variant="secondary"
                 className="w-full"
               >
-                {saving ? "Saving…" : "💾 Save/Create Video/Share}
+                {saving ? "Saving…" : "💾 Save & Share"}
               </Button>
             )}
 
@@ -435,7 +435,7 @@ export default function MusicClient() {
                 disabled={loading}
                 className="w-full text-lg"
               >
-                {loading ? "🎥 Rendering Video…" : "📀 Create Video"}
+                {loading ? "🎥 Rendering Video…" : "📀 Create Video to Share"}
               </Button>
             )}
 
