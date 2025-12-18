@@ -277,8 +277,7 @@ export default function MusicClient() {
               ❄️ Your Holibae Anthem ❄️
             </h1>
             <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
-              Describe your Holibae&apos;s holiday mood. We&apos;ll create a magical
-              60-second seasonal anthem just for them.
+              Create your Holibae&apos;s jingle.
             </p>
           </div>
         </header>
