@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { sdk } from "@farcaster/miniapp-sdk";
 import Image from "next/image";
+import { moontime } from "../fonts"; // 👈 make sure path is correct
 
 export default function DashboardClient() {
   const router = useRouter();
@@ -12,7 +13,6 @@ export default function DashboardClient() {
 
   const originHolder = searchParams.get("originHolder") === "1";
 
-  // ✅ Force light mode
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("light");
@@ -54,10 +54,9 @@ export default function DashboardClient() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start bg-[var(--bg)] text-[var(--foreground)] px-4 py-10 font-sans">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-md text-center">
 
-        {/* 🎁 Hero image at top */}
         <div className="mb-6 overflow-hidden rounded-2xl shadow-lg">
           <Image
             src="/holibae-hero.png"
@@ -69,7 +68,6 @@ export default function DashboardClient() {
           />
         </div>
 
-        {/* 🔵 Base Blue + White Card */}
         <div className="card px-8 py-10 space-y-8">
           <div className="space-y-3">
             <h1 className="text-5xl font-bold font-oswald tracking-wide text-[var(--foreground)] leading-tight">
@@ -80,8 +78,11 @@ export default function DashboardClient() {
 
           {originHolder ? (
             <div className="space-y-2">
-              <p className="text-lg font-semibold text-[var(--base-blue)]">
-                Welcome, originator ✨
+              {/* new script font + removed comma */}
+              <p
+                className={`${moontime.className} text-3xl text-[var(--base-blue)] leading-tight`}
+              >
+                Welcome originator ✨
               </p>
               <p className="text-base leading-relaxed text-[var(--muted)]">
                 The Holibae Creator + Music Studio is unlocked.
@@ -91,7 +92,9 @@ export default function DashboardClient() {
             <div className="bg-[var(--silver-light)] rounded-xl p-4 border-l-4 border-[var(--base-blue)]">
               <p className="text-base leading-relaxed text-[var(--foreground)]">
                 You'll need at least{" "}
-                <span className="font-bold text-[var(--base-blue)] text-lg">3.5k $ORIGINSTORY</span>{" "}
+                <span className="font-bold text-[var(--base-blue)] text-lg">
+                  3.5k $ORIGINSTORY
+                </span>{" "}
                 to unlock all Holibae features.
               </p>
             </div>
@@ -100,16 +103,16 @@ export default function DashboardClient() {
           <div className="flex flex-col gap-4 pt-4">
             <button
               onClick={() => goTo("/create")}
-              className="btn-primary w-full"
+              className="btn-primary w-full py-5 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              🎨 Create a Holibae
+              Create a Holibae
             </button>
 
             <button
               onClick={() => goTo("/music")}
-              className="bg-[var(--silver)] text-white py-4 min-h-[56px] rounded-xl text-lg font-semibold shadow hover:bg-[var(--base-blue)] hover:-translate-y-0.5 hover:shadow-lg transition-all w-full"
+              className="w-full py-5 rounded-xl bg-[#3c8aff] text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              🎶 Enter Music Studio
+              Enter Music Studio
             </button>
           </div>
         </div>

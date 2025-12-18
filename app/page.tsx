@@ -87,40 +87,41 @@ export default function Home() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-[var(--bg,#f7e8d0)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-md text-center">
-
-        {/* 🎁 HERO IMAGE */}
-        <div className="mb-4 overflow-hidden rounded-2xl shadow bg-[#f7e8d0]">
+  
+        {/* HERO */}
+        <div className="mb-4 overflow-hidden rounded-2xl shadow bg-[var(--bg,#f7e8d0)]">
           <img
             src="/holibae-hero.png"
             alt="Holibae Hero"
             className="w-full h-[170px] object-cover"
           />
         </div>
-
-        {/* 🟣 PURPLE + GOLD CARD */}
-        <div className="px-6 py-8 space-y-6 rounded-2xl bg-black text-white border border-purple-900 shadow-md">
-          <h1 className="text-3xl font-bold font-oswald tracking-tight">
-            ❄️ Holibae Labs ❄️
+  
+        {/* BLUE CARD */}
+        <div className="px-6 py-8 space-y-6 rounded-2xl bg-[#0000ff] text-[#3c8aff] border border-[#3c8aff] shadow-md">
+  
+          <h1 className="text-3xl font-bold font-oswald tracking-tight text-[#3c8aff]">
+            ❄️ Greetings ❄️
           </h1>
+          <p className="text-sm leading-relaxed text-white">
+  Hold{" "}
+  <span className="font-semibold text-white">
+    at least {MIN_REQUIRED.toLocaleString()} $originstory
+  </span>{" "}
+  to enter the lab.
+</p>
 
-          <p className="text-sm leading-relaxed text-white/80">
-            Hold{" "}
-            <span className="font-semibold text-[#f5c95d]">
-              at least {MIN_REQUIRED.toLocaleString()} $originstory
-            </span>{" "}
-            to enter the lab.
-          </p>
-
+  
           <button
             onClick={handleEnter}
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-[#ce19e6] text-[#f5c95d] font-semibold shadow hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full py-5 rounded-xl bg-white text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Checking access…" : "Enter Holibae Labs"}
           </button>
-
+  
           {balance && (
-            <p className="text-xs text-white/70">
+            <p className="text-xs text-white/90">
               Your originstory balance:{" "}
               <span className="font-semibold text-white">
                 {Number(balance).toLocaleString()}
@@ -128,12 +129,15 @@ export default function Home() {
               (min required: {MIN_REQUIRED.toLocaleString()})
             </p>
           )}
-
+  
           {error && (
-            <p className="text-sm text-red-500 whitespace-pre-line">{error}</p>
+            <p className="text-sm text-red-300 whitespace-pre-line">
+              {error}
+            </p>
           )}
-        </div>
-      </div>
-    </main>
+  
+        </div> {/* end blue card */}
+      </div>  {/* end container */}
+    </main>   /* end main */
   );
 }

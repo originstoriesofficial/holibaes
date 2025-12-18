@@ -24,8 +24,8 @@ const HOLIDAY_OPTIONS = [
   { id: "solstice", label: "💫 Winter Solstice / Yule", blurb: "Celestial motifs, stone textures, witchy energy." },
   { id: "lunarNewYear", label: "🧨 Lunar New Year Preview", blurb: "Red and gold lanterns, dragons, fireworks." },
   { id: "newYear", label: "🎉 Global New Year", blurb: "Metallic tones, confetti, skyline countdown." },
-  { id: "sinterklaas", label: "🎁 Sinterklaas", blurb: "Red robes, golden mitre, steamboat arrival, candy treats." },
-  { id: "basemas", label: "🔵 Blue Basemas (Base)", blurb: "Base blue, onchain glyphs, futuristic holiday." },
+  { id: "sinterklaas", label: "🎁 Sinterklaas", blurb: "Dutch Traditions, Red robes, golden mitre, steamboat arrival, candy treats." },
+  { id: "basemas", label: "🔵 Blue Basemas (Base)", blurb: "Base blue, futuristic, monochromatic." },
 ] as const;
 
 export default function CreateClient({ fid, originHolder }: CreateClientProps) {
@@ -164,21 +164,20 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
+<main className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-lg mx-auto space-y-8">
         {!imageUrl ? (
           <>
             <header className="space-y-4">
               <div className="space-y-2">
                 <h1 className="text-4xl font-bold text-[var(--base-blue)] tracking-wide">
-                  Create your Holibae
+                  Create your Holibae 🪄
                 </h1>
                 <div className="h-1 w-20 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
               </div>
               <div className="text-base text-[var(--muted)] space-y-2">
-                <p className="font-semibold text-[var(--foreground)]">Three simple steps:</p>
                 <ol className="list-decimal list-inside space-y-1 pl-2">
-                  <li>Choose a form (animal or character)</li>
+                  <li>Choose a form (animal or doll)</li>
                   <li>Pick a holiday tradition</li>
                   <li>Select a color palette</li>
                 </ol>
@@ -200,7 +199,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
               {step === 1 && (
                 <div className="space-y-3">
                   <label className="block text-lg font-semibold text-[var(--base-blue)]">
-                    Step 1: Your Holibae Form
+                  ⬇️ Your Holibae Form
                   </label>
                   <textarea
                     rows={4}
@@ -215,7 +214,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
               {step === 2 && (
                 <div className="space-y-3">
                   <label className="block text-lg font-semibold text-[var(--base-blue)]">
-                    Step 2: Choose a Holiday
+                  Choose a Holiday
                   </label>
                   <div className="rounded-xl border-2 border-[var(--border)] bg-white p-3">
                     <div className="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
@@ -247,7 +246,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
               {step === 3 && (
                 <div className="space-y-3">
                   <label className="block text-lg font-semibold text-[var(--base-blue)]">
-                    Step 3: Choose a Color
+                  Choose a Color
                   </label>
                   <textarea
                     rows={3}
@@ -270,7 +269,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   </Button>
                 ) : (
                   <Button onClick={handleGenerateCharacter} disabled={generating} className="flex-1">
-                    {generating ? "✨ Summoning…" : "🎨 Create Holibae"}
+                    {generating ? "✨ Summoning…" : "Summon"}
                   </Button>
                 )}
               </div>
