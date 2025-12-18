@@ -62,8 +62,8 @@ export default function MusicClient() {
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(false);   // for song + video
-  const [saving, setSaving] = useState(false);     // for IPFS
+  const [loading, setLoading] = useState(false); // song + video
+  const [saving, setSaving] = useState(false); // IPFS
   const [error, setError] = useState<string | null>(null);
 
   const fid = searchParams.get("fid");
@@ -162,9 +162,23 @@ export default function MusicClient() {
         throw new Error("Pinning failed.");
       }
 
-      const data = (await res.json()) as { cid: string; url: string };
-      setIpfsUrl(data.url);
-      setIpfsHash(data.cid);
+      // handle both the older { cid, url } shape and the newer { ipfsHash, gatewayUrl }
+      const data = (await res.json()) as {
+        cid?: string;
+        url?: string;
+        ipfsHash?: string;
+        gatewayUrl?: string;
+      };
+
+      const cid = data.ipfsHash || data.cid;
+      const url = data.gatewayUrl || data.url;
+
+      if (!cid || !url) {
+        throw new Error("Pinata response missing CID or URL");
+      }
+
+      setIpfsUrl(url);
+      setIpfsHash(cid);
 
       // local history
       if (typeof window !== "undefined") {
@@ -179,7 +193,7 @@ export default function MusicClient() {
           prompt: prompt || DEFAULT_PROMPT_SUGGESTION,
           lyrics,
           style,
-          ipfsHash: data.cid,
+          ipfsHash: cid,
         };
 
         const next = [entry, ...existing].slice(0, 50);
@@ -193,8 +207,8 @@ export default function MusicClient() {
     }
   };
 
-  // -------------------- CREATE VIDEO (Livepeer) --------------------
-  const createAndPollVideo = async () => {
+  // -------------------- CREATE VIDEO (Transloadit template) --------------------
+  const createAndMergeVideo = async () => {
     if (!ipfsUrl) {
       setError("Save song first.");
       return;
@@ -209,7 +223,7 @@ export default function MusicClient() {
     setError(null);
 
     try {
-      const createRes = await fetch("/api/create-video", {
+      const res = await fetch("/api/merge-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -220,36 +234,21 @@ export default function MusicClient() {
         }),
       });
 
-      const { jobId, error } = await createRes.json();
-      if (!jobId) {
-        setError(error || "Livepeer job failed.");
-        setLoading(false);
-        return;
+      if (!res.ok) {
+        console.error("merge-video failed:", await res.text());
+        throw new Error("Video merge failed.");
       }
 
-      const poll = async () => {
-        const statusRes = await fetch(`/api/video-status?jobId=${jobId}`);
-        const statusJson = await statusRes.json();
+      const data = (await res.json()) as { videoUrl?: string };
+      if (!data.videoUrl) {
+        throw new Error("No videoUrl returned from merge-video");
+      }
 
-        if (statusJson.status === "ready") {
-          setVideoUrl(statusJson.videoUrl);
-          setLoading(false);
-          return;
-        }
-
-        if (statusJson.status === "failed") {
-          setError("Video failed.");
-          setLoading(false);
-          return;
-        }
-
-        setTimeout(poll, 2000);
-      };
-
-      poll();
+      setVideoUrl(data.videoUrl);
     } catch (err) {
       console.error(err);
       setError("Video creation error.");
+    } finally {
       setLoading(false);
     }
   };
@@ -277,8 +276,8 @@ export default function MusicClient() {
               ❄️ Your Holibae Anthem ❄️
             </h1>
             <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
-              Create your Holibae&apos;s jingle, pin it, turn it into a video, and
-              share it on Farcaster.
+              Create your Holibae&apos;s jingle, pin it, turn it into a static
+              video, and share it on Farcaster.
             </p>
           </div>
         </header>
@@ -337,9 +336,11 @@ export default function MusicClient() {
               {loading ? "🎵 Generating…" : "🎶 Generate Holibae Song"}
             </Button>
 
-            {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-                <p className="text-sm text-red-700">{error}</p>
+            {error && !loading && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mt-4">
+                <p className="text-sm text-red-700 whitespace-pre-line">
+                  {error}
+                </p>
               </div>
             )}
           </section>
@@ -398,7 +399,7 @@ export default function MusicClient() {
             {/* create video – only after song is saved, before video exists */}
             {ipfsUrl && !videoUrl && (
               <Button
-                onClick={createAndPollVideo}
+                onClick={createAndMergeVideo}
                 disabled={loading}
                 className="w-full text-lg"
               >
@@ -425,10 +426,6 @@ export default function MusicClient() {
                   videoUrl={videoUrl}
                 />
               </>
-            )}
-
-            {error && !loading && (
-              <p className="text-red-500 text-sm">{error}</p>
             )}
           </section>
         </div>
