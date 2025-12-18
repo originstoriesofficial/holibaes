@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { sdk } from "@farcaster/miniapp-sdk";
 import Image from "next/image";
-import { moontime } from "../fonts"; // 👈 make sure path is correct
+import { moontime } from "../fonts"; // this now resolves to app/fonts.ts
 
 export default function DashboardClient() {
   const router = useRouter();
@@ -56,7 +56,6 @@ export default function DashboardClient() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10 font-sans">
       <div className="w-full max-w-md text-center">
-
         <div className="mb-6 overflow-hidden rounded-2xl shadow-lg">
           <Image
             src="/holibae-hero.png"
@@ -73,12 +72,11 @@ export default function DashboardClient() {
             <h1 className="text-5xl font-bold font-oswald tracking-wide text-[var(--foreground)] leading-tight">
               ❄️ Holibae Labs
             </h1>
-            <div className="h-1 w-20 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] mx-auto rounded-full"></div>
+            <div className="h-1 w-20 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] mx-auto rounded-full" />
           </div>
 
           {originHolder ? (
             <div className="space-y-2">
-              {/* new script font + removed comma */}
               <p
                 className={`${moontime.className} text-3xl text-[var(--base-blue)] leading-tight`}
               >
@@ -91,7 +89,7 @@ export default function DashboardClient() {
           ) : (
             <div className="bg-[var(--silver-light)] rounded-xl p-4 border-l-4 border-[var(--base-blue)]">
               <p className="text-base leading-relaxed text-[var(--foreground)]">
-                You'll need at least{" "}
+                You&apos;ll need at least{" "}
                 <span className="font-bold text-[var(--base-blue)] text-lg">
                   3.5k $ORIGINSTORY
                 </span>{" "}
