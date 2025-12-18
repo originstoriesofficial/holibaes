@@ -162,7 +162,7 @@ export default function MusicClient() {
         throw new Error("Pinning failed.");
       }
 
-      // handle both the older { cid, url } shape and the newer { ipfsHash, gatewayUrl }
+      // support both { cid, url } and { ipfsHash, gatewayUrl }
       const data = (await res.json()) as {
         cid?: string;
         url?: string;
@@ -207,7 +207,7 @@ export default function MusicClient() {
     }
   };
 
-  // -------------------- CREATE VIDEO (Transloadit template) --------------------
+  // -------------------- CREATE + POLL VIDEO (Transloadit template) --------------------
   const createAndMergeVideo = async () => {
     if (!ipfsUrl) {
       setError("Save song first.");
@@ -223,6 +223,7 @@ export default function MusicClient() {
     setError(null);
 
     try {
+      // 1) create Transloadit assembly via /api/merge-video
       const res = await fetch("/api/merge-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -234,21 +235,50 @@ export default function MusicClient() {
         }),
       });
 
-      if (!res.ok) {
-        console.error("merge-video failed:", await res.text());
-        throw new Error("Video merge failed.");
+      const createJson = await res.json();
+
+      if (!res.ok || !createJson.assemblyUrl) {
+        console.error("merge-video failed:", createJson);
+        setError(createJson.error || "Video merge job failed.");
+        setLoading(false);
+        return;
       }
 
-      const data = (await res.json()) as { videoUrl?: string };
-      if (!data.videoUrl) {
-        throw new Error("No videoUrl returned from merge-video");
-      }
+      const assemblyUrl = createJson.assemblyUrl as string;
 
-      setVideoUrl(data.videoUrl);
+      // 2) poll /api/merge-status until ready/failed
+      const poll = async () => {
+        try {
+          const statusRes = await fetch(
+            `/api/merge-status?assemblyUrl=${encodeURIComponent(assemblyUrl)}`
+          );
+          const statusJson = await statusRes.json();
+
+          if (statusJson.status === "ready") {
+            setVideoUrl(statusJson.videoUrl || null);
+            setLoading(false);
+            return;
+          }
+
+          if (statusJson.status === "failed") {
+            setError("Video creation failed.");
+            setLoading(false);
+            return;
+          }
+
+          // still processing
+          setTimeout(poll, 3000);
+        } catch (err) {
+          console.error("merge-status error:", err);
+          setError("Video status error.");
+          setLoading(false);
+        }
+      };
+
+      poll();
     } catch (err) {
       console.error(err);
       setError("Video creation error.");
-    } finally {
       setLoading(false);
     }
   };
@@ -368,7 +398,9 @@ export default function MusicClient() {
                 <div className="font-semibold">
                   {formFromCreate || "Mystery Holibae"}
                 </div>
-                <div className="text-xs text-[var(--muted)]">Style: {style}</div>
+                <div className="text-xs text-[var(--muted)]">
+                  Style: {style}
+                </div>
                 {ipfsHash && (
                   <div className="text-[10px] break-all text-[var(--muted)]">
                     IPFS: {ipfsHash}
