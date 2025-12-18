@@ -1,10 +1,15 @@
+// app/api/compose/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, music_length_ms } = await req.json();
+    const {
+      prompt,
+      music_length_ms = 60000,
+      output_format = "mp3_44100_128",
+    } = await req.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -13,45 +18,55 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const falRes = await fetch(
-      "https://api.fal.ai/music/generate",
+    const apiKey = process.env.MUSIC_API_KEY;
+    if (!apiKey) {
+      console.error("❌ Missing MUSIC_API_KEY env var");
+      return NextResponse.json(
+        { error: "Server key missing" },
+        { status: 500 }
+      );
+    }
+
+    const response = await fetch(
+      "https://api.elevenlabs.io/v1/music/generate",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.FAL_KEY}`,
           "Content-Type": "application/json",
+          Accept: "audio/mpeg",            // <-- required for binary mp3 return
+          "xi-api-key": apiKey,
         },
         body: JSON.stringify({
           prompt,
-          duration_ms: music_length_ms ?? 60000,
-          format: "mp3",
+          music_length_ms,
+          output_format,
         }),
       }
     );
 
-    if (!falRes.ok) {
-      const txt = await falRes.text();
-      console.error("compose failed:", txt);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("❌ ElevenLabs generation failure:", errText);
       return NextResponse.json(
-        { error: "music failed", details: txt },
-        { status: 502 }
+        { error: "Music generation failed", details: errText },
+        { status: 500 }
       );
     }
 
-    // stream / buffer MP3
-    const arrayBuffer = await falRes.arrayBuffer();
-    const uint8 = new Uint8Array(arrayBuffer);
+    const audioBuffer = await response.arrayBuffer();
 
-    return new NextResponse(uint8, {
+    return new NextResponse(audioBuffer, {
       status: 200,
       headers: {
         "Content-Type": "audio/mpeg",
+        "Content-Disposition": 'inline; filename="holibae-anthem.mp3"',
+        "Cache-Control": "max-age=0, no-cache, no-store",
       },
     });
   } catch (err) {
-    console.error("compose error:", err);
+    console.error("❌ /api/compose exception", err);
     return NextResponse.json(
-      { error: "server compose failed" },
+      { error: "Internal compose failure" },
       { status: 500 }
     );
   }
