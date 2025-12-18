@@ -62,8 +62,8 @@ export default function MusicClient() {
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);   // for song + video
+  const [saving, setSaving] = useState(false);     // for IPFS
   const [error, setError] = useState<string | null>(null);
 
   const fid = searchParams.get("fid");
@@ -78,11 +78,12 @@ export default function MusicClient() {
     return "holibae_songs_anon";
   }, [address, fid]);
 
-  // -------------------- GEN SONG --------------------
+  // -------------------- GEN SONG (ElevenLabs) --------------------
   const generateSong = async () => {
     if (loading) return;
     setLoading(true);
     setError(null);
+
     setAudioUrl(null);
     setAudioBlob(null);
     setIpfsUrl(null);
@@ -94,7 +95,6 @@ export default function MusicClient() {
         (prompt && prompt.trim()) || DEFAULT_PROMPT_SUGGESTION;
 
       let fullPrompt = `${basePrompt} in the style of ${style}.`;
-
       if (lyrics.trim()) {
         fullPrompt += ` Use these lyrics: ${lyrics.trim()}.`;
       } else {
@@ -126,7 +126,7 @@ export default function MusicClient() {
     }
   };
 
-  // -------------------- SAVE TO IPFS --------------------
+  // -------------------- SAVE TO IPFS (Pinata) --------------------
   const handleSaveSong = async () => {
     if (!audioBlob) {
       setError("Generate a song first.");
@@ -166,7 +166,7 @@ export default function MusicClient() {
       setIpfsUrl(data.url);
       setIpfsHash(data.cid);
 
-      // save into local history
+      // local history
       if (typeof window !== "undefined") {
         const existingRaw = window.localStorage.getItem(storageKey);
         const existing: SavedSong[] = existingRaw
@@ -193,7 +193,7 @@ export default function MusicClient() {
     }
   };
 
-  // -------------------- CREATE VIDEO --------------------
+  // -------------------- CREATE VIDEO (Livepeer) --------------------
   const createAndPollVideo = async () => {
     if (!ipfsUrl) {
       setError("Save song first.");
@@ -277,7 +277,8 @@ export default function MusicClient() {
               ❄️ Your Holibae Anthem ❄️
             </h1>
             <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
-              Create your Holibae&apos;s jingle.
+              Create your Holibae&apos;s jingle, pin it, turn it into a video, and
+              share it on Farcaster.
             </p>
           </div>
         </header>
@@ -382,8 +383,8 @@ export default function MusicClient() {
               </div>
             )}
 
-               {/* save to IPFS */}
-               {!ipfsUrl && audioBlob && (
+            {/* save to IPFS */}
+            {!ipfsUrl && audioBlob && (
               <Button
                 onClick={handleSaveSong}
                 disabled={saving}
