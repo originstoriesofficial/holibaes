@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "nodejs"; // Required for fetch, FormData, etc.
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Download the image from URL
+    // Fetch image from URL
     const imgRes = await fetch(imageUrl);
     if (!imgRes.ok) {
       return NextResponse.json(
@@ -45,17 +45,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const arrayBuffer = await imgRes.arrayBuffer();
-    const contentType = imgRes.headers.get("content-type") ?? "image/png";
+    const bytes = await imgRes.arrayBuffer();
+    const mime = imgRes.headers.get("content-type") ?? "image/png";
 
-    // 2. Wrap image as a File object
-    const blob = new Blob([arrayBuffer], { type: contentType });
-    const file = new File([blob], "holibae.png", { type: contentType });
+    const file = new File([bytes], "holibae.png", { type: mime });
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const pinataForm = new FormData();
+    pinataForm.append("file", file);
 
-    // 3. Construct Pinata metadata
     const timestamp = Date.now();
     const shortAddress = address.slice(0, 8).toLowerCase();
 
@@ -63,6 +60,7 @@ export async function POST(req: NextRequest) {
       name: `holibae-${shortAddress}-${timestamp}.png`,
       keyvalues: {
         app: "holibaes",
+        type: "image",
         walletAddress: address,
         fid: fid ?? "",
         hollyForm: hollyForm ?? "",
@@ -72,44 +70,49 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    formData.append("pinataMetadata", JSON.stringify(metadata));
+    pinataForm.append("pinataMetadata", JSON.stringify(metadata));
 
-    // 4. Upload to Pinata (pinFileToIPFS)
-    const pinataRes = await fetch(
+    const uploadRes = await fetch(
       "https://api.pinata.cloud/pinning/pinFileToIPFS",
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.PINATA_JWT}`,
         },
-        body: formData,
+        body: pinataForm,
       }
     );
 
-    if (!pinataRes.ok) {
-      const errText = await pinataRes.text();
-      console.error("❌ Pinata error:", errText);
+    if (!uploadRes.ok) {
+      const errorDetails = await uploadRes.text();
+      console.error("❌ Pinata image upload failed:", errorDetails);
       return NextResponse.json(
-        { error: "Pinata upload failed", details: errText },
+        { error: "Pinata image upload failed", details: errorDetails },
         { status: 502 }
       );
     }
 
-    const pinataJson = await pinataRes.json();
+    const json = await uploadRes.json();
+    const ipfsHash = json.IpfsHash;
+
+    const gatewayBase =
+      process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
+
+    const gatewayUrl = `${gatewayBase}/${ipfsHash}`;
 
     return NextResponse.json(
       {
-        ipfsHash: pinataJson.IpfsHash,
-        pinSize: pinataJson.PinSize,
-        timestamp: pinataJson.Timestamp,
-        isDuplicate: pinataJson.isDuplicate,
+        ipfsHash,
+        gatewayUrl,
+        pinSize: json.PinSize,
+        timestamp: json.Timestamp,
       },
       { status: 200 }
     );
   } catch (err) {
     console.error("❌ save-holibae error:", err);
     return NextResponse.json(
-      { error: "Internal error saving Holibae to Pinata" },
+      { error: "Internal error saving Holibae" },
       { status: 500 }
     );
   }

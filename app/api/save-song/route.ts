@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
 
-    const file = formData.get("file");
+    const file = formData.get("file") as File | null;
     const address = formData.get("address") as string | null;
     const fid = formData.get("fid") as string | null;
     const prompt = formData.get("prompt") as string | null;
@@ -23,20 +23,17 @@ export async function POST(req: NextRequest) {
 
     if (!process.env.PINATA_JWT) {
       return NextResponse.json(
-        { error: "PINATA_JWT not configured on server" },
+        { error: "PINATA_JWT not configured" },
         { status: 500 }
       );
     }
 
     const pinataForm = new FormData();
-    // name is just a hint; Pinata will use it for filename
     pinataForm.append("file", file, "holibae-song.mp3");
 
     const timestamp = Date.now();
-    const shortAddress = address.slice(0, 8).toLowerCase();
-
     const metadata = {
-      name: `holibae-song-${shortAddress}-${timestamp}.mp3`,
+      name: `holibae-song-${address.slice(0, 8)}-${timestamp}.mp3`,
       keyvalues: {
         app: "holibaes",
         type: "song",
@@ -50,48 +47,36 @@ export async function POST(req: NextRequest) {
 
     pinataForm.append("pinataMetadata", JSON.stringify(metadata));
 
-    const pinataRes = await fetch(
-      "https://api.pinata.cloud/pinning/pinFileToIPFS",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.PINATA_JWT}`,
-        },
-        body: pinataForm,
-      }
-    );
+    const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.PINATA_JWT}`,
+      },
+      body: pinataForm,
+    });
 
-    if (!pinataRes.ok) {
-      const errText = await pinataRes.text();
-      console.error("❌ Pinata song error:", errText);
+    if (!res.ok) {
+      const errText = await res.text();
       return NextResponse.json(
-        { error: "Pinata song upload failed", details: errText },
+        { error: "Pinata upload failed", details: errText },
         { status: 502 }
       );
     }
 
-    const pinataJson = await pinataRes.json();
-    const ipfsHash = pinataJson.IpfsHash as string;
+    const json = await res.json();
+    const ipfsHash = json.IpfsHash;
 
-    // You can swap gateway base if you have a dedicated one
     const gatewayBase =
       process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
     const gatewayUrl = `${gatewayBase}/${ipfsHash}`;
 
     return NextResponse.json(
-      {
-        ipfsHash,
-        gatewayUrl,
-        pinSize: pinataJson.PinSize,
-        timestamp: pinataJson.Timestamp,
-        isDuplicate: pinataJson.isDuplicate,
-      },
+      { ipfsHash, gatewayUrl, timestamp },
       { status: 200 }
     );
   } catch (err) {
-    console.error("❌ save-song error:", err);
     return NextResponse.json(
-      { error: "Internal error saving song to Pinata" },
+      { error: "Internal error saving song" },
       { status: 500 }
     );
   }

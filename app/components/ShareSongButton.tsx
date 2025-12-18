@@ -5,36 +5,31 @@ import { useComposeCast } from "@coinbase/onchainkit/minikit";
 import { Button } from "./Button";
 
 export interface ShareSongButtonProps {
-  style: string;
   prompt: string;
-  characterImageUrl?: string | null;
-  characterForm?: string | null;
-  audioUrl?: string | null; // use IPFS / gateway URL here
+  style: string;
+  holibaeImageUrl?: string | null;
+  videoUrl?: string | null; // Livepeer output
 }
 
 export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
-  style,
   prompt,
-  characterImageUrl,
-  characterForm,
-  audioUrl,
+  style,
+  holibaeImageUrl,
+  videoUrl,
 }) => {
   const { composeCast } = useComposeCast();
 
   const handleShare = () => {
-    const characterInfo = characterForm
-      ? ` featuring my ${characterForm} Holibae`
-      : "";
-
-    const songLink = audioUrl ? `\n\nListen here: ${audioUrl}` : "";
-
-    const text = `🎶 Just created a ${style} holiday anthem${characterInfo}! "${prompt}" ✨${songLink}\n\nCreate yours at Holibae Labs!`;
+    const text = `🎶 Just made a ${style} Holibae music video! "${prompt}" ✨\n\nCreate yours at Holibae Labs!`;
 
     let embeds: [] | [string] | [string, string] | undefined;
 
-    // only embed the Holibae image; audio is a link in text
-    if (characterImageUrl) {
-      embeds = [characterImageUrl];
+    if (holibaeImageUrl && videoUrl) {
+      embeds = [holibaeImageUrl, videoUrl];
+    } else if (videoUrl) {
+      embeds = [videoUrl];
+    } else if (holibaeImageUrl) {
+      embeds = [holibaeImageUrl];
     } else {
       embeds = undefined;
     }
@@ -42,11 +37,11 @@ export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
     composeCast({ text, embeds });
   };
 
-  const disabled = !audioUrl && !characterImageUrl;
+  const disabled = !holibaeImageUrl && !videoUrl;
 
   return (
-    <Button onClick={handleShare} variant="secondary" disabled={disabled}>
-      🎵 Share Song {characterImageUrl && "+ Holibae"}
+    <Button onClick={handleShare} disabled={disabled} variant="secondary">
+      🎥 Share Video {holibaeImageUrl && "+ Holibae"}
     </Button>
   );
 };
