@@ -386,7 +386,7 @@ export async function POST(req: Request) {
 
     // 🔑 FINAL PROMPT – colorPhrase is still the main color driver
     const prompt = `
-${STYLE_PLUSH}
+
 A highly detailed and realistic plush ${hollyForm} character with ${colorPhrase} accents throughout, designed as a seasonal ${holidayName} traditional holiday collectible. Gentle diffusion glow, ${holidayName} elements in the background, premium toy photography lighting, hyper-detailed 3D render
 
 The ${hollyForm} is wearing ${outfit}, clearly inspired by ${holidayName} traditions, with distinctly seasonal details in the clothing and accessories.
@@ -395,7 +395,7 @@ The background is a fully visible, immersive ${holidayName} scene set in ${desig
 Around the character are ${motifsList}, reinforcing the ${holidayName} holiday environment and seasonal storytelling.
 
 Lighting is soft and cinematic, with glowing ${colorPhrase} highlights in the environment and background, gently wrapping the plush form.
-3D toy aesthetic, glossy texture, full-body visible, 4k.
+3D toy aesthetic, glossy texture, full-body visible, 4k. ${STYLE_PLUSH}
 `;
 
     const result = await fal.subscribe("fal-ai/stable-cascade", {
