@@ -274,7 +274,7 @@ const HOLLY_MAP = {
     ],
   },
 
-  // ✅ add Sinterklaas (NL-specific)
+  // ✅ Sinterklaas (NL-specific)
   sinterklaas: {
     design: [
       "Dutch winter living room celebration",
@@ -329,6 +329,23 @@ function pickRandom<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function pickMany<T>(arr: readonly T[], count: number): T[] {
+  if (count >= arr.length) return [...arr];
+  const copy = [...arr];
+  const picked: T[] = [];
+  while (picked.length < count && copy.length > 0) {
+    const idx = Math.floor(Math.random() * copy.length);
+    picked.push(copy.splice(idx, 1)[0]);
+  }
+  return picked;
+}
+
+function formatHolidayName(key: HollyKey): string {
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (c) => c.toUpperCase());
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {
@@ -354,24 +371,33 @@ export async function POST(req: Request) {
       : "christmas") as HollyKey;
 
     const holidayConfig = HOLLY_MAP[safeKey];
-    const design = pickRandom(holidayConfig.design);
-    const outfit = pickRandom(holidayConfig.outfit);
-    const motifs = pickRandom(holidayConfig.motifs);
+
+    // pull *more* info per holiday for richer backgrounds + outfits
+    const [designMain, designSecondary] = pickMany(holidayConfig.design, 2);
+    const [outfit] = pickMany(holidayConfig.outfit, 1);
+    const motifsPicked = pickMany(holidayConfig.motifs, 2);
 
     const colorPhrase = color.trim().toLowerCase();
+    const holidayName = formatHolidayName(safeKey);
+    const motifsList = motifsPicked.join(", ");
+    const designSecondaryText = designSecondary
+      ? `, with additional atmosphere from ${designSecondary}`
+      : "";
 
-    // 🔑 FINAL PROMPT – color is the ONLY strong color
+    // 🔑 FINAL PROMPT – colorPhrase is still the main color driver
     const prompt = `
-    ${STYLE_PLUSH}
-    A highly detailed and realistic plush ${hollyForm} character with ${colorPhrase} accents throughout. Thee ${hollyForm} is wearing an ${outfit},
-    The character is tanding in a festive ${design} scene,
-    surrounded by ${motifs}.
-    Lighting is soft and cinematic, with glowing ${colorPhrase} highlights in the environment.
-    3D toy aesthetic, glossy texture, full-body visible, 4k.
-    `;
-    
-    
-    
+${STYLE_PLUSH}
+A highly detailed and realistic plush ${hollyForm} character with ${colorPhrase} accents throughout, designed as a seasonal ${holidayName} collectible.
+
+The ${hollyForm} is wearing ${outfit}, clearly inspired by ${holidayName} traditions, with distinctly seasonal details in the clothing and accessories.
+
+The background is a fully visible, immersive ${holidayName} scene set in ${designMain}${designSecondaryText}.
+Around the character are ${motifsList}, reinforcing the ${holidayName} holiday environment and seasonal storytelling.
+
+Lighting is soft and cinematic, with glowing ${colorPhrase} highlights in the environment and background, gently wrapping the plush form.
+3D toy aesthetic, glossy texture, full-body visible, 4k.
+`;
+
     const result = await fal.subscribe("fal-ai/stable-cascade", {
       input: {
         prompt,

@@ -9,7 +9,7 @@ export interface ShareSongButtonProps {
   prompt: string;
   characterImageUrl?: string | null;
   characterForm?: string | null;
-  audioUrl?: string | null;
+  audioUrl?: string | null; // should be an HTTP/IPFS URL
 }
 
 export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
@@ -22,23 +22,32 @@ export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
   const { composeCast } = useComposeCast();
 
   const handleShare = () => {
-    const characterInfo = characterForm ? ` featuring my ${characterForm} Holibae` : "";
+    if (!audioUrl && !characterImageUrl) return;
+
+    const characterInfo = characterForm
+      ? ` featuring my ${characterForm} Holibae`
+      : "";
     const text = `🎶 Just created a ${style} holiday anthem${characterInfo}! "${prompt}" ✨\n\nCreate yours at Holibae Labs!`;
 
-    const embeds: [string] | [string, string] | undefined =
-      characterImageUrl && audioUrl?.startsWith("http")
-        ? [characterImageUrl, audioUrl]
-        : characterImageUrl
-        ? [characterImageUrl]
-        : audioUrl?.startsWith("http")
-        ? [audioUrl]
-        : undefined;
+    let embeds: [] | [string] | [string, string] | undefined;
+
+    if (characterImageUrl && audioUrl) {
+      embeds = [characterImageUrl, audioUrl];
+    } else if (characterImageUrl) {
+      embeds = [characterImageUrl];
+    } else if (audioUrl) {
+      embeds = [audioUrl];
+    } else {
+      embeds = undefined;
+    }
 
     composeCast({ text, embeds });
   };
 
+  const disabled = !audioUrl && !characterImageUrl;
+
   return (
-    <Button onClick={handleShare} variant="secondary">
+    <Button onClick={handleShare} variant="secondary" disabled={disabled}>
       🎵 Share Song {characterImageUrl && "+ Holibae"}
     </Button>
   );

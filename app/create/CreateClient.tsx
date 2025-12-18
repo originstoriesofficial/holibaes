@@ -91,7 +91,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
 
       const label = HOLIDAY_OPTIONS.find((h) => h.id === holidayKey)?.label ?? "Mystery";
       setCharacterSummary(
-        `Your Holibae is a ${hollyForm} infused with ${label} energy, glowing in ${color} tones.`
+        `Your Holibae is a ${hollyForm} infused with ${label} energy, glowing in ${color} tones. Press image to download.`
       );
     } catch (err: any) {
       setError(err?.message || "Something went wrong.");
@@ -142,7 +142,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
     }
 
     const labName = originHolder ? "OriginStory" : "Holibae";
-    const text = `I just created my Holibae in the ${labName} lab ✨ Create yours: ${rootUrl}`;
+    const text = `I just summoned my Holibae ✨ Create yours: ${rootUrl}`;
     composeCast({ text, embeds: [imageUrl] });
   };
 
@@ -320,7 +320,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   
               <div className="space-y-3">
                 <Button onClick={handleSaveCharacter} disabled={saving}>
-                  {saving ? "Saving…" : savedOnce ? "✅ Holibae saved" : "💾 Save this Holibae"}
+                  {saving ? "Saving…" : savedOnce ? "✅ Holibae saved" : "💾 Save this Holibae to the Collection)"}
                 </Button>
   
                 <Button onClick={handleShareCharacter} variant="secondary">
@@ -328,7 +328,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 </Button>
   
                 <Button onClick={handleGoToMusic} className="bg-[var(--silver)] hover:bg-[var(--base-blue)]">
-                  🎶 Enter music studio
+                  💿 Enter music studio
                 </Button>
               </div>
   

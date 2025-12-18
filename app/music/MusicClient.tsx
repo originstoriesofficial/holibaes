@@ -13,12 +13,15 @@ const styles = [
   "Vaporwave", "Acoustic", "Chillwave", "Shoegaze", "Trance",
 ];
 
-interface SavedSong {
+const DEFAULT_PROMPT_SUGGESTION = "a cozy winter holiday vibe with sparkles";
+
+export interface SavedSong {
   id: string;
   createdAt: number;
   prompt: string;
   lyrics: string;
   style: string;
+  ipfsHash?: string;
 }
 
 export default function MusicClient() {
@@ -30,10 +33,13 @@ export default function MusicClient() {
     document.documentElement.classList.add("light");
   }, []);
 
-  const [prompt, setPrompt] = useState("a cozy winter holiday vibe with sparkles");
+  const [prompt, setPrompt] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [style, setStyle] = useState(styles[0]);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null); // used for playback/download
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null); // raw audio from compose
+  const [ipfsUrl, setIpfsUrl] = useState<string | null>(null); // pinned URL for sharing
+  const [ipfsHash, setIpfsHash] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,9 +60,16 @@ export default function MusicClient() {
     setLoading(true);
     setError(null);
     setAudioUrl(null);
+    setAudioBlob(null);
+    setIpfsUrl(null);
+    setIpfsHash(null);
 
     try {
-      const fullPrompt = `${prompt} in the style of ${style}.${lyrics ? " Lyrics: " + lyrics : ""}`;
+      const basePrompt = (prompt && prompt.trim()) || DEFAULT_PROMPT_SUGGESTION;
+      const fullPrompt = `${basePrompt} in the style of ${style}.${
+        lyrics ? " Lyrics: " + lyrics : ""
+      }`;
+
       const res = await fetch("/api/compose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,46 +82,89 @@ export default function MusicClient() {
 
       if (!res.ok) throw new Error("Failed to generate song");
       const blob = await res.blob();
+
       const url = URL.createObjectURL(blob);
+      setAudioBlob(blob);
       setAudioUrl(url);
-    } catch {
+    } catch (e) {
+      console.error(e);
       setError("Oops! Something went wrong while creating your holiday jam.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSaveSong = () => {
-    if (!audioUrl) {
+  const handleSaveSong = async () => {
+    if (!audioBlob) {
       setError("Generate a song first.");
       return;
     }
-
-    if (typeof window === "undefined") return;
+    if (!address) {
+      setError("Connect a wallet to save your jingle.");
+      return;
+    }
 
     setSaving(true);
     setError(null);
 
     try {
-      const existingRaw = window.localStorage.getItem(storageKey);
-      const existing: SavedSong[] = existingRaw ? JSON.parse(existingRaw) : [];
+      const formData = new FormData();
+      formData.append("file", audioBlob, "holibae-song.mp3");
+      formData.append("address", address);
+      if (fid) formData.append("fid", fid);
+      formData.append(
+        "prompt",
+        (prompt && prompt.trim()) || DEFAULT_PROMPT_SUGGESTION
+      );
+      formData.append("style", style);
+      formData.append("lyrics", lyrics);
 
-      const entry: SavedSong = {
-        id: crypto.randomUUID(),
-        createdAt: Date.now(),
-        prompt,
-        lyrics,
-        style,
+      const res = await fetch("/api/save-song", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("save-song failed:", text);
+        throw new Error("Could not save song to IPFS.");
+      }
+
+      const data = await res.json();
+      const { gatewayUrl, ipfsHash: hash } = data as {
+        gatewayUrl: string;
+        ipfsHash: string;
       };
 
-      const next = [entry, ...existing].slice(0, 50);
-      window.localStorage.setItem(storageKey, JSON.stringify(next));
-    } catch {
-      setError("Could not save song locally.");
+      setIpfsUrl(gatewayUrl);
+      setIpfsHash(hash);
+
+      // Optional: also log in localStorage for quick local history
+      if (typeof window !== "undefined") {
+        const existingRaw = window.localStorage.getItem(storageKey);
+        const existing: SavedSong[] = existingRaw ? JSON.parse(existingRaw) : [];
+
+        const entry: SavedSong = {
+          id: crypto.randomUUID(),
+          createdAt: Date.now(),
+          prompt: prompt || DEFAULT_PROMPT_SUGGESTION,
+          lyrics,
+          style,
+          ipfsHash: hash,
+        };
+
+        const next = [entry, ...existing].slice(0, 50);
+        window.localStorage.setItem(storageKey, JSON.stringify(next));
+      }
+    } catch (e) {
+      console.error(e);
+      setError("Could not save song to IPFS.");
     } finally {
       setSaving(false);
     }
   };
+
+  const effectiveDownloadUrl = ipfsUrl || audioUrl || undefined;
 
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
@@ -133,7 +189,8 @@ export default function MusicClient() {
           </div>
 
           <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
-            Describe your Holibae's holiday mood. We'll create a magical 60-second seasonal anthem just for them.
+            Describe your Holibae&apos;s holiday mood. We&apos;ll create a magical 60-second
+            seasonal anthem just for them.
           </p>
         </header>
 
@@ -142,17 +199,21 @@ export default function MusicClient() {
           <section className="card p-8 space-y-6">
             <div className="space-y-5">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-[var(--foreground)]">Holiday Mood</label>
+                <label className="text-sm font-semibold text-[var(--foreground)]">
+                  Holiday Mood
+                </label>
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Describe the holly-jolly mood"
+                  placeholder={DEFAULT_PROMPT_SUGGESTION}
                   className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-[var(--foreground)]">Lyrics (Optional)</label>
+                <label className="text-sm font-semibold text-[var(--foreground)]">
+                  Lyrics (Optional)
+                </label>
                 <textarea
                   value={lyrics}
                   onChange={(e) => setLyrics(e.target.value)}
@@ -162,7 +223,9 @@ export default function MusicClient() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-[var(--foreground)]">Music Style</label>
+                <label className="text-sm font-semibold text-[var(--foreground)]">
+                  Music Style
+                </label>
                 <select
                   value={style}
                   onChange={(e) => setStyle(e.target.value)}
@@ -214,34 +277,48 @@ export default function MusicClient() {
                   {formFromCreate || "Mystery Holibae"}
                 </div>
                 <div className="text-sm text-[var(--muted)]">
-                  Style: <span className="font-semibold text-[var(--base-blue)]">{style}</span>
+                  Style:{" "}
+                  <span className="font-semibold text-[var(--base-blue)]">
+                    {style}
+                  </span>
                 </div>
+                {ipfsHash && (
+                  <div className="text-[10px] text-[var(--muted)] break-all">
+                    IPFS: {ipfsHash}
+                  </div>
+                )}
               </div>
             </div>
 
             {audioUrl ? (
               <div className="space-y-4">
                 <div className="bg-[var(--silver-light)] p-4 rounded-xl">
-                  <audio controls src={audioUrl} className="w-full" />
+                  <audio controls src={effectiveDownloadUrl} className="w-full" />
                 </div>
 
                 <div className="space-y-3">
                   <Button onClick={handleSaveSong} disabled={saving} variant="secondary">
-                    {saving ? "Saving…" : "💾 Save this jingle"}
+                    {saving
+                      ? "Saving…"
+                      : ipfsUrl
+                      ? "✅ Jingle saved onchain storage"
+                      : "💾 Save this jingle"}
                   </Button>
 
-                  <a
-                    href={audioUrl}
-                    download="holibae-song.mp3"
-                    className="block w-full text-center py-2 rounded-lg bg-amber-600 font-semibold text-sm shadow-md hover:bg-amber-700 transition"
-                  >
-                    ⬇️ Download Song
-                  </a>
+                  {effectiveDownloadUrl && (
+                    <a
+                      href={effectiveDownloadUrl}
+                      download="holibae-song.mp3"
+                      className="block w-full text-center py-2 rounded-lg bg-amber-600 font-semibold text-sm shadow-md hover:bg-amber-700 transition"
+                    >
+                      ⬇️ Download Song
+                    </a>
+                  )}
 
                   <ShareSongButton
                     style={style}
-                    prompt={prompt}
-                    audioUrl={audioUrl}
+                    prompt={prompt || DEFAULT_PROMPT_SUGGESTION}
+                    audioUrl={ipfsUrl || undefined}
                     characterImageUrl={imageUrlFromCreate || undefined}
                     characterForm={formFromCreate || undefined}
                   />
@@ -249,7 +326,9 @@ export default function MusicClient() {
               </div>
             ) : (
               <div className="bg-[var(--silver-light)] p-6 rounded-xl text-center">
-                <p className="text-base text-[var(--muted)]">Generate a jolly anthem to save and share 🎶</p>
+                <p className="text-base text-[var(--muted)]">
+                  Generate a jolly anthem to save and share 🎶
+                </p>
               </div>
             )}
           </section>
