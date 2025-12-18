@@ -8,13 +8,29 @@ import { ShareSongButton } from "../components/ShareSongButton";
 import { Button } from "../components/Button";
 
 const styles = [
-  "Lo-fi","Jazz","Ambient","Orchestral","Fantasy","Cyberpunk","Retro",
-  "Funk","Dream Pop","Gospel","Neo Soul","Future Bass","Ballad","Pop",
-  "Synthwave","Vaporwave","Acoustic","Chillwave","Shoegaze","Trance",
+  "Lo-fi",
+  "Jazz",
+  "Ambient",
+  "Orchestral",
+  "Fantasy",
+  "Cyberpunk",
+  "Retro",
+  "Funk",
+  "Dream Pop",
+  "Gospel",
+  "Neo Soul",
+  "Future Bass",
+  "Ballad",
+  "Pop",
+  "Synthwave",
+  "Vaporwave",
+  "Acoustic",
+  "Chillwave",
+  "Shoegaze",
+  "Trance",
 ];
 
-const DEFAULT_PROMPT_SUGGESTION =
-  "a cozy winter holiday vibe with sparkles";
+const DEFAULT_PROMPT_SUGGESTION = "a cozy winter holiday vibe with sparkles";
 
 export interface SavedSong {
   id: string;
@@ -243,7 +259,6 @@ export default function MusicClient() {
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-5xl mx-auto space-y-10">
-        
         {/* HEADER */}
         <header className="space-y-5">
           <div className="flex items-center gap-3 flex-wrap">
@@ -257,25 +272,79 @@ export default function MusicClient() {
             )}
           </div>
 
-          <h1 className="text-5xl font-bold text-[var(--base-blue)] tracking-wide">
-            ❄️ Your Holibae Anthem ❄️
-          </h1>
+          <div className="space-y-3">
+            <h1 className="text-5xl font-bold text-[var(--base-blue)] tracking-wide">
+              ❄️ Your Holibae Anthem ❄️
+            </h1>
+            <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
+              Describe your Holibae&apos;s holiday mood. We&apos;ll create a magical
+              60-second seasonal anthem just for them.
+            </p>
+          </div>
         </header>
 
         {/* GRID */}
         <div className="grid md:grid-cols-[1.5fr,1fr] gap-8">
-          
-          {/* LEFT */}
+          {/* LEFT: controls */}
           <section className="card p-8 space-y-6">
-            {/* prompt / lyrics */}
-            {/* ... unchanged body UI ... */}
+            <div className="space-y-5">
+              {/* Holiday Mood */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[var(--foreground)]">
+                  Holiday Mood
+                </label>
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder={DEFAULT_PROMPT_SUGGESTION}
+                  className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base"
+                />
+              </div>
+
+              {/* Lyrics */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[var(--foreground)]">
+                  Lyrics (Optional)
+                </label>
+                <textarea
+                  value={lyrics}
+                  onChange={(e) => setLyrics(e.target.value)}
+                  placeholder="Write some lyrics (poetic or funny!)"
+                  className="w-full min-h-[100px] rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base"
+                />
+              </div>
+
+              {/* Style */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[var(--foreground)]">
+                  Choose Music Style
+                </label>
+                <select
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value)}
+                  className="w-full rounded-xl border-2 border-[var(--border)] bg-white px-4 py-3 text-base"
+                >
+                  {styles.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             <Button onClick={generateSong} disabled={loading} className="text-lg">
-              {loading ? "🎵 Generating…" : "🎶 Generate"}
+              {loading ? "🎵 Generating…" : "🎶 Generate Holibae Song"}
             </Button>
+
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
           </section>
 
-          {/* RIGHT */}
+          {/* RIGHT: preview + actions */}
           <section className="card p-8 space-y-6">
             <h2 className="font-bold text-[var(--base-blue)]">❄️ Preview</h2>
 
@@ -294,21 +363,34 @@ export default function MusicClient() {
                 </div>
               )}
 
-              <div>
-                <div className="font-semibold">{formFromCreate}</div>
-                <div className="text-xs">{style}</div>
-                {ipfsHash && <div className="text-[10px] break-all">IPFS: {ipfsHash}</div>}
+              <div className="space-y-1">
+                <div className="font-semibold">
+                  {formFromCreate || "Mystery Holibae"}
+                </div>
+                <div className="text-xs text-[var(--muted)]">Style: {style}</div>
+                {ipfsHash && (
+                  <div className="text-[10px] break-all text-[var(--muted)]">
+                    IPFS: {ipfsHash}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* audio preview */}
             {effectiveDownloadUrl && (
-              <audio controls src={effectiveDownloadUrl} className="w-full" />
+              <div className="bg-[var(--silver-light)] p-4 rounded-xl">
+                <audio controls src={effectiveDownloadUrl} className="w-full" />
+              </div>
             )}
 
-            {/* save */}
+            {/* save to IPFS */}
             {!ipfsUrl && audioBlob && (
-              <Button onClick={handleSaveSong} disabled={saving} variant="secondary">
+              <Button
+                onClick={handleSaveSong}
+                disabled={saving}
+                variant="secondary"
+                className="w-full"
+              >
                 {saving ? "Saving…" : "💾 Save to IPFS"}
               </Button>
             )}
@@ -329,24 +411,26 @@ export default function MusicClient() {
               <a
                 href={videoUrl}
                 target="_blank"
-                className="block w-full text-center py-3 rounded-lg bg-[#3c8aff] text-white font-semibold shadow hover:scale-105"
+                rel="noreferrer"
+                className="block w-full text-center py-3 rounded-lg bg-[#3c8aff] text-white font-semibold shadow hover:scale-105 transition"
               >
                 ▶️ Watch Holibae Song Video
               </a>
             )}
 
             {/* share */}
-            {ipfsUrl && (
-             <ShareSongButton
-             prompt={prompt}
-             style={style}
-             holibaeImageUrl={imageUrlFromCreate || undefined}
-             videoUrl={videoUrl || undefined}
-           />
-           
+            {(videoUrl || imageUrlFromCreate) && (
+              <ShareSongButton
+                prompt={prompt || DEFAULT_PROMPT_SUGGESTION}
+                style={style}
+                holibaeImageUrl={imageUrlFromCreate || undefined}
+                videoUrl={videoUrl || undefined}
+              />
             )}
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && !loading && (
+              <p className="text-red-500 text-sm">{error}</p>
+            )}
           </section>
         </div>
       </div>
