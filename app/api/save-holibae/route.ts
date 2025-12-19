@@ -1,9 +1,33 @@
+// app/api/save-holibae/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs"; // Required for fetch, FormData, etc.
 
+function buildGatewayUrlFromCid(cid: string): string {
+  const cleanCid = cid
+    .trim()
+    .replace(/^ipfs:\/\//, "") // ipfs://CID
+    .replace(/^\/?ipfs\//, ""); // /ipfs/CID or ipfs/CID
+
+  const gatewayBase =
+    process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
+
+  return `${gatewayBase}/${cleanCid}`;
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const body = (await req.json()) as {
+      address?: string;
+      fid?: string | null;
+      hollyForm?: string;
+      holidayKey?: string;
+      color?: string;
+      imageUrl?: string;  // can be Fal URL / gateway URL / ipfs://CID / CID
+      ipfsHash?: string;  // optional CID
+      summary?: string | null;
+    };
+
     const {
       address,
       fid,
@@ -11,20 +35,13 @@ export async function POST(req: NextRequest) {
       holidayKey,
       color,
       imageUrl,
+      ipfsHash,
       summary,
-    } = (await req.json()) as {
-      address?: string;
-      fid?: string | null;
-      hollyForm?: string;
-      holidayKey?: string;
-      color?: string;
-      imageUrl?: string;
-      summary?: string | null;
-    };
+    } = body;
 
-    if (!address || !imageUrl) {
+    if (!address) {
       return NextResponse.json(
-        { error: "Missing wallet address or imageUrl" },
+        { error: "Missing wallet address" },
         { status: 400 }
       );
     }
@@ -36,11 +53,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Download the image from URL (Fal URL or whatever you pass)
-    const imgRes = await fetch(imageUrl);
-    if (!imgRes.ok) {
+    // ---------------- NORMALIZE IMAGE SOURCE URL ----------------
+    let sourceUrl: string | null = null;
+
+    if (imageUrl && imageUrl.trim()) {
+      const raw = imageUrl.trim();
+
+      if (raw.startsWith("http://") || raw.startsWith("https://")) {
+        // already a full URL
+        sourceUrl = raw;
+      } else {
+        // treat as CID / ipfs:// / /ipfs/CID
+        sourceUrl = buildGatewayUrlFromCid(raw);
+      }
+    } else if (ipfsHash && ipfsHash.trim()) {
+      // if caller sends only a CID
+      sourceUrl = buildGatewayUrlFromCid(ipfsHash.trim());
+    }
+
+    if (!sourceUrl || !sourceUrl.startsWith("http")) {
       return NextResponse.json(
-        { error: "Could not download image from source URL" },
+        {
+          error:
+            "Invalid image URL or CID. Must be a full http(s) URL or a valid CID/ipfs:// string.",
+          receivedImageUrl: imageUrl,
+          receivedIpfsHash: ipfsHash,
+        },
+        { status: 400 }
+      );
+    }
+
+    // ---------------- DOWNLOAD IMAGE ----------------
+    const imgRes = await fetch(sourceUrl);
+    if (!imgRes.ok) {
+      console.error("❌ Failed to download image:", sourceUrl, imgRes.status);
+      return NextResponse.json(
+        { error: "Could not download image from source URL", sourceUrl },
         { status: 502 }
       );
     }
@@ -48,14 +96,14 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await imgRes.arrayBuffer();
     const contentType = imgRes.headers.get("content-type") ?? "image/png";
 
-    // 2. Wrap image as a File object
+    // Wrap as File for pinFileToIPFS
     const blob = new Blob([arrayBuffer], { type: contentType });
     const file = new File([blob], "holibae.png", { type: contentType });
 
     const formData = new FormData();
     formData.append("file", file);
 
-    // 3. Construct Pinata metadata
+    // ---------------- PINATA METADATA ----------------
     const timestamp = Date.now();
     const shortAddress = address.slice(0, 8).toLowerCase();
 
@@ -69,12 +117,14 @@ export async function POST(req: NextRequest) {
         holidayKey: holidayKey ?? "",
         color: color ?? "",
         summary: summary ?? "",
+        // Optionally also store the original source URL:
+        sourceUrl,
       },
     };
 
     formData.append("pinataMetadata", JSON.stringify(metadata));
 
-    // 4. Upload to Pinata (pinFileToIPFS)
+    // ---------------- PIN TO IPFS ----------------
     const pinataRes = await fetch(
       "https://api.pinata.cloud/pinning/pinFileToIPFS",
       {
@@ -96,16 +146,13 @@ export async function POST(req: NextRequest) {
     }
 
     const pinataJson = await pinataRes.json();
-    const ipfsHash = pinataJson.IpfsHash as string;
+    const ipfsHashFinal = pinataJson.IpfsHash as string;
 
-    // build a permanent gateway URL
-    const gatewayBase =
-      process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
-    const gatewayUrl = `${gatewayBase}/${ipfsHash}`;
+    const gatewayUrl = buildGatewayUrlFromCid(ipfsHashFinal);
 
     return NextResponse.json(
       {
-        ipfsHash,
+        ipfsHash: ipfsHashFinal,
         gatewayUrl,
         pinSize: pinataJson.PinSize,
         timestamp: pinataJson.Timestamp,
