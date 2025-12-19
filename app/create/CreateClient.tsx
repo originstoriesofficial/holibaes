@@ -89,7 +89,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
         throw new Error(data?.error || "No image returned.");
       }
 
-      // This is the Fal URL (temporary) – will be replaced by IPFS after saving
+      // Fal URL (temporary) – will be replaced by IPFS URL after saving
       setImageUrl(data.imageUrl);
 
       const label =
@@ -106,9 +106,11 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
 
   /**
    * Save Holibae to Pinata (IPFS).
-   * - Takes current imageUrl (Fal or other)
-   * - Pins it
-   * - Returns the permanent IPFS gateway URL
+   * Accepts:
+   *   - { gatewayUrl } OR
+   *   - { ipfsHash } only
+   *
+   * Always normalizes to a full https:// URL.
    */
   const handleSaveCharacter = async (): Promise<string | null> => {
     setError(null);
@@ -117,7 +119,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       return null;
     }
 
-    if (saving) return imageUrl; // avoid duplicate calls
+    if (saving) return imageUrl; // avoid double calls
 
     setSaving(true);
 
@@ -147,9 +149,19 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
         gatewayUrl?: string;
       };
 
-      const ipfsImageUrl = data.gatewayUrl;
-      if (!ipfsImageUrl) {
-        throw new Error("Missing gatewayUrl from save-holibae.");
+      // ✅ normalize to a proper https URL
+      let ipfsImageUrl: string | null = null;
+
+      if (data.gatewayUrl) {
+        ipfsImageUrl = data.gatewayUrl;
+      } else if (data.ipfsHash) {
+        // build from CID if backend only returns hash
+        ipfsImageUrl = `https://gateway.pinata.cloud/ipfs/${data.ipfsHash}`;
+      }
+
+      if (!ipfsImageUrl || !ipfsImageUrl.startsWith("http")) {
+        console.error("Invalid image URL from save-holibae:", ipfsImageUrl);
+        throw new Error("Invalid image URL from save-holibae.");
       }
 
       // ✅ Replace Fal URL with permanent IPFS URL
@@ -172,13 +184,13 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       return;
     }
 
-    const labName = originHolder ? "OriginStory" : "Holibae"; // not used in text yet but fine for later variation
+    const labName = originHolder ? "OriginStory" : "Holibae";
     const text = `I just summoned my ${labName} ✨ Create yours: ${rootUrl}`;
     composeCast({ text, embeds: [imageUrl] });
   };
 
   /**
-   * Ensure we have a permanent IPFS image URL before going to music.
+   * Ensure we have a permanent https image URL before going to music.
    * - If not saved yet, call handleSaveCharacter
    * - Then push to /music with that IPFS URL
    */
@@ -194,6 +206,11 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
         return;
       }
       finalImageUrl = ipfsImageUrl;
+    }
+
+    if (!finalImageUrl.startsWith("http")) {
+      setError("Image URL must start with http(s).");
+      return;
     }
 
     const params = new URLSearchParams();
