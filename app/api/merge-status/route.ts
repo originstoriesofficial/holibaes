@@ -1,74 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
-import Transloadit from "transloadit";
 
 export const runtime = "nodejs";
 
-const client = new Transloadit({
-  authKey: process.env.TRANSLOADIT_KEY!,
-  authSecret: process.env.TRANSLOADIT_SECRET!,
-});
-
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const { audioUrl, imageUrl, address, fid } = await req.json();
+    const assemblyUrl = req.nextUrl.searchParams.get("assemblyUrl");
 
-    if (!audioUrl || !imageUrl || !address) {
+    if (!assemblyUrl) {
       return NextResponse.json(
-        { error: "Missing audioUrl, imageUrl, or wallet address" },
+        { error: "Missing assemblyUrl" },
         { status: 400 }
       );
     }
 
-    // 🔍 Log and validate URLs
-    console.log("📸 Image URL:", imageUrl);
-    console.log("🎵 Audio URL:", audioUrl);
+    console.log("🔍 Checking assembly status:", assemblyUrl);
 
-    // Validate URLs
-    if (!audioUrl.startsWith("http://") && !audioUrl.startsWith("https://")) {
-      return NextResponse.json(
-        { error: "Invalid audio URL - must start with http:// or https://" },
-        { status: 400 }
-      );
+    const res = await fetch(assemblyUrl);
+    const data = await res.json();
+
+    console.log("📦 Assembly status:", data.ok);
+
+    // Check if completed
+    if (data.ok === "ASSEMBLY_COMPLETED") {
+      const video =
+        data.results?.encode_video?.[0]?.ssl_url ||
+        data.results?.encode_video?.[0]?.url;
+
+      if (video) {
+        return NextResponse.json({
+          status: "ready",
+          videoUrl: video,
+        });
+      }
     }
 
-    if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
-      return NextResponse.json(
-        { error: "Invalid image URL - must start with http:// or https://" },
-        { status: 400 }
-      );
+    // Check if failed
+    if (data.error) {
+      console.error("❌ Assembly failed:", data.error, data.message);
+      return NextResponse.json({
+        status: "failed",
+        error: data.message || "Assembly failed",
+      });
     }
 
-    console.log("🔍 Starting assembly...");
-
-    const assembly = await client.createAssembly({
-      params: {
-        template_id: process.env.TRANSLOADIT_TEMPLATE_ID!,
-        fields: {
-          audioUrl,
-          imageUrl,
-          wallet_address: address,
-          fid: fid ?? "",
-        },
-      },
-      // DON'T wait - return assembly URL for polling
-      waitForCompletion: false,
-    });
-
-    console.log("📦 Assembly created:", assembly?.assembly_id);
-    console.log("📦 Assembly URL:", assembly?.assembly_ssl_url);
-
-    // Return assembly URL for status polling
-    return NextResponse.json({ 
-      assemblyUrl: assembly?.assembly_ssl_url,
-      assemblyId: assembly?.assembly_id 
+    // Still processing
+    return NextResponse.json({
+      status: "processing",
+      progress: data.bytes_expected > 0 
+        ? Math.round((data.bytes_received / data.bytes_expected) * 100)
+        : 0,
     });
   } catch (err: any) {
-    console.error("❌ merge-video error:", err);
+    console.error("❌ merge-status error:", err);
     return NextResponse.json(
-      { 
-        error: err.message ?? "merge failed",
-        assemblyUrl: err.response?.assembly_ssl_url 
-      },
+      { status: "failed", error: err.message ?? "Status check failed" },
       { status: 500 }
     );
   }

@@ -19,7 +19,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("🔍 Starting assembly with:", { audioUrl, imageUrl });
+    // 🔍 Log and validate URLs
+    console.log("📸 Image URL:", imageUrl);
+    console.log("🎵 Audio URL:", audioUrl);
+
+    // Validate URLs
+    if (!audioUrl.startsWith("http://") && !audioUrl.startsWith("https://")) {
+      return NextResponse.json(
+        { error: "Invalid audio URL - must start with http:// or https://" },
+        { status: 400 }
+      );
+    }
+
+    if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+      return NextResponse.json(
+        { error: "Invalid image URL - must start with http:// or https://" },
+        { status: 400 }
+      );
+    }
+
+    console.log("🔍 Starting assembly...");
 
     const assembly = await client.createAssembly({
       params: {
@@ -31,37 +50,25 @@ export async function POST(req: NextRequest) {
           fid: fid ?? "",
         },
       },
-      waitForCompletion: true,
+      // DON'T wait - return assembly URL for polling
+      waitForCompletion: false,
     });
 
-    console.log("📦 Assembly status:", assembly?.ok);
-    console.log("📦 Assembly ID:", assembly?.assembly_id);
-    console.log("📦 Results:", JSON.stringify(assembly?.results, null, 2));
+    console.log("📦 Assembly created:", assembly?.assembly_id);
+    console.log("📦 Assembly URL:", assembly?.assembly_ssl_url);
 
-    const video =
-      assembly?.results?.encode_video?.[0]?.ssl_url ||
-      assembly?.results?.encode_video?.[0]?.url;
-
-    if (!video) {
-      console.error("❌ No video in results. Full assembly:", JSON.stringify(assembly, null, 2));
-      return NextResponse.json(
-        {
-          error: "No video returned",
-          assembly_id: assembly?.assembly_id,
-          assembly_url: assembly?.assembly_ssl_url,
-          results: assembly?.results,
-          error_details: assembly?.error,
-        },
-        { status: 500 }
-      );
-    }
-
-    console.log("✅ Video created:", video);
-    return NextResponse.json({ videoUrl: video });
+    // Return assembly URL for status polling
+    return NextResponse.json({ 
+      assemblyUrl: assembly?.assembly_ssl_url,
+      assemblyId: assembly?.assembly_id 
+    });
   } catch (err: any) {
     console.error("❌ merge-video error:", err);
     return NextResponse.json(
-      { error: err.message ?? "merge failed", details: err },
+      { 
+        error: err.message ?? "merge failed",
+        assemblyUrl: err.response?.assembly_ssl_url 
+      },
       { status: 500 }
     );
   }
