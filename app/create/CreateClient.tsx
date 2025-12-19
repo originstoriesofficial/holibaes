@@ -24,7 +24,7 @@ const HOLIDAY_OPTIONS = [
   { id: "solstice", label: "💫 Winter Solstice / Yule", blurb: "Celestial motifs, stone textures, witchy energy." },
   { id: "lunarNewYear", label: "🧨 Lunar New Year Preview", blurb: "Red and gold lanterns, dragons, fireworks." },
   { id: "newYear", label: "🎉 Global New Year", blurb: "Metallic tones, confetti, skyline countdown." },
-  { id: "sinterklaas", label: "🎁 Sinterklaas", blurb: "Dutch Traditions, Red robes, golden mitre, steamboat arrival, candy treats." },
+  { id: "sinterklaas", label: "🎁 Sinterklaas", blurb: "Dutch traditions, candy treats, cozy interiors." },
   { id: "basemas", label: "🔵 Blue Basemas (Base)", blurb: "Base blue, futuristic, monochromatic." },
 ] as const;
 
@@ -49,7 +49,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   const [color, setColor] = useState("");
 
   const [characterSummary, setCharacterSummary] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null); // Fal first, then IPFS
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -85,11 +85,15 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       });
 
       const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.imageUrl) throw new Error(data?.error || "No image returned.");
+      if (!res.ok || !data?.imageUrl) {
+        throw new Error(data?.error || "No image returned.");
+      }
 
+      // This is the Fal URL (temporary) – will be replaced by IPFS after saving
       setImageUrl(data.imageUrl);
 
-      const label = HOLIDAY_OPTIONS.find((h) => h.id === holidayKey)?.label ?? "Mystery";
+      const label =
+        HOLIDAY_OPTIONS.find((h) => h.id === holidayKey)?.label ?? "Mystery";
       setCharacterSummary(
         `Your Holibae is a ${hollyForm} infused with ${label} energy, glowing in ${color} tones. Press image to download.`
       );
@@ -100,14 +104,21 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
     }
   };
 
-  const handleSaveCharacter = async () => {
+  /**
+   * Save Holibae to Pinata (IPFS).
+   * - Takes current imageUrl (Fal or other)
+   * - Pins it
+   * - Returns the permanent IPFS gateway URL
+   */
+  const handleSaveCharacter = async (): Promise<string | null> => {
     setError(null);
     if (!imageUrl || !address) {
       setError("Missing image or wallet address.");
-      return;
+      return null;
     }
 
-    if (saving) return;
+    if (saving) return imageUrl; // avoid duplicate calls
+
     setSaving(true);
 
     try {
@@ -125,10 +136,30 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to save.");
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("save-holibae failed:", txt);
+        throw new Error("Failed to save.");
+      }
+
+      const data = (await res.json()) as {
+        ipfsHash?: string;
+        gatewayUrl?: string;
+      };
+
+      const ipfsImageUrl = data.gatewayUrl;
+      if (!ipfsImageUrl) {
+        throw new Error("Missing gatewayUrl from save-holibae.");
+      }
+
+      // ✅ Replace Fal URL with permanent IPFS URL
+      setImageUrl(ipfsImageUrl);
       setSavedOnce(true);
+      return ipfsImageUrl;
     } catch (err: any) {
+      console.error(err);
       setError(err?.message || "Failed to save.");
+      return null;
     } finally {
       setSaving(false);
     }
@@ -141,17 +172,36 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
       return;
     }
 
-    const labName = originHolder ? "OriginStory" : "Holibae";
-    const text = `I just summoned my Holibae ✨ Create yours: ${rootUrl}`;
+    const labName = originHolder ? "OriginStory" : "Holibae"; // not used in text yet but fine for later variation
+    const text = `I just summoned my ${labName} ✨ Create yours: ${rootUrl}`;
     composeCast({ text, embeds: [imageUrl] });
   };
 
-  const handleGoToMusic = () => {
+  /**
+   * Ensure we have a permanent IPFS image URL before going to music.
+   * - If not saved yet, call handleSaveCharacter
+   * - Then push to /music with that IPFS URL
+   */
+  const handleGoToMusic = async () => {
+    setError(null);
+
+    let finalImageUrl = imageUrl;
+
+    if (!finalImageUrl || !savedOnce) {
+      const ipfsImageUrl = await handleSaveCharacter();
+      if (!ipfsImageUrl) {
+        // saving failed
+        return;
+      }
+      finalImageUrl = ipfsImageUrl;
+    }
+
     const params = new URLSearchParams();
     if (fid) params.set("fid", fid);
     if (originHolder) params.set("originHolder", "1");
     if (hollyForm) params.set("hollyForm", hollyForm);
-    if (imageUrl) params.set("imageUrl", imageUrl);
+    if (finalImageUrl) params.set("imageUrl", finalImageUrl);
+
     router.push(`/music?${params.toString()}`);
   };
 
@@ -164,7 +214,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   };
 
   return (
-<main className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-lg mx-auto space-y-8">
         {!imageUrl ? (
           <>
@@ -183,7 +233,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 </ol>
               </div>
             </header>
-  
+
             <div className="flex justify-center gap-3">
               {[1, 2, 3].map((s) => (
                 <div
@@ -194,12 +244,12 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 />
               ))}
             </div>
-  
+
             <section className="card p-8 space-y-6">
               {step === 1 && (
                 <div className="space-y-3">
                   <label className="block text-lg font-semibold text-[var(--base-blue)]">
-                  ⬇️ Your Holibae Form
+                    ⬇️ Your Holibae Form
                   </label>
                   <textarea
                     rows={4}
@@ -210,11 +260,11 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   />
                 </div>
               )}
-  
+
               {step === 2 && (
                 <div className="space-y-3">
                   <label className="block text-lg font-semibold text-[var(--base-blue)]">
-                  Choose a Holiday
+                    Choose a Holiday
                   </label>
                   <div className="rounded-xl border-2 border-[var(--border)] bg-white p-3">
                     <div className="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
@@ -232,7 +282,11 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                             }`}
                           >
                             <div className="font-semibold text-base">{opt.label}</div>
-                            <div className={`text-xs mt-1 ${active ? "text-white/90" : "text-[var(--muted)]"}`}>
+                            <div
+                              className={`text-xs mt-1 ${
+                                active ? "text-white/90" : "text-[var(--muted)]"
+                              }`}
+                            >
                               {opt.blurb}
                             </div>
                           </button>
@@ -242,11 +296,11 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   </div>
                 </div>
               )}
-  
+
               {step === 3 && (
                 <div className="space-y-3">
                   <label className="block text-lg font-semibold text-[var(--base-blue)]">
-                  Choose a Color
+                    Choose a Color
                   </label>
                   <textarea
                     rows={3}
@@ -257,23 +311,32 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   />
                 </div>
               )}
-  
+
               <div className="flex gap-3 pt-4">
-                <Button variant="secondary" onClick={prevStep} disabled={step === 1} className="flex-1">
+                <Button
+                  variant="secondary"
+                  onClick={prevStep}
+                  disabled={step === 1}
+                  className="flex-1"
+                >
                   ← Back
                 </Button>
-  
+
                 {step < 3 ? (
                   <Button onClick={nextStep} className="flex-1">
                     Next →
                   </Button>
                 ) : (
-                  <Button onClick={handleGenerateCharacter} disabled={generating} className="flex-1">
+                  <Button
+                    onClick={handleGenerateCharacter}
+                    disabled={generating}
+                    className="flex-1"
+                  >
                     {generating ? "✨ Summoning…" : "Summon"}
                   </Button>
                 )}
               </div>
-  
+
               {error && (
                 <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
                   <p className="text-sm text-red-700">{error}</p>
@@ -290,18 +353,18 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                 </h1>
                 <div className="h-1 w-16 bg-gradient-to-r from-[var(--base-blue)] to-[var(--silver)] rounded-full"></div>
               </div>
-              <button 
-                onClick={handleCreateAnother} 
+              <button
+                onClick={handleCreateAnother}
                 className="text-sm font-semibold text-[var(--silver)] hover:text-[var(--base-blue)] transition-colors underline"
               >
                 Create another
               </button>
             </header>
-  
+
             <section className="space-y-6">
               <div className="card overflow-hidden p-4">
                 <Image
-                  src={imageUrl!}
+                  src={imageUrl}
                   alt="Holibae"
                   width={500}
                   height={500}
@@ -309,7 +372,7 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   priority
                 />
               </div>
-  
+
               {characterSummary && (
                 <div className="card p-5">
                   <p className="text-base text-[var(--foreground)] leading-relaxed">
@@ -317,21 +380,28 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
                   </p>
                 </div>
               )}
-  
+
               <div className="space-y-3">
-                <Button onClick={handleSaveCharacter} disabled={saving}>
-                  {saving ? "Saving…" : savedOnce ? "✅ Holibae saved" : "💾 Save this Holibae to the Collection)"}
+                <Button onClick={() => void handleSaveCharacter()} disabled={saving}>
+                  {saving
+                    ? "Saving…"
+                    : savedOnce
+                    ? "✅ Holibae saved"
+                    : "💾 Save this Holibae to the Collection"}
                 </Button>
-  
+
                 <Button onClick={handleShareCharacter} variant="secondary">
                   📤 Share Holibae
                 </Button>
-  
-                <Button onClick={handleGoToMusic} className="bg-[var(--silver)] hover:bg-[var(--base-blue)]">
+
+                <Button
+                  onClick={() => void handleGoToMusic()}
+                  className="bg-[var(--silver)] hover:bg-[var(--base-blue)]"
+                >
                   💿 Enter music studio
                 </Button>
               </div>
-  
+
               {error && (
                 <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
                   <p className="text-sm text-red-700">{error}</p>
