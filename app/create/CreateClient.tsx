@@ -114,16 +114,29 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
    */
   const handleSaveCharacter = async (): Promise<string | null> => {
     setError(null);
+  
     if (!imageUrl || !address) {
       setError("Missing image or wallet address.");
       return null;
     }
-
-    if (saving) return imageUrl; // avoid double calls
-
+  
+    if (saving) return imageUrl;
+  
     setSaving(true);
-
+  
     try {
+      // 🔍 Optional: validate image URL before sending
+      try {
+        const check = await fetch(imageUrl, { method: "HEAD" });
+        if (!check.ok) {
+          setError("The image could not be accessed. Please regenerate.");
+          return null;
+        }
+      } catch {
+        setError("Image URL unreachable. Try generating again.");
+        return null;
+      }
+  
       const res = await fetch("/api/save-holibae", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -137,46 +150,47 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
           summary: characterSummary,
         }),
       });
-
+  
+      const txt = await res.clone().text();
+      console.log("📦 save-holibae raw response:", txt);
+  
       if (!res.ok) {
-        const txt = await res.text();
-        console.error("save-holibae failed:", txt);
-        throw new Error("Failed to save.");
+        console.error("❌ save-holibae failed:", txt);
+        throw new Error("Failed to save Holibae.");
       }
-
+  
       const data = (await res.json()) as {
         ipfsHash?: string;
         gatewayUrl?: string;
       };
-
-      // ✅ normalize to a proper https URL
+  
+      console.log("✅ save-holibae parsed:", data);
+  
       let ipfsImageUrl: string | null = null;
-
+  
       if (data.gatewayUrl) {
         ipfsImageUrl = data.gatewayUrl;
       } else if (data.ipfsHash) {
-        // build from CID if backend only returns hash
         ipfsImageUrl = `https://gateway.pinata.cloud/ipfs/${data.ipfsHash}`;
       }
-
+  
       if (!ipfsImageUrl || !ipfsImageUrl.startsWith("http")) {
-        console.error("Invalid image URL from save-holibae:", ipfsImageUrl);
+        console.error("❌ Invalid image URL from save-holibae:", ipfsImageUrl);
         throw new Error("Invalid image URL from save-holibae.");
       }
-
-      // ✅ Replace Fal URL with permanent IPFS URL
+  
       setImageUrl(ipfsImageUrl);
       setSavedOnce(true);
       return ipfsImageUrl;
     } catch (err: any) {
-      console.error(err);
+      console.error("❌ Final save error:", err);
       setError(err?.message || "Failed to save.");
       return null;
     } finally {
       setSaving(false);
     }
   };
-
+  
   const handleShareCharacter = () => {
     setError(null);
     if (!imageUrl) {
