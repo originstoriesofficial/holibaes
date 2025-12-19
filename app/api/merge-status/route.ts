@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const res = await fetch(assemblyUrl);
     const data = await res.json();
 
-    console.log("📦 Assembly status:", data.ok);
+    console.log("📦 Full assembly response:", JSON.stringify(data, null, 2));
 
     // Check if completed
     if (data.ok === "ASSEMBLY_COMPLETED") {
@@ -27,10 +27,14 @@ export async function GET(req: NextRequest) {
         data.results?.encode_video?.[0]?.url;
 
       if (video) {
+        console.log("✅ Video ready:", video);
         return NextResponse.json({
           status: "ready",
           videoUrl: video,
         });
+      } else {
+        console.log("⚠️ Assembly completed but no video found in results");
+        console.log("Available results:", Object.keys(data.results || {}));
       }
     }
 
@@ -44,11 +48,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Still processing
+    const progress = data.bytes_expected > 0 
+      ? Math.round((data.bytes_received / data.bytes_expected) * 100)
+      : 0;
+    
+    console.log(`⏳ Processing: ${progress}%`);
+
     return NextResponse.json({
       status: "processing",
-      progress: data.bytes_expected > 0 
-        ? Math.round((data.bytes_received / data.bytes_expected) * 100)
-        : 0,
+      progress,
     });
   } catch (err: any) {
     console.error("❌ merge-status error:", err);

@@ -8,7 +8,7 @@ export interface ShareSongButtonProps {
   prompt: string;
   style: string;
   holibaeImageUrl?: string | null;
-  videoUrl?: string | null; // Livepeer CDN output (MP4)
+  videoUrl?: string | null;
 }
 
 export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
@@ -20,17 +20,18 @@ export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
   const { composeCast } = useComposeCast();
 
   const handleShare = () => {
-    const text = `🎶 Just made a ${style} Holibae music video! "${prompt}" ✨\n\nCreate yours at Holibae Labs!`;
+    const text = `🎶 Just made a ${style} Holibae anthem! "${prompt}" ✨\n\nCreate yours at Holibae Labs!`;
 
-    let embeds: [] | [string] | undefined;
+    // ✅ Type must be exactly: [] | [string] | [string, string] | undefined
+    let embeds: [] | [string] | [string, string] | undefined;
 
-    // 🔑 PRIORITIZE VIDEO
+    // Prioritize video, fallback to image
     if (videoUrl) {
-      embeds = [videoUrl]; // show video player in Warpcast
+      embeds = [videoUrl]; // Single video embed
     } else if (holibaeImageUrl) {
-      embeds = [holibaeImageUrl];
+      embeds = [holibaeImageUrl]; // Single image embed
     } else {
-      embeds = undefined;
+      embeds = undefined; // No embeds
     }
 
     composeCast({ text, embeds });
@@ -39,8 +40,8 @@ export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
   const disabled = !videoUrl && !holibaeImageUrl;
 
   return (
-    <Button onClick={handleShare} disabled={disabled} variant="secondary">
-      🎥 Share Video {holibaeImageUrl && "+ Holibae"}
+    <Button onClick={handleShare} disabled={disabled} variant="secondary" className="w-full">
+      {videoUrl ? "🎥 Share Video on Farcaster" : "📤 Share Holibae"}
     </Button>
   );
 };
