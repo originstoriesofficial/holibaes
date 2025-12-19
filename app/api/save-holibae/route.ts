@@ -36,11 +36,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log("📸 Attempting to fetch image from:", imageUrl);
+
     // Fetch image from URL
     const imgRes = await fetch(imageUrl);
     if (!imgRes.ok) {
+      const errText = await imgRes.text().catch(() => "[no response body]");
+      console.error("❌ Could not fetch image:", imageUrl, errText);
       return NextResponse.json(
-        { error: "Could not download image from source URL" },
+        { error: "Could not download image from source URL", sourceUrl: imageUrl },
         { status: 502 }
       );
     }
@@ -94,6 +98,14 @@ export async function POST(req: NextRequest) {
 
     const json = await uploadRes.json();
     const ipfsHash = json.IpfsHash;
+
+    if (!ipfsHash) {
+      console.error("❌ Missing IpfsHash in response:", json);
+      return NextResponse.json(
+        { error: "Invalid Pinata response", details: json },
+        { status: 502 }
+      );
+    }
 
     const gatewayBase =
       process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
