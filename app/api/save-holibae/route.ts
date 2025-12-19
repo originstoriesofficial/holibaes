@@ -1,33 +1,9 @@
-// app/api/save-holibae/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "nodejs"; // Required for fetch, FormData, etc.
-
-function buildGatewayUrlFromCid(cid: string): string {
-  const cleanCid = cid
-    .trim()
-    .replace(/^ipfs:\/\//, "") // ipfs://CID
-    .replace(/^\/?ipfs\//, ""); // /ipfs/CID or ipfs/CID
-
-  const gatewayBase =
-    process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
-
-  return `${gatewayBase}/${cleanCid}`;
-}
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as {
-      address?: string;
-      fid?: string | null;
-      hollyForm?: string;
-      holidayKey?: string;
-      color?: string;
-      imageUrl?: string;  // can be Fal URL / gateway URL / ipfs://CID / CID
-      ipfsHash?: string;  // optional CID
-      summary?: string | null;
-    };
-
     const {
       address,
       fid,
@@ -35,13 +11,20 @@ export async function POST(req: NextRequest) {
       holidayKey,
       color,
       imageUrl,
-      ipfsHash,
       summary,
-    } = body;
+    } = (await req.json()) as {
+      address?: string;
+      fid?: string | null;
+      hollyForm?: string;
+      holidayKey?: string;
+      color?: string;
+      imageUrl?: string;
+      summary?: string | null;
+    };
 
-    if (!address) {
+    if (!address || !imageUrl) {
       return NextResponse.json(
-        { error: "Missing wallet address" },
+        { error: "Missing wallet address or imageUrl" },
         { status: 400 }
       );
     }
@@ -53,57 +36,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ---------------- NORMALIZE IMAGE SOURCE URL ----------------
-    let sourceUrl: string | null = null;
-
-    if (imageUrl && imageUrl.trim()) {
-      const raw = imageUrl.trim();
-
-      if (raw.startsWith("http://") || raw.startsWith("https://")) {
-        // already a full URL
-        sourceUrl = raw;
-      } else {
-        // treat as CID / ipfs:// / /ipfs/CID
-        sourceUrl = buildGatewayUrlFromCid(raw);
-      }
-    } else if (ipfsHash && ipfsHash.trim()) {
-      // if caller sends only a CID
-      sourceUrl = buildGatewayUrlFromCid(ipfsHash.trim());
-    }
-
-    if (!sourceUrl || !sourceUrl.startsWith("http")) {
-      return NextResponse.json(
-        {
-          error:
-            "Invalid image URL or CID. Must be a full http(s) URL or a valid CID/ipfs:// string.",
-          receivedImageUrl: imageUrl,
-          receivedIpfsHash: ipfsHash,
-        },
-        { status: 400 }
-      );
-    }
-
-    // ---------------- DOWNLOAD IMAGE ----------------
-    const imgRes = await fetch(sourceUrl);
+    // Fetch image from URL
+    const imgRes = await fetch(imageUrl);
     if (!imgRes.ok) {
-      console.error("❌ Failed to download image:", sourceUrl, imgRes.status);
       return NextResponse.json(
-        { error: "Could not download image from source URL", sourceUrl },
+        { error: "Could not download image from source URL" },
         { status: 502 }
       );
     }
 
-    const arrayBuffer = await imgRes.arrayBuffer();
-    const contentType = imgRes.headers.get("content-type") ?? "image/png";
+    const bytes = await imgRes.arrayBuffer();
+    const mime = imgRes.headers.get("content-type") ?? "image/png";
 
-    // Wrap as File for pinFileToIPFS
-    const blob = new Blob([arrayBuffer], { type: contentType });
-    const file = new File([blob], "holibae.png", { type: contentType });
+    const file = new File([bytes], "holibae.png", { type: mime });
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const pinataForm = new FormData();
+    pinataForm.append("file", file);
 
-    // ---------------- PINATA METADATA ----------------
     const timestamp = Date.now();
     const shortAddress = address.slice(0, 8).toLowerCase();
 
@@ -111,59 +60,59 @@ export async function POST(req: NextRequest) {
       name: `holibae-${shortAddress}-${timestamp}.png`,
       keyvalues: {
         app: "holibaes",
+        type: "image",
         walletAddress: address,
         fid: fid ?? "",
         hollyForm: hollyForm ?? "",
         holidayKey: holidayKey ?? "",
         color: color ?? "",
         summary: summary ?? "",
-        // Optionally also store the original source URL:
-        sourceUrl,
       },
     };
 
-    formData.append("pinataMetadata", JSON.stringify(metadata));
+    pinataForm.append("pinataMetadata", JSON.stringify(metadata));
 
-    // ---------------- PIN TO IPFS ----------------
-    const pinataRes = await fetch(
+    const uploadRes = await fetch(
       "https://api.pinata.cloud/pinning/pinFileToIPFS",
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.PINATA_JWT}`,
         },
-        body: formData,
+        body: pinataForm,
       }
     );
 
-    if (!pinataRes.ok) {
-      const errText = await pinataRes.text();
-      console.error("❌ Pinata error:", errText);
+    if (!uploadRes.ok) {
+      const errorDetails = await uploadRes.text();
+      console.error("❌ Pinata image upload failed:", errorDetails);
       return NextResponse.json(
-        { error: "Pinata upload failed", details: errText },
+        { error: "Pinata image upload failed", details: errorDetails },
         { status: 502 }
       );
     }
 
-    const pinataJson = await pinataRes.json();
-    const ipfsHashFinal = pinataJson.IpfsHash as string;
+    const json = await uploadRes.json();
+    const ipfsHash = json.IpfsHash;
 
-    const gatewayUrl = buildGatewayUrlFromCid(ipfsHashFinal);
+    const gatewayBase =
+      process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
+
+    const gatewayUrl = `${gatewayBase}/${ipfsHash}`;
 
     return NextResponse.json(
       {
-        ipfsHash: ipfsHashFinal,
+        ipfsHash,
         gatewayUrl,
-        pinSize: pinataJson.PinSize,
-        timestamp: pinataJson.Timestamp,
-        isDuplicate: pinataJson.isDuplicate,
+        pinSize: json.PinSize,
+        timestamp: json.Timestamp,
       },
       { status: 200 }
     );
   } catch (err) {
     console.error("❌ save-holibae error:", err);
     return NextResponse.json(
-      { error: "Internal error saving Holibae to Pinata" },
+      { error: "Internal error saving Holibae" },
       { status: 500 }
     );
   }
