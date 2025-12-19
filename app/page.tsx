@@ -117,12 +117,10 @@ export default function Home() {
 </p>
 
 <button
-  onClick={handleEnter}
-  disabled={loading}
   className="
     w-full py-5 rounded-xl 
-    bg-[#0f7b3e]          /* deep green */
-    text-white           
+    bg-[#0f7b3e]
+    !text-white
     text-lg font-semibold 
     shadow-lg 
     hover:scale-105 hover:shadow-xl 
@@ -132,7 +130,6 @@ export default function Home() {
 >
   {loading ? "Checking access…" : "Enter Holibae Labs"}
 </button>
-
 
 {balance && (
   <p className="text-xs text-white/90">
