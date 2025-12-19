@@ -89,7 +89,6 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
         throw new Error(data?.error || "No image returned.");
       }
 
-      // Fal URL (temporary) – will be replaced by IPFS URL after saving
       setImageUrl(data.imageUrl);
 
       const label =
@@ -105,92 +104,49 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   };
 
   /**
-   * Save Holibae to Pinata (IPFS).
-   * Accepts:
-   *   - { gatewayUrl } OR
-   *   - { ipfsHash } only
-   *
-   * Always normalizes to a full https:// URL.
+   * Upload Fal-generated image to IPFS via client.
    */
   const handleSaveCharacter = async (): Promise<string | null> => {
     setError(null);
-  
+
     if (!imageUrl || !address) {
       setError("Missing image or wallet address.");
       return null;
     }
-  
+
     if (saving) return imageUrl;
-  
     setSaving(true);
-  
+
     try {
-      // 🔍 Optional: validate image URL before sending
-      try {
-        const check = await fetch(imageUrl, { method: "HEAD" });
-        if (!check.ok) {
-          setError("The image could not be accessed. Please regenerate.");
-          return null;
-        }
-      } catch {
-        setError("Image URL unreachable. Try generating again.");
-        return null;
-      }
-  
-      const res = await fetch("/api/save-holibae", {
+      const imgRes = await fetch(imageUrl);
+      const blob = await imgRes.blob();
+
+      const form = new FormData();
+      form.append("file", new File([blob], "holibae.png", { type: blob.type }));
+
+      const res = await fetch("/api/upload-ipfs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address,
-          fid,
-          hollyForm,
-          holidayKey,
-          color,
-          imageUrl,
-          summary: characterSummary,
-        }),
+        body: form,
       });
-  
-      const txt = await res.clone().text();
-      console.log("📦 save-holibae raw response:", txt);
-  
-      if (!res.ok) {
-        console.error("❌ save-holibae failed:", txt);
-        throw new Error("Failed to save Holibae.");
+
+      const data = await res.json();
+      if (!res.ok || !data?.cid) {
+        throw new Error(data?.error || "Failed to upload to IPFS");
       }
-  
-      const data = (await res.json()) as {
-        ipfsHash?: string;
-        gatewayUrl?: string;
-      };
-  
-      console.log("✅ save-holibae parsed:", data);
-  
-      let ipfsImageUrl: string | null = null;
-  
-      if (data.gatewayUrl) {
-        ipfsImageUrl = data.gatewayUrl;
-      } else if (data.ipfsHash) {
-        ipfsImageUrl = `https://gateway.pinata.cloud/ipfs/${data.ipfsHash}`;
-      }
-  
-      if (!ipfsImageUrl || !ipfsImageUrl.startsWith("http")) {
-        console.error("❌ Invalid image URL from save-holibae:", ipfsImageUrl);
-        throw new Error("Invalid image URL from save-holibae.");
-      }
-  
+
+      const ipfsImageUrl = `https://gateway.pinata.cloud/ipfs/${data.cid}`;
       setImageUrl(ipfsImageUrl);
       setSavedOnce(true);
       return ipfsImageUrl;
     } catch (err: any) {
-      console.error("❌ Final save error:", err);
+      console.error("❌ Save error:", err);
       setError(err?.message || "Failed to save.");
       return null;
     } finally {
       setSaving(false);
     }
   };
-  
+
   const handleShareCharacter = () => {
     setError(null);
     if (!imageUrl) {
@@ -203,22 +159,13 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
     composeCast({ text, embeds: [imageUrl] });
   };
 
-  /**
-   * Ensure we have a permanent https image URL before going to music.
-   * - If not saved yet, call handleSaveCharacter
-   * - Then push to /music with that IPFS URL
-   */
   const handleGoToMusic = async () => {
     setError(null);
-
     let finalImageUrl = imageUrl;
 
     if (!finalImageUrl || !savedOnce) {
       const ipfsImageUrl = await handleSaveCharacter();
-      if (!ipfsImageUrl) {
-        // saving failed
-        return;
-      }
+      if (!ipfsImageUrl) return;
       finalImageUrl = ipfsImageUrl;
     }
 
@@ -243,7 +190,6 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
     setError(null);
     setStep(1);
   };
-
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-lg mx-auto space-y-8">

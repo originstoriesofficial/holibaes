@@ -1,23 +1,21 @@
-import { NextResponse } from 'next/server';
-import { uploadToIPFS } from './../lib/ipfs';
+import { NextRequest, NextResponse } from "next/server";
+import { uploadToIPFS } from "@/app/lib/ipfs";
 
-export async function POST(req: Request) {
+export const runtime = "nodejs";
+
+export async function POST(req: NextRequest) {
   try {
-    const { base64, fileName, mimeType, animal, cape, hand } = await req.json();
+    const form = await req.formData();
+    const file = form.get("file");
 
-    if (!base64 || !fileName || !mimeType) {
-      return NextResponse.json({ error: 'Missing upload parameters' }, { status: 400 });
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
 
-    const buffer = Buffer.from(base64.split(',')[1], 'base64');
-    const file = new File([buffer], fileName, { type: mimeType });
-
-    const attributes = { animal, cape, hand };
-
-    const result = await uploadToIPFS(file, attributes);
-    return NextResponse.json(result);
+    const upload = await uploadToIPFS(file);
+    return NextResponse.json(upload);
   } catch (err) {
-    console.error('Upload API error:', err);
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    console.error("❌ upload-ipfs error:", err);
+    return NextResponse.json({ error: "Failed to upload to IPFS" }, { status: 500 });
   }
 }
