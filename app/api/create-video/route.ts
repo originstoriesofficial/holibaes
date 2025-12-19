@@ -1,116 +1,74 @@
-// app/api/create-video/route.ts
+// /app/api/create-video/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
 export const runtime = "nodejs";
-
-interface CreateVideoBody {
-  audioUrl?: string;
-  imageUrl?: string;
-  address?: string;
-  fid?: string | null;
-}
+export const maxDuration = 60; // Allow up to 60 seconds
 
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as CreateVideoBody;
-    const { audioUrl, imageUrl, address, fid } = body || {};
+    const { imageUrl, audioUrl, walletAddress } = await req.json();
 
-    // Basic input validation
-    if (!audioUrl || !imageUrl || !address) {
-      console.error("❌ create-video: missing fields", {
-        hasAudioUrl: !!audioUrl,
-        hasImageUrl: !!imageUrl,
-        hasAddress: !!address,
-      });
+    if (!imageUrl || !audioUrl) {
       return NextResponse.json(
-        { error: "Missing audioUrl, imageUrl, or wallet address" },
+        { error: "Missing imageUrl or audioUrl" },
         { status: 400 }
       );
     }
 
-    // Env var check
-    const apiKey = process.env.LIVEPEER_API_KEY;
-    if (!apiKey) {
-      console.error("❌ LIVEPEER_API_KEY is not set");
-      return NextResponse.json(
-        { error: "Livepeer API key not configured on server" },
-        { status: 500 }
-      );
-    }
+    console.log("🎬 Creating video with Cloudinary...");
 
-    // Call Livepeer transform API
-    const res = await fetch("https://livepeer.studio/api/transform", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        input: [
-          // ⚠️ These shapes must match Livepeer's API spec.
-          // If Livepeer expects { type: "audio", url: audioUrl } etc,
-          // adjust here accordingly.
-          { audioUrl },
-          { imageUrl },
-        ],
-        transform: {
-          video: {
-            codec: "h264",
-            width: 1080,
-            height: 1080,
-            fps: 30,
-          },
-          audio: {
-            codec: "aac",
-            channels: 2,
-          },
-        },
-        metadata: {
-          app: "holibaes",
-          walletAddress: address,
-          fid: fid ?? "",
-          type: "holibae-song-video",
-        },
-      }),
+    // Upload image
+    const imageUpload = await cloudinary.uploader.upload(imageUrl, {
+      resource_type: "image",
+      folder: "holibaes/images",
     });
 
-    const text = await res.text();
-    let data: any = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      // if Livepeer returns non-JSON (HTML error, etc)
-      data = null;
-    }
+    // Upload audio
+    const audioUpload = await cloudinary.uploader.upload(audioUrl, {
+      resource_type: "video",
+      folder: "holibaes/audio",
+    });
 
-    if (!res.ok) {
-      console.error("❌ Livepeer transform failed", {
-        status: res.status,
-        body: text,
-      });
-      return NextResponse.json(
+    // Create video using explicit API (this actually processes it)
+    const videoResult = await cloudinary.uploader.explicit(imageUpload.public_id, {
+      resource_type: "video",
+      type: "upload",
+      eager: [
         {
-          error: "Livepeer transform failed",
-          details: text || "Non-JSON error from Livepeer",
+          width: 1080,
+          height: 1080,
+          crop: "pad",
+          background: "black",
+          duration: 60,
+          overlay: { resource_type: "video", public_id: audioUpload.public_id },
+          flags: "layer_apply",
+          format: "mp4",
         },
-        { status: 502 }
-      );
-    }
+      ],
+      eager_async: false, // Wait for processing to complete
+    });
 
-    const jobId = data?.id;
-    if (!jobId) {
-      console.error("❌ Livepeer response missing job id", data);
-      return NextResponse.json(
-        { error: "Livepeer response did not include a job id" },
-        { status: 502 }
-      );
-    }
+    // Get the processed video URL
+    const videoUrl = videoResult.eager[0].secure_url;
 
-    return NextResponse.json({ jobId }, { status: 200 });
-  } catch (err) {
-    console.error("❌ create-video error", err);
+    console.log("✅ Video ready:", videoUrl);
+
+    return NextResponse.json({
+      videoUrl,
+      imagePublicId: imageUpload.public_id,
+      audioPublicId: audioUpload.public_id,
+    });
+  } catch (err: any) {
+    console.error("❌ Cloudinary error:", err);
     return NextResponse.json(
-      { error: "Internal error creating video" },
+      { error: err.message || "Failed to create video" },
       { status: 500 }
     );
   }

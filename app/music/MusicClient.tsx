@@ -207,7 +207,7 @@ export default function MusicClient() {
     }
   };
 
-  // -------------------- CREATE + POLL VIDEO (Transloadit template) --------------------
+  // -------------------- CREATE VIDEO (Cloudinary) --------------------
   const createAndMergeVideo = async () => {
     if (!ipfsUrl) {
       setError("Save song first.");
@@ -223,62 +223,39 @@ export default function MusicClient() {
     setError(null);
 
     try {
-      // 1) create Transloadit assembly via /api/merge-video
-      const res = await fetch("/api/merge-video", {
+      console.log("🎬 Creating video with Cloudinary...");
+      console.log("📸 Image URL:", imageUrlFromCreate);
+      console.log("🎵 Audio URL:", ipfsUrl);
+
+      const res = await fetch("/api/create-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           audioUrl: ipfsUrl,
           imageUrl: imageUrlFromCreate,
-          address,
-          fid,
+          walletAddress: address,
         }),
       });
 
-      const createJson = await res.json();
-
-      if (!res.ok || !createJson.assemblyUrl) {
-        console.error("merge-video failed:", createJson);
-        setError(createJson.error || "Video merge job failed.");
-        setLoading(false);
-        return;
+      if (!res.ok) {
+        const errData = await res.json();
+        console.error("❌ Video creation failed:", errData);
+        throw new Error(errData.error || "Video creation failed");
       }
 
-      const assemblyUrl = createJson.assemblyUrl as string;
+      const data = await res.json();
+      console.log("✅ Video response:", data);
 
-      // 2) poll /api/merge-status until ready/failed
-      const poll = async () => {
-        try {
-          const statusRes = await fetch(
-            `/api/merge-status?assemblyUrl=${encodeURIComponent(assemblyUrl)}`
-          );
-          const statusJson = await statusRes.json();
+      if (!data.videoUrl) {
+        throw new Error("No video URL returned");
+      }
 
-          if (statusJson.status === "ready") {
-            setVideoUrl(statusJson.videoUrl || null);
-            setLoading(false);
-            return;
-          }
-
-          if (statusJson.status === "failed") {
-            setError("Video creation failed.");
-            setLoading(false);
-            return;
-          }
-
-          // still processing
-          setTimeout(poll, 3000);
-        } catch (err) {
-          console.error("merge-status error:", err);
-          setError("Video status error.");
-          setLoading(false);
-        }
-      };
-
-      poll();
-    } catch (err) {
-      console.error(err);
-      setError("Video creation error.");
+      setVideoUrl(data.videoUrl);
+      console.log("✅ Video ready:", data.videoUrl);
+    } catch (err: any) {
+      console.error("❌ Video creation error:", err);
+      setError(err.message || "Video creation failed.");
+    } finally {
       setLoading(false);
     }
   };
@@ -435,7 +412,7 @@ export default function MusicClient() {
                 disabled={loading}
                 className="w-full text-lg"
               >
-                {loading ? "🎥 Rendering Video…" : "📀 Create Video to Share"}
+                {loading ? "🎥 Creating Video…" : "📀 Create Video to Share"}
               </Button>
             )}
 

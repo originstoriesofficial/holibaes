@@ -17,6 +17,7 @@
     "@react-native-async-storage/async-storage": "^1.24.0",
     "aws-sdk": "^1.7.2",
     "axios": "^1.13.2",
+    "cloudinary": "^2.8.0",
     "next": "16.0.7",
     "pinata": "^2.5.1",
     "react": "^19.2.0",
