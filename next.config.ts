@@ -40,10 +40,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'your-bucket.s3.us-west-2.amazonaws.com', // replace if needed
+        hostname: 'your-bucket.s3.us-west-2.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gateway.pinata.cloud',
+        pathname: '/ipfs/**',
       },
     ],
   },
+  
 
   async headers() {
     return [
