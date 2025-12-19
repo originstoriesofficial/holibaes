@@ -108,44 +108,47 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
    */
   const handleSaveCharacter = async (): Promise<string | null> => {
     setError(null);
-
+  
     if (!imageUrl || !address) {
       setError("Missing image or wallet address.");
       return null;
     }
-
+  
     if (saving) return imageUrl;
+  
     setSaving(true);
-
+  
     try {
-      const imgRes = await fetch(imageUrl);
-      const blob = await imgRes.blob();
-
+      const res = await fetch(imageUrl);
+      const blob = await res.blob();
+  
       const form = new FormData();
       form.append("file", new File([blob], "holibae.png", { type: blob.type }));
-
-      const res = await fetch("/api/upload-ipfs", {
+  
+      const upload = await fetch("/upload-ipfs", {
         method: "POST",
         body: form,
       });
-
-      const data = await res.json();
-      if (!res.ok || !data?.cid) {
-        throw new Error(data?.error || "Failed to upload to IPFS");
+  
+      const data = await upload.json();
+      const ipfsUrl = data.url || `https://gateway.pinata.cloud/ipfs/${data.cid}`;
+  
+      if (!ipfsUrl || !ipfsUrl.startsWith("http")) {
+        throw new Error("Invalid IPFS image URL returned.");
       }
-
-      const ipfsImageUrl = `https://gateway.pinata.cloud/ipfs/${data.cid}`;
-      setImageUrl(ipfsImageUrl);
+  
+      setImageUrl(ipfsUrl);
       setSavedOnce(true);
-      return ipfsImageUrl;
+      return ipfsUrl;
     } catch (err: any) {
-      console.error("❌ Save error:", err);
+      console.error("❌ Final save error:", err);
       setError(err?.message || "Failed to save.");
       return null;
     } finally {
       setSaving(false);
     }
   };
+  
 
   const handleShareCharacter = () => {
     setError(null);
