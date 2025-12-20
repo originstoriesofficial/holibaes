@@ -106,55 +106,61 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
   /**
    * Upload Fal-generated image to IPFS via client.
    */
-  const handleSaveCharacter = async (): Promise<string | null> => {
-    setError(null);
-    if (!imageUrl || !address) {
-      setError("Missing image or wallet address.");
-      return null;
+const handleSaveCharacter = async (): Promise<string | null> => {
+  setError(null);
+  if (!imageUrl || !address) {
+    setError("Missing image or wallet address.");
+    return null;
+  }
+
+  if (saving) return imageUrl; // Return current if already saving
+
+  setSaving(true);
+
+  try {
+    const res = await fetch("/api/save-holibae", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address,
+        fid,
+        hollyForm,
+        holidayKey,
+        color,
+        imageUrl,
+        summary: characterSummary,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to save.");
     }
+    
+    const data = await res.json();
+    
+    // Update imageUrl to IPFS URL
+    const ipfsUrl =
+    data.gatewayUrl ||
+    data.url ||
+    (data.ipfsHash
+      ? `${process.env.NEXT_PUBLIC_PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs"}/${data.ipfsHash}`
+      : null);
   
-    if (saving) return imageUrl; // Return current if already saving
-  
-    setSaving(true);
-  
-    try {
-      const res = await fetch("/api/save-holibae", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address,
-          fid,
-          hollyForm,
-          holidayKey,
-          color,
-          imageUrl,
-          summary: characterSummary,
-        }),
-      });
-  
-      if (!res.ok) {
-        throw new Error("Failed to save.");
-      }
-      
-      const data = await res.json();
-      
-      // Update imageUrl to IPFS URL
-      const ipfsUrl = data.gatewayUrl || data.url;
-      if (ipfsUrl) {
-        setImageUrl(ipfsUrl);
-        setSavedOnce(true);
-        return ipfsUrl;
-      }
-      
-      throw new Error("No IPFS URL returned");
-    } catch (err: any) {
-      console.error("❌ Save error:", err);
-      setError(err?.message || "Failed to save.");
-      return null;
-    } finally {
-      setSaving(false);
+    if (ipfsUrl) {
+      setImageUrl(ipfsUrl);
+      setSavedOnce(true);
+      return ipfsUrl;
     }
-  };
+    
+    throw new Error("No IPFS URL returned");
+  } catch (err: any) {
+    console.error("❌ Save error:", err);
+    setError(err?.message || "Failed to save.");
+    return null;
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleShareCharacter = () => {
     setError(null);

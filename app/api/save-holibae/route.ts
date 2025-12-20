@@ -108,19 +108,22 @@ export async function POST(req: NextRequest) {
     }
 
     const gatewayBase =
-      process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
-
-    const gatewayUrl = `${gatewayBase}/${ipfsHash}`;
-
-    return NextResponse.json(
-      {
-        ipfsHash,
-        gatewayUrl,
-        pinSize: json.PinSize,
-        timestamp: json.Timestamp,
-      },
-      { status: 200 }
-    );
+    process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs";
+  
+  const gatewayUrl = `${gatewayBase}/${ipfsHash}`;
+  
+  console.log("✅ Returning gateway URL:", gatewayUrl);
+  
+  return NextResponse.json(
+    {
+      ipfsHash,
+      gatewayUrl,
+      pinSize: json.PinSize,
+      timestamp: json.Timestamp,
+    },
+    { status: 200 }
+  );
+  
   } catch (err) {
     console.error("❌ save-holibae error:", err);
     return NextResponse.json(
