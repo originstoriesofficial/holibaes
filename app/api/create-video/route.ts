@@ -25,53 +25,58 @@ export async function POST(req: NextRequest) {
     console.log("📸 Image:", imageUrl);
     console.log("🎵 Audio:", audioUrl);
 
-    // Upload image - remove folder parameter
-    console.log("⬆️ Uploading image...");
-    const imageUpload = await cloudinary.uploader.upload(imageUrl, {
-      resource_type: "image",
-      public_id: `holibae-image-${walletAddress}-${Date.now()}`,
-    });
-    console.log("✅ Image uploaded:", imageUpload.public_id);
-
-    // Upload audio - remove folder parameter
+    // Upload audio first
     console.log("⬆️ Uploading audio...");
     const audioUpload = await cloudinary.uploader.upload(audioUrl, {
-      resource_type: "video", // Audio uses 'video' resource type
-      public_id: `holibae-audio-${walletAddress}-${Date.now()}`,
+      resource_type: "video",
+      public_id: `holibae-audio-${Date.now()}`,
     });
     console.log("✅ Audio uploaded:", audioUpload.public_id);
 
-    // Create video using explicit API
-    console.log("🎬 Generating video...");
-    const videoResult = await cloudinary.uploader.explicit(imageUpload.public_id, {
+    // Upload image as a video (this is the key!)
+    // We'll convert the static image to a video with the audio's duration
+    console.log("⬆️ Converting image to video...");
+    const videoUpload = await cloudinary.uploader.upload(imageUrl, {
       resource_type: "video",
-      type: "upload",
+      public_id: `holibae-video-${Date.now()}`,
+      // These transformations happen during upload
       eager: [
         {
+          // Resize and pad to 1080x1080
           width: 1080,
           height: 1080,
           crop: "pad",
           background: "black",
-          duration: 60,
-          overlay: { resource_type: "video", public_id: audioUpload.public_id },
+          // Add audio overlay
+          overlay: {
+            resource_type: "video",
+            public_id: audioUpload.public_id,
+          },
           flags: "layer_apply",
+          audio_codec: "aac",
+          video_codec: "h264",
+          duration: 60,
           format: "mp4",
         },
       ],
-      eager_async: false, // Wait for processing
+      eager_async: false, // Wait for processing to complete
     });
 
-    const videoUrl = videoResult.eager[0].secure_url;
+    // Get the processed video URL
+    const videoUrl = videoUpload.eager && videoUpload.eager.length > 0
+      ? videoUpload.eager[0].secure_url
+      : videoUpload.secure_url;
 
     console.log("✅ Video ready:", videoUrl);
 
     return NextResponse.json({
       videoUrl,
-      imagePublicId: imageUpload.public_id,
       audioPublicId: audioUpload.public_id,
+      videoPublicId: videoUpload.public_id,
     });
   } catch (err: any) {
     console.error("❌ Cloudinary error:", err);
+    console.error("Full error:", JSON.stringify(err, null, 2));
     return NextResponse.json(
       { error: err.message || "Failed to create video" },
       { status: 500 }
