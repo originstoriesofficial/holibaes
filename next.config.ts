@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
         hostname: 'gateway.pinata.cloud',
         pathname: '/ipfs/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'pink-improved-alligator-890.mypinata.cloud',
+        pathname: '/ipfs/**',
+      },
     ],
   },
   
