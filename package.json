@@ -22,6 +22,8 @@
     "pinata": "^2.5.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "replicate": "^1.4.0",
+    "shotstack-sdk": "^0.2.9",
     "transloadit": "^3.0.2"
   },
   "devDependencies": {

@@ -9,6 +9,7 @@ export interface ShareSongButtonProps {
   style: string;
   holibaeImageUrl?: string | null;
   videoUrl?: string | null;
+  audioUrl?: string | null;
 }
 
 export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
@@ -16,32 +17,24 @@ export const ShareSongButton: React.FC<ShareSongButtonProps> = ({
   style,
   holibaeImageUrl,
   videoUrl,
+  audioUrl,
 }) => {
   const { composeCast } = useComposeCast();
 
   const handleShare = () => {
     const text = `🎶 Just made a ${style} Holibae anthem! "${prompt}" ✨\n\nCreate yours at Holibae Labs!`;
 
-    // ✅ Type must be exactly: [] | [string] | [string, string] | undefined
-    let embeds: [] | [string] | [string, string] | undefined;
-
-    // Prioritize video, fallback to image
-    if (videoUrl) {
-      embeds = [videoUrl]; // Single video embed
-    } else if (holibaeImageUrl) {
-      embeds = [holibaeImageUrl]; // Single image embed
-    } else {
-      embeds = undefined; // No embeds
-    }
+    const media = videoUrl || audioUrl || undefined;
+    const embeds: [string] | undefined = media ? [media] : undefined;
 
     composeCast({ text, embeds });
   };
 
-  const disabled = !videoUrl && !holibaeImageUrl;
+  const disabled = !videoUrl && !audioUrl;
 
   return (
     <Button onClick={handleShare} disabled={disabled} variant="secondary" className="w-full">
-      {videoUrl ? "🎥 Share Video on Farcaster" : "📤 Share Holibae"}
+      {videoUrl ? "📤 Share Holibae" : "🎵 Share Song"}
     </Button>
   );
 };

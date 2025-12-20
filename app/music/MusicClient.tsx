@@ -8,26 +8,9 @@ import { ShareSongButton } from "../components/ShareSongButton";
 import { Button } from "../components/Button";
 
 const styles = [
-  "Lo-fi",
-  "Jazz",
-  "Ambient",
-  "Orchestral",
-  "Fantasy",
-  "Cyberpunk",
-  "Retro",
-  "Funk",
-  "Dream Pop",
-  "Gospel",
-  "Neo Soul",
-  "Future Bass",
-  "Ballad",
-  "Pop",
-  "Synthwave",
-  "Vaporwave",
-  "Acoustic",
-  "Chillwave",
-  "Shoegaze",
-  "Trance",
+  "Lo-fi", "Jazz", "Ambient", "Orchestral", "Fantasy", "Cyberpunk", "Retro", "Funk",
+  "Dream Pop", "Gospel", "Neo Soul", "Future Bass", "Ballad", "Pop", "Synthwave",
+  "Vaporwave", "Acoustic", "Chillwave", "Shoegaze", "Trance",
 ];
 
 const DEFAULT_PROMPT_SUGGESTION = "a cozy winter holiday vibe with sparkles";
@@ -60,15 +43,12 @@ export default function MusicClient() {
   const [ipfsUrl, setIpfsUrl] = useState<string | null>(null);
   const [ipfsHash, setIpfsHash] = useState<string | null>(null);
 
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-
-  const [loading, setLoading] = useState(false); // song + video
-  const [saving, setSaving] = useState(false); // IPFS
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fid = searchParams.get("fid");
-  const formFromCreate =
-    searchParams.get("hollyForm") ?? searchParams.get("animal");
+  const formFromCreate = searchParams.get("hollyForm") ?? searchParams.get("animal");
   const imageUrlFromCreate = searchParams.get("imageUrl");
   const originHolder = searchParams.get("originHolder") === "1";
 
@@ -78,7 +58,6 @@ export default function MusicClient() {
     return "holibae_songs_anon";
   }, [address, fid]);
 
-  // -------------------- GEN SONG (ElevenLabs) --------------------
   const generateSong = async () => {
     if (loading) return;
     setLoading(true);
@@ -88,18 +67,13 @@ export default function MusicClient() {
     setAudioBlob(null);
     setIpfsUrl(null);
     setIpfsHash(null);
-    setVideoUrl(null);
 
     try {
-      const basePrompt =
-        (prompt && prompt.trim()) || DEFAULT_PROMPT_SUGGESTION;
-
+      const basePrompt = prompt.trim() || DEFAULT_PROMPT_SUGGESTION;
       let fullPrompt = `${basePrompt} in the style of ${style}.`;
-      if (lyrics.trim()) {
-        fullPrompt += ` Use these lyrics: ${lyrics.trim()}.`;
-      } else {
-        fullPrompt += ` Instrumental only, no vocals, no singing, no choir.`;
-      }
+      fullPrompt += lyrics.trim()
+        ? ` Use these lyrics: ${lyrics.trim()}.`
+        : ` Instrumental only, no vocals, no singing, no choir.`;
 
       const res = await fetch("/api/compose", {
         method: "POST",
@@ -114,10 +88,8 @@ export default function MusicClient() {
       if (!res.ok) throw new Error("Failed to generate song");
 
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
       setAudioBlob(blob);
-      setAudioUrl(url);
+      setAudioUrl(URL.createObjectURL(blob));
     } catch (e) {
       console.error(e);
       setError("Song generation failed.");
@@ -126,16 +98,9 @@ export default function MusicClient() {
     }
   };
 
-  // -------------------- SAVE TO IPFS (Pinata) --------------------
   const handleSaveSong = async () => {
-    if (!audioBlob) {
-      setError("Generate a song first.");
-      return;
-    }
-    if (!address) {
-      setError("Wallet required.");
-      return;
-    }
+    if (!audioBlob) return setError("Generate a song first.");
+    if (!address) return setError("Wallet required.");
 
     setSaving(true);
     setError(null);
@@ -145,58 +110,34 @@ export default function MusicClient() {
       formData.append("file", audioBlob, "holibae-song.mp3");
       formData.append("address", address);
       if (fid) formData.append("fid", fid);
-      formData.append(
-        "prompt",
-        (prompt && prompt.trim()) || DEFAULT_PROMPT_SUGGESTION
-      );
+      formData.append("prompt", prompt.trim() || DEFAULT_PROMPT_SUGGESTION);
       formData.append("style", style);
       formData.append("lyrics", lyrics);
 
-      const res = await fetch("/api/save-song", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch("/api/save-song", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Pinning failed");
 
-      if (!res.ok) {
-        console.error("save-song failed:", await res.text());
-        throw new Error("Pinning failed.");
-      }
-
-      // support both { cid, url } and { ipfsHash, gatewayUrl }
-      const data = (await res.json()) as {
-        cid?: string;
-        url?: string;
-        ipfsHash?: string;
-        gatewayUrl?: string;
-      };
-
+      const data = await res.json();
       const cid = data.ipfsHash || data.cid;
       const url = data.gatewayUrl || data.url;
-
-      if (!cid || !url) {
-        throw new Error("Pinata response missing CID or URL");
-      }
+      if (!cid || !url) throw new Error("Pinata response missing CID or URL");
 
       setIpfsUrl(url);
       setIpfsHash(cid);
 
-      // local history
+      const localEntry: SavedSong = {
+        id: crypto.randomUUID(),
+        createdAt: Date.now(),
+        prompt: prompt || DEFAULT_PROMPT_SUGGESTION,
+        lyrics,
+        style,
+        ipfsHash: cid,
+      };
+
       if (typeof window !== "undefined") {
         const existingRaw = window.localStorage.getItem(storageKey);
-        const existing: SavedSong[] = existingRaw
-          ? JSON.parse(existingRaw)
-          : [];
-
-        const entry: SavedSong = {
-          id: crypto.randomUUID(),
-          createdAt: Date.now(),
-          prompt: prompt || DEFAULT_PROMPT_SUGGESTION,
-          lyrics,
-          style,
-          ipfsHash: cid,
-        };
-
-        const next = [entry, ...existing].slice(0, 50);
+        const existing: SavedSong[] = existingRaw ? JSON.parse(existingRaw) : [];
+        const next = [localEntry, ...existing].slice(0, 50);
         window.localStorage.setItem(storageKey, JSON.stringify(next));
       }
     } catch (e) {
@@ -207,65 +148,11 @@ export default function MusicClient() {
     }
   };
 
-  // -------------------- CREATE VIDEO (Cloudinary) --------------------
-  const createAndMergeVideo = async () => {
-    if (!ipfsUrl) {
-      setError("Save song first.");
-      return;
-    }
-    if (!address || !imageUrlFromCreate) {
-      setError("Missing wallet or Holibae image.");
-      return;
-    }
-
-    setLoading(true);
-    setVideoUrl(null);
-    setError(null);
-
-    try {
-      console.log("🎬 Creating video with Cloudinary...");
-      console.log("📸 Image URL:", imageUrlFromCreate);
-      console.log("🎵 Audio URL:", ipfsUrl);
-
-      const res = await fetch("/api/create-video", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          audioUrl: ipfsUrl,
-          imageUrl: imageUrlFromCreate,
-          walletAddress: address,
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        console.error("❌ Video creation failed:", errData);
-        throw new Error(errData.error || "Video creation failed");
-      }
-
-      const data = await res.json();
-      console.log("✅ Video response:", data);
-
-      if (!data.videoUrl) {
-        throw new Error("No video URL returned");
-      }
-
-      setVideoUrl(data.videoUrl);
-      console.log("✅ Video ready:", data.videoUrl);
-    } catch (err: any) {
-      console.error("❌ Video creation error:", err);
-      setError(err.message || "Video creation failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const effectiveDownloadUrl = audioUrl || ipfsUrl || undefined;
 
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--foreground)] px-4 py-10">
       <div className="w-full max-w-5xl mx-auto space-y-10">
-        {/* HEADER */}
         <header className="space-y-5">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--base-blue)]">
@@ -283,22 +170,16 @@ export default function MusicClient() {
               ❄️ Your Holibae Anthem ❄️
             </h1>
             <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
-              Create your Holibae&apos;s jingle, pin it, turn it into a static
-              video, and share it on Farcaster.
+              Create your Holibae&apos;s jingle, pin it, and share it on Farcaster.
             </p>
           </div>
         </header>
 
-        {/* GRID */}
         <div className="grid md:grid-cols-[1.5fr,1fr] gap-8">
-          {/* LEFT: controls */}
           <section className="card p-8 space-y-6">
             <div className="space-y-5">
-              {/* Holiday Mood */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-[var(--foreground)]">
-                  Holiday Mood
-                </label>
+                <label className="text-sm font-semibold">Holiday Mood</label>
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
@@ -307,11 +188,8 @@ export default function MusicClient() {
                 />
               </div>
 
-              {/* Lyrics */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-[var(--foreground)]">
-                  Lyrics (Optional)
-                </label>
+                <label className="text-sm font-semibold">Lyrics (Optional)</label>
                 <textarea
                   value={lyrics}
                   onChange={(e) => setLyrics(e.target.value)}
@@ -320,11 +198,8 @@ export default function MusicClient() {
                 />
               </div>
 
-              {/* Style */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-[var(--foreground)]">
-                  Choose Music Style
-                </label>
+                <label className="text-sm font-semibold">Choose Music Style</label>
                 <select
                   value={style}
                   onChange={(e) => setStyle(e.target.value)}
@@ -345,14 +220,11 @@ export default function MusicClient() {
 
             {error && !loading && (
               <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mt-4">
-                <p className="text-sm text-red-700 whitespace-pre-line">
-                  {error}
-                </p>
+                <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
               </div>
             )}
           </section>
 
-          {/* RIGHT: preview + actions */}
           <section className="card p-8 space-y-6">
             <h2 className="font-bold text-[var(--base-blue)]">❄️ Preview</h2>
 
@@ -372,28 +244,20 @@ export default function MusicClient() {
               )}
 
               <div className="space-y-1">
-                <div className="font-semibold">
-                  {formFromCreate || "Mystery Holibae"}
-                </div>
-                <div className="text-xs text-[var(--muted)]">
-                  Style: {style}
-                </div>
+                <div className="font-semibold">{formFromCreate || "Mystery Holibae"}</div>
+                <div className="text-xs text-[var(--muted)]">Style: {style}</div>
                 {ipfsHash && (
-                  <div className="text-[10px] break-all text-[var(--muted)]">
-                    IPFS: {ipfsHash}
-                  </div>
+                  <div className="text-[10px] break-all text-[var(--muted)]">IPFS: {ipfsHash}</div>
                 )}
               </div>
             </div>
 
-            {/* audio preview */}
             {effectiveDownloadUrl && (
               <div className="bg-[var(--silver-light)] p-4 rounded-xl">
                 <audio controls src={effectiveDownloadUrl} className="w-full" />
               </div>
             )}
 
-            {/* save to IPFS */}
             {!ipfsUrl && audioBlob && (
               <Button
                 onClick={handleSaveSong}
@@ -405,36 +269,13 @@ export default function MusicClient() {
               </Button>
             )}
 
-            {/* create video – only after song is saved, before video exists */}
-            {ipfsUrl && !videoUrl && (
-              <Button
-                onClick={createAndMergeVideo}
-                disabled={loading}
-                className="w-full text-lg"
-              >
-                {loading ? "🎥 Creating Video…" : "📀 Create Video to Share"}
-              </Button>
-            )}
-
-            {/* final video + share – only after video is ready */}
-            {videoUrl && (
-              <>
-                <a
-                  href={videoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block w-full text-center py-3 rounded-lg bg-[#3c8aff] text-white font-semibold shadow hover:scale-105 transition"
-                >
-                  ▶️ Watch Holibae Song Video
-                </a>
-
-                <ShareSongButton
-                  prompt={prompt || DEFAULT_PROMPT_SUGGESTION}
-                  style={style}
-                  holibaeImageUrl={imageUrlFromCreate || undefined}
-                  videoUrl={videoUrl}
-                />
-              </>
+            {ipfsUrl && (
+              <ShareSongButton
+                prompt={prompt || DEFAULT_PROMPT_SUGGESTION}
+                style={style}
+                holibaeImageUrl={imageUrlFromCreate || undefined}
+                audioUrl={ipfsUrl}
+              />
             )}
           </section>
         </div>
