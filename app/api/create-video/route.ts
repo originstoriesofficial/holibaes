@@ -42,31 +42,30 @@ export async function POST(req: NextRequest) {
     console.log("✅ Audio uploaded:", audioUpload.public_id);
 
     // Step 3: Create video using create_slideshow
-    // This creates a video from static images with audio
     console.log("🎬 Creating slideshow video...");
     
     const slideshowPublicId = `holibae-video-${Date.now()}`;
     
+    const manifest = {
+      w: 1080,
+      h: 1080,
+      fps: 1,
+      du: 60,
+      vars: {
+        sdur: 60000,
+        tdur: 0,
+        slides: [
+          {
+            media: `i:${imageUpload.public_id}`,
+          },
+        ],
+      },
+    };
+
     const videoResult = await cloudinary.uploader.create_slideshow({
       public_id: slideshowPublicId,
-      manifest_json: {
-        w: 1080,
-        h: 1080,
-        fps: 1, // 1 frame per second (static image)
-        du: 60, // 60 seconds duration
-        vars: {
-          sdur: 60000, // slide duration in milliseconds
-          tdur: 0, // no transition
-          slides: [
-            {
-              media: `i:${imageUpload.public_id}`,
-            },
-          ],
-        },
-      },
-      upload_preset: undefined, // Use direct upload
+      manifest_json: JSON.stringify(manifest) as any, // Type assertion to bypass incorrect types
     });
-
     console.log("✅ Slideshow created:", videoResult.public_id);
 
     // Step 4: Add audio to the video
