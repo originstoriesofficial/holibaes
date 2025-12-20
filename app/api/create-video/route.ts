@@ -25,7 +25,15 @@ export async function POST(req: NextRequest) {
     console.log("📸 Image:", imageUrl);
     console.log("🎵 Audio:", audioUrl);
 
-    // Upload audio first
+    // Step 1: Upload image as IMAGE
+    console.log("⬆️ Uploading image...");
+    const imageUpload = await cloudinary.uploader.upload(imageUrl, {
+      resource_type: "image",
+      public_id: `holibae-img-${Date.now()}`,
+    });
+    console.log("✅ Image uploaded:", imageUpload.public_id);
+
+    // Step 2: Upload audio
     console.log("⬆️ Uploading audio...");
     const audioUpload = await cloudinary.uploader.upload(audioUrl, {
       resource_type: "video",
@@ -33,46 +41,61 @@ export async function POST(req: NextRequest) {
     });
     console.log("✅ Audio uploaded:", audioUpload.public_id);
 
-    // Upload image as a video (this is the key!)
-    // We'll convert the static image to a video with the audio's duration
-    console.log("⬆️ Converting image to video...");
-    const videoUpload = await cloudinary.uploader.upload(imageUrl, {
+    // Step 3: Create video using create_slideshow
+    // This creates a video from static images with audio
+    console.log("🎬 Creating slideshow video...");
+    
+    const slideshowPublicId = `holibae-video-${Date.now()}`;
+    
+    const videoResult = await cloudinary.uploader.create_slideshow({
+      public_id: slideshowPublicId,
+      manifest_json: {
+        w: 1080,
+        h: 1080,
+        fps: 1, // 1 frame per second (static image)
+        du: 60, // 60 seconds duration
+        vars: {
+          sdur: 60000, // slide duration in milliseconds
+          tdur: 0, // no transition
+          slides: [
+            {
+              media: `i:${imageUpload.public_id}`,
+            },
+          ],
+        },
+      },
+      upload_preset: undefined, // Use direct upload
+    });
+
+    console.log("✅ Slideshow created:", videoResult.public_id);
+
+    // Step 4: Add audio to the video
+    console.log("🎵 Adding audio overlay...");
+    
+    const finalVideo = cloudinary.url(videoResult.public_id, {
       resource_type: "video",
-      public_id: `holibae-video-${Date.now()}`,
-      // These transformations happen during upload
-      eager: [
+      transformation: [
         {
-          // Resize and pad to 1080x1080
-          width: 1080,
-          height: 1080,
-          crop: "pad",
-          background: "black",
-          // Add audio overlay
           overlay: {
             resource_type: "video",
             public_id: audioUpload.public_id,
           },
+        },
+        {
           flags: "layer_apply",
           audio_codec: "aac",
-          video_codec: "h264",
-          duration: 60,
-          format: "mp4",
         },
       ],
-      eager_async: false, // Wait for processing to complete
+      format: "mp4",
     });
 
-    // Get the processed video URL
-    const videoUrl = videoUpload.eager && videoUpload.eager.length > 0
-      ? videoUpload.eager[0].secure_url
-      : videoUpload.secure_url;
-
-    console.log("✅ Video ready:", videoUrl);
+    console.log("✅ Video ready:", finalVideo);
 
     return NextResponse.json({
-      videoUrl,
+      videoUrl: finalVideo,
+      imagePublicId: imageUpload.public_id,
       audioPublicId: audioUpload.public_id,
-      videoPublicId: videoUpload.public_id,
+      videoPublicId: videoResult.public_id,
     });
   } catch (err: any) {
     console.error("❌ Cloudinary error:", err);
