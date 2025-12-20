@@ -108,47 +108,53 @@ export default function CreateClient({ fid, originHolder }: CreateClientProps) {
    */
   const handleSaveCharacter = async (): Promise<string | null> => {
     setError(null);
-  
     if (!imageUrl || !address) {
       setError("Missing image or wallet address.");
       return null;
     }
   
-    if (saving) return imageUrl;
+    if (saving) return imageUrl; // Return current if already saving
   
     setSaving(true);
   
     try {
-      const res = await fetch(imageUrl);
-      const blob = await res.blob();
-  
-      const form = new FormData();
-      form.append("file", new File([blob], "holibae.png", { type: blob.type }));
-  
-      const upload = await fetch("/upload-ipfs", {
+      const res = await fetch("/api/save-holibae", {
         method: "POST",
-        body: form,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address,
+          fid,
+          hollyForm,
+          holidayKey,
+          color,
+          imageUrl,
+          summary: characterSummary,
+        }),
       });
   
-      const data = await upload.json();
-      const ipfsUrl = data.url || `https://gateway.pinata.cloud/ipfs/${data.cid}`;
-  
-      if (!ipfsUrl || !ipfsUrl.startsWith("http")) {
-        throw new Error("Invalid IPFS image URL returned.");
+      if (!res.ok) {
+        throw new Error("Failed to save.");
       }
-  
-      setImageUrl(ipfsUrl);
-      setSavedOnce(true);
-      return ipfsUrl;
+      
+      const data = await res.json();
+      
+      // Update imageUrl to IPFS URL
+      const ipfsUrl = data.gatewayUrl || data.url;
+      if (ipfsUrl) {
+        setImageUrl(ipfsUrl);
+        setSavedOnce(true);
+        return ipfsUrl;
+      }
+      
+      throw new Error("No IPFS URL returned");
     } catch (err: any) {
-      console.error("❌ Final save error:", err);
+      console.error("❌ Save error:", err);
       setError(err?.message || "Failed to save.");
       return null;
     } finally {
       setSaving(false);
     }
   };
-  
 
   const handleShareCharacter = () => {
     setError(null);

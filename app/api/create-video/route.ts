@@ -1,4 +1,3 @@
-// /app/api/create-video/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -9,7 +8,7 @@ cloudinary.config({
 });
 
 export const runtime = "nodejs";
-export const maxDuration = 60; // Allow up to 60 seconds
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,20 +22,27 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("🎬 Creating video with Cloudinary...");
+    console.log("📸 Image:", imageUrl);
+    console.log("🎵 Audio:", audioUrl);
 
-    // Upload image
+    // Upload image - remove folder parameter
+    console.log("⬆️ Uploading image...");
     const imageUpload = await cloudinary.uploader.upload(imageUrl, {
       resource_type: "image",
-      folder: "holibaes/images",
+      public_id: `holibae-image-${walletAddress}-${Date.now()}`,
     });
+    console.log("✅ Image uploaded:", imageUpload.public_id);
 
-    // Upload audio
+    // Upload audio - remove folder parameter
+    console.log("⬆️ Uploading audio...");
     const audioUpload = await cloudinary.uploader.upload(audioUrl, {
-      resource_type: "video",
-      folder: "holibaes/audio",
+      resource_type: "video", // Audio uses 'video' resource type
+      public_id: `holibae-audio-${walletAddress}-${Date.now()}`,
     });
+    console.log("✅ Audio uploaded:", audioUpload.public_id);
 
-    // Create video using explicit API (this actually processes it)
+    // Create video using explicit API
+    console.log("🎬 Generating video...");
     const videoResult = await cloudinary.uploader.explicit(imageUpload.public_id, {
       resource_type: "video",
       type: "upload",
@@ -52,10 +58,9 @@ export async function POST(req: NextRequest) {
           format: "mp4",
         },
       ],
-      eager_async: false, // Wait for processing to complete
+      eager_async: false, // Wait for processing
     });
 
-    // Get the processed video URL
     const videoUrl = videoResult.eager[0].secure_url;
 
     console.log("✅ Video ready:", videoUrl);
