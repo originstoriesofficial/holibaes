@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
 import Image from "next/image";
+import { moontime } from "../fonts";
 import { ShareSongButton } from "../components/ShareSongButton";
 import { Button } from "../components/Button";
 
@@ -226,7 +227,10 @@ export default function MusicClient() {
           </section>
 
           <section className="card p-8 space-y-6">
-            <h2 className="font-bold text-[var(--base-blue)]">❄️ Preview</h2>
+          <h2 className={`${moontime.className} text-4xl text-[var(--base-blue)] leading-tight`}>
+  ❄️ Preview
+</h2>
+
 
             <div className="flex items-center gap-4">
               {imageUrlFromCreate ? (

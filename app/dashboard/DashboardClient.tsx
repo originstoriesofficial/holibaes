@@ -4,12 +4,13 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { sdk } from "@farcaster/miniapp-sdk";
 import Image from "next/image";
-import { moontime } from "../fonts"; // this now resolves to app/fonts.ts
+import { moontime } from "../fonts";
 
 export default function DashboardClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [fid, setFid] = useState<number | null>(null);
+  const [muted, setMuted] = useState(true); // 🎵 audio state
 
   const originHolder = searchParams.get("originHolder") === "1";
 
@@ -68,49 +69,69 @@ export default function DashboardClient() {
         </div>
 
         <div className="card px-8 py-10 space-y-8">
+          {originHolder ? (
+            <div className="space-y-4 text-center">
+              <h1
+                className={`${moontime.className} text-5xl text-[var(--base-blue)] leading-tight`}
+              >
+                ⭐ Welcome originator
+              </h1>
+              <p className="text-base leading-relaxed text-[var(--muted)]">
+                The Holibae Creator + Music Studio is unlocked.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-[var(--silver-light)] rounded-xl p-4 border-l-4 border-[var(--base-blue)]">
+              <p className="text-base leading-relaxed text-[var(--foreground)]">
+                You’ll need at least{" "}
+                <span className="font-bold text-[var(--base-blue)] text-lg">
+                  3.5k $ORIGINSTORY
+                </span>{" "}
+                to unlock all Holibae features.
+              </p>
+            </div>
+          )}
 
-{originHolder ? (
-  <div className="space-y-4 text-center">
+          <div className="flex flex-col gap-4 pt-6">
+            <button
+              onClick={() => goTo("/create")}
+              className="btn-primary w-full py-5 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Create a Holibae
+            </button>
 
-    {/* ⭐ main header in moontime font */}
-    <h1
-      className={`${moontime.className} text-5xl text-[var(--base-blue)] leading-tight`}
-    >
-      ⭐ Welcome originator
-    </h1>
-
-    <p className="text-base leading-relaxed text-[var(--muted)]">
-      The Holibae Creator + Music Studio is unlocked.
-    </p>
-  </div>
-) : (
-  <div className="bg-[var(--silver-light)] rounded-xl p-4 border-l-4 border-[var(--base-blue)]">
-    <p className="text-base leading-relaxed text-[var(--foreground)]">
-      You’ll need at least{" "}
-      <span className="font-bold text-[var(--base-blue)] text-lg">
-        3.5k $ORIGINSTORY
-      </span>{" "}
-      to unlock all Holibae features.
-    </p>
-  </div>
-)}
-
-<div className="flex flex-col gap-4 pt-6">
-  <button
-    onClick={() => goTo("/create")}
-    className="btn-primary w-full py-5 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-  >
-    Create a Holibae
-  </button>
-
-  <button
-    onClick={() => goTo("/music")}
-    className="w-full py-5 rounded-xl bg-[#3c8aff] text-[#0000ff] text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-  >
-    Enter Music Studio
-  </button>
-</div>
+            <button
+              onClick={() => goTo("/music")}
+              className="w-full py-5 rounded-xl bg-[var(--base-blue)] text-white text-lg font-semibold shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Enter Holibae Labs
+            </button>
+          </div>
         </div>
+      </div>
+
+      {/* 🔈 Holiday Song Player */}
+      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-white border border-[var(--border)] shadow-lg px-4 py-2 rounded-full text-sm">
+        <audio
+          id="holiday-audio"
+          src="/audio/holiday-song.mp3"
+          autoPlay
+          loop
+          muted={muted}
+        />
+        <span className="text-[var(--muted)]">Holiday music</span>
+        <button
+          onClick={() => {
+            const audio = document.getElementById("holiday-audio") as HTMLAudioElement | null;
+            if (audio) {
+              audio.muted = !audio.muted;
+              setMuted(audio.muted);
+            }
+          }}
+          className="text-[var(--base-blue)] font-semibold hover:underline"
+        >
+          {muted ? "Unmute" : "Mute"}
+        </button>
       </div>
     </main>
   );

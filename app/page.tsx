@@ -122,7 +122,7 @@ export default function Home() {
   className="
     w-full py-5 rounded-xl 
     bg-[#0f7b3e]          /* deep green */
-    text-white           
+    text-[#0000ff]       
     text-lg font-semibold 
     shadow-lg 
     hover:scale-105 hover:shadow-xl 
